@@ -29,7 +29,8 @@ jobs:
 
     - name: Create Fake local AppSettings
       run: |
-        echo {} > ${{github.workspace}}\localconfig\appsettings.json
+        mkdir ${{github.workspace}}\localconfig
+        echo {} > ${{github.workspace}}\localconfig\appsettings.local.json
 
     - name: Build Palace Host
       run: dotnet publish src\palace.host\palace.host.csproj -c Release --no-restore -v d
