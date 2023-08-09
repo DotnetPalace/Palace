@@ -96,13 +96,13 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
 
 	(bool success, string? failReason) InstallLocalService(Shared.Messages.InstallService message, DownloadFileResult zipFileInfo)
     {
-		var installationFolder = System.IO.Path.Combine(_settings.InstallationDirectory, message.ServiceSettings.ServiceName);
+		var installationFolder = System.IO.Path.Combine(_settings.InstallationFolder, message.ServiceSettings.ServiceName);
 
 		_logger.LogInformation("Try to install MicroService {MainAssembly} in {installationFolder}", message.ServiceSettings.MainAssembly, installationFolder);
 
 		string? extractDirectory = null;
         // Dezip dans son répertoire avec la bonne version
-        extractDirectory = System.IO.Path.Combine(_settings.DownloadDirectory, message.ServiceSettings.ServiceName);
+        extractDirectory = System.IO.Path.Combine(_settings.DownloadFolder, message.ServiceSettings.ServiceName);
         if (Directory.Exists(extractDirectory))
         {
             Directory.Delete(extractDirectory, true);
@@ -168,12 +168,12 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
 			return result;
         }
 
-        if (!System.IO.Directory.Exists(_settings.DownloadDirectory))
+        if (!System.IO.Directory.Exists(_settings.DownloadFolder))
         {
-            System.IO.Directory.CreateDirectory(_settings.DownloadDirectory);
+            System.IO.Directory.CreateDirectory(_settings.DownloadFolder);
         }
 
-        result.ZipFileName = System.IO.Path.Combine(_settings.DownloadDirectory, contentDisposition.Split(';')[1].Split('=')[1]);
+        result.ZipFileName = System.IO.Path.Combine(_settings.DownloadFolder, contentDisposition.Split(';')[1].Split('=')[1]);
 
         if (File.Exists(result.ZipFileName))
         {
@@ -203,7 +203,7 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
         var unZipFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(unZipFileName)!, serviceSettings.ServiceName);
 		var fileList = System.IO.Directory.GetFiles(unZipFolder, "*.*", System.IO.SearchOption.AllDirectories);
 
-        var installationFolder = System.IO.Path.Combine(_settings.InstallationDirectory, serviceSettings.ServiceName);
+        var installationFolder = System.IO.Path.Combine(_settings.InstallationFolder, serviceSettings.ServiceName);
 
 		_logger.LogInformation($"try to deploy {fileList.Count()} files from {unZipFolder} to {installationFolder}");
 

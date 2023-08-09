@@ -11,30 +11,30 @@ public static class GlobalExtensions
     public static void Initialize(this Configuration.GlobalSettings palaceSettings)
     {
         var currentDirectory = Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
-        if (palaceSettings.UpdateDirectory.StartsWith(@".\"))
+        if (palaceSettings.UpdateFolder.StartsWith(@".\"))
         {
-            palaceSettings.UpdateDirectory = Path.Combine(currentDirectory, palaceSettings.UpdateDirectory.Replace(@".\", string.Empty));
+            palaceSettings.UpdateFolder = Path.Combine(currentDirectory, palaceSettings.UpdateFolder.Replace(@".\", string.Empty));
         }
-        if (palaceSettings.DownloadDirectory.StartsWith(@".\"))
+        if (palaceSettings.DownloadFolder.StartsWith(@".\"))
         {
-            palaceSettings.DownloadDirectory = Path.Combine(currentDirectory, palaceSettings.DownloadDirectory.Replace(@".\", string.Empty));
+            palaceSettings.DownloadFolder = Path.Combine(currentDirectory, palaceSettings.DownloadFolder.Replace(@".\", string.Empty));
         }
-        if (palaceSettings.InstallationDirectory.StartsWith(@".\"))
+        if (palaceSettings.InstallationFolder.StartsWith(@".\"))
         {
-            palaceSettings.InstallationDirectory = Path.Combine(currentDirectory, palaceSettings.InstallationDirectory.Replace(@".\", string.Empty));
+            palaceSettings.InstallationFolder = Path.Combine(currentDirectory, palaceSettings.InstallationFolder.Replace(@".\", string.Empty));
         }
 
-        if (!Directory.Exists(palaceSettings.UpdateDirectory))
+        if (!Directory.Exists(palaceSettings.UpdateFolder))
 		{
-			Directory.CreateDirectory(palaceSettings.UpdateDirectory);
+			Directory.CreateDirectory(palaceSettings.UpdateFolder);
 		}
-        if (!Directory.Exists(palaceSettings.DownloadDirectory))
+        if (!Directory.Exists(palaceSettings.DownloadFolder))
         {
-            Directory.CreateDirectory(palaceSettings.DownloadDirectory);
+            Directory.CreateDirectory(palaceSettings.DownloadFolder);
         }
-        if (!Directory.Exists(palaceSettings.InstallationDirectory))
+        if (!Directory.Exists(palaceSettings.InstallationFolder))
 		{
-			Directory.CreateDirectory(palaceSettings.InstallationDirectory);
+			Directory.CreateDirectory(palaceSettings.InstallationFolder);
 		}
     }
 }

@@ -32,7 +32,7 @@ public class MainWorker : BackgroundService
     {
 		_ip = await Shared.ExternalIPResolver.GetIP();
 
-        var installedServiceList = await ProcessHelper.GetInstalledServiceList(_settings.InstallationDirectory);
+        var installedServiceList = await ProcessHelper.GetInstalledServiceList(_settings.InstallationFolder);
         var serviceSettingsList = installedServiceList.Select(x => x.ServiceName).ToList();
 
         var runningServiceList = ProcessHelper.GetRunningProcess(serviceSettingsList.ToArray());

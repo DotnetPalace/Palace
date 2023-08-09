@@ -19,6 +19,14 @@ namespace PalaceDeployCli
 		public bool StopService()
 		{
 			var serviceController = new ServiceController(Settings.ServiceName);
+			if (serviceController is null
+				|| serviceController.Container is null)
+			{
+				// not installed
+				return true;
+			}
+
+
 			if (serviceController.Status.Equals(ServiceControllerStatus.Stopped)
 				|| serviceController.Status.Equals(ServiceControllerStatus.StopPending))
 			{
@@ -34,7 +42,15 @@ namespace PalaceDeployCli
 		public bool StartService()
 		{
 			var serviceController = new ServiceController(Settings.ServiceName);
-			if (serviceController.Status.Equals(ServiceControllerStatus.Running))
+            if (serviceController is null
+				|| serviceController.Container is null)
+            {
+				// not installed
+                return true;
+            }
+
+
+            if (serviceController.Status.Equals(ServiceControllerStatus.Running))
 			{
 				Console.WriteLine("Service {0} is already running", Settings.ServiceName);
 				return false;

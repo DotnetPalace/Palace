@@ -8,9 +8,9 @@ namespace Palace.Host.Configuration;
 
 public class GlobalSettings : Shared.GlobalSettings
 {
-    public string UpdateDirectory { get; set; } = @".\update";
-    public string DownloadDirectory { get; set; } = @".\download";
-    public string InstallationDirectory { get; set; } = @".\microservices";
+    public string UpdateFolder { get; set; } = @".\update";
+    public string DownloadFolder { get; set; } = @".\download";
+    public string InstallationFolder { get; set; } = @".\microservices";
     public string HostName { get; set; } = System.Environment.MachineName;
 
     public int ScanIntervalInSeconds { get; set; } = 20;
