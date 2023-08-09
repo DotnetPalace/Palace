@@ -18,8 +18,8 @@ var currentPath = Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
 
 builder.Configuration.SetBasePath(currentPath)
             .AddJsonFile("appSettings.json", false, false)
-            .AddJsonFile("appSettings.local.json", true, false)
             .AddJsonFile($"appSettings.{builder.Environment.EnvironmentName}.json", true, false)
+            .AddJsonFile("appSettings.local.json", true, false)
             .AddEnvironmentVariables();
 
 var section = builder.Configuration.GetSection("Palace");

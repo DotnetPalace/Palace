@@ -17,8 +17,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         config
             .SetBasePath(currentDirectory)
             .AddJsonFile("appSettings.json")
-            .AddJsonFile($"appsettings.local.json", optional: true, reloadOnChange: false)
-            .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+            .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.local.json", optional: true, reloadOnChange: false);
 
         hostingContext.HostingEnvironment.ApplicationName = "Palace.Host";
     })
