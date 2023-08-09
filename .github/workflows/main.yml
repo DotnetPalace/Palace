@@ -4,6 +4,13 @@ on:
   pull_request:
     branches: [ prod ]
 
+env:
+  DOTNET_CONFIGURATION : Debug
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
 
@@ -19,7 +26,7 @@ jobs:
       run: dotnet restore palace.sln
 
     - name: Build Palace Client
-      run: dotnet build src\Palace.Client\Palace.Client.csproj -c Release --no-restore
+      run: dotnet build src\Palace.Client\Palace.Client.csproj -c $DOTNET_CONFIGURATION --no-restore
 
     - name: Pack Palace Client
       run: dotnet pack --no-build --configuration Release ${{github.workspace}}\src\Palace.Client\Palace.Client.csproj --output .
@@ -33,31 +40,31 @@ jobs:
         echo {} > ${{github.workspace}}\localconfig\appsettings.local.json
 
     - name: Build Palace Host
-      run: dotnet publish src\palace.host\palace.host.csproj -c Release --no-restore -v d
+      run: dotnet publish src\palace.host\palace.host.csproj -c $DOTNET_CONFIGURATION --no-restore -v d
 
     - name: Zip Palace Host
       run: |
-        cd ${{github.workspace}}\src\palace.host\bin\Release\net7.0-windows\publish
+        cd ${{github.workspace}}\src\palace.host\bin\$DOTNET_CONFIGURATION\net7.0-windows\publish
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palacehost.zip * 
 
     - name: Build Palace Server
       run: |
         cd ${{github.workspace}}\src\palace.server
-        dotnet publish -p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
+        dotnet publish -c $DOTNET_CONFIGURATION
 
     - name: Zip Palace Server
       run: |
-        cd ${{github.workspace}}\src\palace.server\bin\Debug\net7.0\publish
+        cd ${{github.workspace}}\src\palace.server\bin\$DOTNET_CONFIGURATION\net7.0\publish
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palaceserver.zip * 
 
     - name: Build Palace Deploy Cli
-      run: dotnet publish src\PalaceDeployCli\PalaceDeployCli.csproj -c Release --no-restore -v d
+      run: dotnet publish src\PalaceDeployCli\PalaceDeployCli.csproj -c $DOTNET_CONFIGURATION --no-restore -v d
 
     - name: Zip Palace Deploy Cli
       run: |
-        cd ${{github.workspace}}\src\PalaceDeployCli\bin\Release\net7.0\publish
+        cd ${{github.workspace}}\src\PalaceDeployCli\bin\$DOTNET_CONFIGURATION\net7.0\publish
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palacedeploycli.zip * 
         
