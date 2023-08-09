@@ -1,0 +1,22 @@
+﻿<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" @onchange="Switch" checked="@Value" />
+</div>
+
+@code {
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter]
+    public System.Linq.Expressions.Expression<Func<bool>> ValueExpression { get; set; } = null!;
+
+    async Task Switch(ChangeEventArgs args)
+    {
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,44 @@
+﻿@page "/packages"
+
+<PageTitle>Palace Server - Packages</PageTitle>
+
+<br/>
+<a href="/UploadPackage" class="btn btn-success">Upload Package</a>
+<br/>
+<br/>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Zip File</th>
+            <th>Version</th>
+            <th>Date</th>
+            <th>Size</th>
+            <th>Locked By</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in availablePackageList)
+       {
+            var size = item.Size / 1024.0;
+        <tr>
+            <td>
+                <a href="/package/@item.PackageFileName">@item.PackageFileName</a>
+            </td>
+            <td>@item.CurrentVersion</td>
+            <td>@item.LastWriteTime</td>
+            <td>
+                <FileSizeLabel FileSize="item.Size"/>
+            </td>
+            <td>@item.LockedBy</td>
+            <td><button class="btn btn-danger" @onclick="() => RemovePackage(item.PackageFileName)">Remove</button></td>
+        </tr>
+       }
+    </tbody>
+</table>
+
+@if (errorReport != null)
+{
+    <span class="alert">@errorReport</span>
+}

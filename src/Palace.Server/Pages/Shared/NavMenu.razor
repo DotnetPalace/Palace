@@ -1,0 +1,48 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Palace Server</a>
+        <button title="Navigation menu" class="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> Dashboard
+            </NavLink>
+            <NavLink class="nav-link" href="/services" Match="NavLinkMatch.All">
+                <span class="oi oi-audio" aria-hidden="true"></span> Services
+            </NavLink>
+            <NavLink class="nav-link" href="Logs" Match="NavLinkMatch.All">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Logs
+            </NavLink>
+            <NavLink class="nav-link" href="Packages" Match="NavLinkMatch.All">
+                <span class="oi oi-folder" aria-hidden="true"></span> Packages
+            </NavLink>
+        </div>
+    </nav>
+    <div class="text-center">
+        <small class="text-white">Version : @version</small>
+    </div>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string version = "1.0.0.0";
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override void OnInitialized()
+    {
+        version = $"{typeof(Program).Assembly.GetName()?.Version}";
+        base.OnInitialized();
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

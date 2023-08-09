@@ -1,0 +1,24 @@
+﻿@page "/uploadpackage"
+
+<PageTitle>Palace Server - UploadPackage</PageTitle>
+<EditForm Model="uploadedFile">
+    <CustomValidator @ref="customValidator"></CustomValidator>
+    <ValidationSummary></ValidationSummary>
+    <div class="row mb-4">
+        <div class="col-md-3 dialog-title">
+            Upload Zip File
+        </div>
+        <div class="col-md-9 file-drop-zone @HoverClass" @ref="fileDropContainer" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
+            <div class="row text-center">
+                <small>You can drop file here</small>
+            </div>
+            <InputFile class="form-control m-2" OnChange="@LoadFile" />
+        </div>
+    </div>
+</EditForm>
+
+@if (@uploading)
+{
+    <div class="alert-warning">Uploading...</div>
+}
+

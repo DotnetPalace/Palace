@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  <Version>2.0.10.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ArianeBus" Version="1.0.10.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

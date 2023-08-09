@@ -1,0 +1,13 @@
+﻿.file-drop-zone {
+    border: 3px dotted green;
+    padding: 10px;
+}
+
+.hover {
+    border-style: solid;
+    background-color: white;
+}
+
+.rz-dialog-content {
+    height: 100%;
+}

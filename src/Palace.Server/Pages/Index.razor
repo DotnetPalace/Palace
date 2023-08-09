@@ -1,0 +1,107 @@
+﻿@page "/"
+@{
+	var ghostHostList = runningServiceList.Select(i => i.HostName).Distinct().ToList();
+	ghostHostList.RemoveAll(i => hostList.Any(j => j.HostName == i));
+}
+
+<table class="table table-bordered w-100 h-100">
+	<thead>
+		<tr>
+			<th colspan="2"></th>
+			@if (hostList.Count > 0)
+			{
+				<th colspan="@hostList.Count">
+					Hosts
+				</th>
+			}
+			@if (ghostHostList.Count > 0)
+			{
+				<th colspan="@ghostHostList.Count">
+					Offline Hosts
+				</th>
+			}
+		</tr>
+		<tr>
+			<th>Groupe</th>
+			<th>Serivce Name</th>
+			@foreach (var host in hostList)
+			{
+				var hostStyle = host.HostState == Palace.Shared.HostState.Down ? "table-danger" : "";
+				<th class="@hostStyle">
+					@host.HostName
+					<div>Version : @host.Version</div>
+					<div>State : @host.HostState</div>
+				</th>
+			}
+			@foreach (var ghostHost in ghostHostList)
+			{
+				<th>@ghostHost</th>
+			}
+		</tr>
+	</thead>
+	<tbody class="table-group-divider">
+		@foreach (var service in serviceSettingsList.OrderBy(i => i.GroupName != null ? i.GroupName : "zzzz").ThenBy(i => i.ServiceName))
+		{
+			var packageInfo = packageInfoList.SingleOrDefault(i => i.PackageFileName == service.PackageFileName);
+			<tr>
+				<td>@service.GroupName</td>
+				<td>
+					<a href="/editservice/@service.ServiceName">@service.ServiceName</a>
+					<div>Version Package : <a href="/package/@packageInfo?.PackageFileName">@packageInfo?.CurrentVersion</a></div>
+					<div>Date Package : @packageInfo?.LastWriteTime</div>
+				</td>
+				@foreach (var host in hostList)
+				{
+					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == host.HostName && i.ServiceName == service.ServiceName);
+					var serviceStyle = runningService?.ServiceState == ServiceState.Down ? "table-danger" : "";
+					<td class="@serviceStyle">
+						@if (runningService is not null)
+						{
+							<div>
+								State : @runningService.ServiceState
+								<small>@runningService.Log</small>
+								<span>@runningService.FailReason</span>
+							</div>
+							<div>
+								Version : @runningService.Version
+							</div>
+							@if (runningService.ServiceState == ServiceState.Offline
+								|| runningService.ServiceState == ServiceState.Updated)
+							{
+								<div>
+									<button type="button" class="btn btn-primary" @onclick="(() => StartService(host, service))">Start</button>
+									<button type="button" class="btn btn-secondary" @onclick="(() => InstallService(host, service))">ReInstall</button>
+								</div>
+							}
+							else if (runningService.ServiceState == ServiceState.Running)
+							{
+								<RunningService ServiceInfo="runningService" 
+									OnStopService="(() => StopService(host.HostName, service))"
+									OnRecycleService="(() => RecycleService(host.HostName, service))" />
+							}
+						}
+						else
+						{
+							<button type="button" class="btn btn-primary" @onclick="(() => InstallService(host, service))">Install</button>
+						}
+					</td>
+				}
+				@foreach (var ghostHost in ghostHostList)
+				{
+					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == ghostHost && i.ServiceName == service.ServiceName);
+					<td>
+						@if (runningService is not null)
+						{
+							<RunningService ServiceInfo="runningService"
+											OnStopService="(() => StopService(ghostHost, service))"
+											OnRecycleService="(() => RecycleService(ghostHost, service))" />
+
+						}
+					</td>
+				}
+			</tr>
+		}
+	</tbody>
+</table>
+
+

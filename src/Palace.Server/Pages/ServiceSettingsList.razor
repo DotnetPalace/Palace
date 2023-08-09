@@ -1,0 +1,49 @@
+﻿@page "/services"
+<PageTitle>Palace service list</PageTitle>
+
+<br />
+<a href="/EditService/new" class="btn btn-success">Add Service</a>
+<br />
+<br />
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>Group</th>
+			<th>ServiceName</th>
+			<th>Arguments</th>
+			<th>MainAssembly</th>
+			<th>PackageFileName</th>
+			<th>AlwaysStarted</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in serviceSettingsList.OrderBy(i => i.GroupName is null ? "zzz" : i.GroupName).ThenBy(i => i.ServiceName))
+		{
+			<tr>
+				<td>
+					@item.GroupName
+				</td>
+				<td>
+					<a href="/EditService/@item.ServiceName">
+						@item.ServiceName
+					</a>
+				</td>
+				<td>@item.Arguments</td>
+				<td>@item.MainAssembly</td>
+				<td>
+					<a href="/package/@item.PackageFileName">@item.PackageFileName</a>
+				</td>
+				<td>
+					<ToggleSwitch Value="item.AlwaysStarted" ValueChanged="(() => SaveSettings(item))" />
+				</td>
+				<td>
+					<button class="btn btn-danger">Remove</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<Toast @ref="toast" />

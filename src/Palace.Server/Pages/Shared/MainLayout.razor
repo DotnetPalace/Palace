@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Palace Server</PageTitle>
+
+<div class="page">
+
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <article class="content px-4">
+            <AuthorizeView Roles="admin">
+                <Authorized>
+                    @Body
+                </Authorized>
+                <NotAuthorized>
+                    <Palace.Server.Pages.Login/>
+                </NotAuthorized>
+            </AuthorizeView>
+        </article>
+    </main>
+</div>
+
+@if (DialogService.DialogType is not null)
+{
+    <DynamicComponent Type="DialogService.DialogType" Parameters="DialogService.Parameters" />
+}

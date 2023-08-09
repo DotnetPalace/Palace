@@ -1,0 +1,12 @@
+﻿<CascadingValue Value="this">
+	<ul class="nav nav-tabs">
+		@foreach(var tab in TabList)
+		{
+			<li class="nav-item">
+				<a @onclick="@(() => ShowTab(tab))" class="nav-link @tab.Active" title="@tab.Title">@tab.Name</a>
+			</li>
+		}
+	</ul>
+    @ChildContent
+</CascadingValue>
+

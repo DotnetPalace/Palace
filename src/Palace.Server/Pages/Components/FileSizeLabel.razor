@@ -1,0 +1,26 @@
+﻿<div @attributes="@CatpuredAttributes">
+	@sizeLabel
+</div>
+
+@code {
+	[Parameter]
+	public long FileSize { get; set; }
+
+	[Parameter(CaptureUnmatchedValues = true)]
+	public Dictionary<string, object> CatpuredAttributes { get; set; } = new();
+
+	string sizeLabel = null!;
+
+	protected override void OnParametersSet()
+	{
+		var units = new[] { "o", "Ko", "Mo", "Go", "To" };
+		var index = 0;
+		var size = Convert.ToDouble(FileSize);
+		while (size > 1024)
+		{
+			size /= 1024d;
+			index++;
+		}
+		sizeLabel = string.Format("{0:F2} {1}", size, units[index]);
+	}
+}
