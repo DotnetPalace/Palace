@@ -37,7 +37,7 @@ jobs:
 
     - name: Zip Palace Host
       run: |
-        cd ${{github.workspace}}\src\palace.host\bin\Release\net7.0\publish
+        cd ${{github.workspace}}\src\palace.host\bin\Release\net7.0-windows\publish
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palacehost.zip * 
 
