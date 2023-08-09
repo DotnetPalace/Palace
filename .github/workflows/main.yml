@@ -63,10 +63,9 @@ jobs:
         
     - uses: dev-drprasad/delete-tag-and-release@v1.0
       with:
-        delete_release: true # default: false
+        delete_release: false # default: false
         tag_name: Latest # tag name to delete
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create Release
       id: create_release
