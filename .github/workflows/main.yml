@@ -21,16 +21,20 @@ jobs:
     - name: Build Palace Client
       run: dotnet build src\Palace.Client\Palace.Client.csproj -c Release --no-restore
 
-    - name: Pack PalaceClient
+    - name: Pack Palace Client
       run: dotnet pack --no-build --configuration Release ${{github.workspace}}\src\Palace.Client\Palace.Client.csproj --output .
 
     - name: Push Nuget
       run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/dotnetpalace/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
 
-    - name: Build Palace
+    - name: Create Fake local AppSettings
+      run: |
+        echo {} > ${{github.workspace}}\localconfig\appsettings.json
+
+    - name: Build Palace Host
       run: dotnet publish src\palace.host\palace.host.csproj -c Release --no-restore -v d
 
-    - name: Zip Palace
+    - name: Zip Palace Host
       run: |
         cd ${{github.workspace}}\src\palace.host\bin\Release\net7.0\publish
         del appsettings.*.json
