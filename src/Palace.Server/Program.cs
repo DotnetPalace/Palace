@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Palace.Server.Services;
 
 using FluentValidation;
+using LogRWebMonitor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,15 @@ builder.Services.AddArianeBus(config =>
 
 builder.Services.AddValidatorsFromAssembly(currentAssembly);
 
+builder.AddLogRWebMonitor(cfg =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        cfg.LogLevel = LogLevel.Trace;
+    }
+    cfg.HostName = "PalaceServer";
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -119,6 +129,8 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.MapControllers();
+
+app.UseLogRWebMonitor();
 
 await app.Services.StartMigration();
 
