@@ -20,7 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
+		<ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
 	</ItemGroup>
 
 	<ItemGroup>
