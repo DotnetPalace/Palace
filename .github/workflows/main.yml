@@ -61,11 +61,11 @@ jobs:
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palacedeploycli.zip * 
         
-    - uses: dev-drprasad/delete-tag-and-release@v1.0
-      with:
-        delete_release: false # default: false
-        tag_name: Latest # tag name to delete
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+    # - uses: dev-drprasad/delete-tag-and-release@v1.0
+    #   with:
+    #     delete_release: false # default: false
+    #     tag_name: Latest # tag name to delete
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create Release
       id: create_release
