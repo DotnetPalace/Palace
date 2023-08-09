@@ -1,4 +1,4 @@
-# Palace V2.0
+# Palace V2
 
 µService hoster suite
 
