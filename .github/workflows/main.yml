@@ -1,0 +1,111 @@
+name: .NET
+
+on:
+  pull_request:
+    branches: [ prod ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore palace.sln
+
+    - name: Build PalaceClient
+      run: dotnet build src\PalaceClient\PalaceClient.csproj -c Release --no-restore
+
+    - name: Pack PalaceClient
+      run: dotnet pack --no-build --configuration Release ${{github.workspace}}\src\PalaceClient\PalaceClient.csproj --output .
+
+    - name: Push Nuget
+      run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.nuget}} --skip-duplicate
+
+    - name: Build Palace
+      run: dotnet publish src\palace\palace.csproj -c Release --no-restore -v d
+
+    - name: Zip Palace
+      run: |
+        cd ${{github.workspace}}\src\palace\bin\Release\net6.0\publish
+        del appsettings.json
+        del appsettings.*.json
+        7z.exe a -r -tzip ${{github.workspace}}\palace.zip * 
+
+    - name: Build Palace Server
+      run: |
+        cd ${{github.workspace}}\src\palaceserver
+        dotnet publish -p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml
+
+    - name: Zip Palace Server
+      run: |
+        cd ${{github.workspace}}\src\palaceserver\bin\Debug\net6.0\publish
+        del appsettings.*.json
+        del appsettings.json
+        del web.config
+        7z.exe a -r -tzip ${{github.workspace}}\palaceserver.zip * 
+
+    - name: Build Palace Deploy Cli
+      run: dotnet publish src\PalaceDeployCli\PalaceDeployCli.csproj -c Release --no-restore -v d
+
+    - name: Zip Palace Deploy Cli
+      run: |
+        cd ${{github.workspace}}\src\PalaceDeployCli\bin\Release\net6.0\publish
+        del appsettings.json
+        del appsettings.*.json
+        7z.exe a -r -tzip ${{github.workspace}}\palacedeploycli.zip * 
+        
+    - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true # default: false
+        tag_name: Latest # tag name to delete
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with: 
+        tag_name: Latest
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Palace
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}\palace.zip
+        asset_name: palace.zip
+        asset_content_type: application/zip
+
+    - name: Upload Release PalaceServer
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}\palaceserver.zip
+        asset_name: palaceserver.zip
+        asset_content_type: application/zip
+
+    - name: Upload Release PalaceDeployCli
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}\palacedeploycli.zip
+        asset_name: palacedeploycli.zip
+        asset_content_type: application/zip
