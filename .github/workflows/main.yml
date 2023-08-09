@@ -29,7 +29,7 @@ jobs:
       run: dotnet build src\Palace.Client\Palace.Client.csproj -c $DOTNET_CONFIGURATION --no-restore
 
     - name: Pack Palace Client
-      run: dotnet pack --no-build --configuration Release ${{github.workspace}}\src\Palace.Client\Palace.Client.csproj --output .
+      run: dotnet pack --no-build --configuration $DOTNET_CONFIGURATION ${{github.workspace}}\src\Palace.Client\Palace.Client.csproj --output .
 
     - name: Push Nuget
       run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/dotnetpalace/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
