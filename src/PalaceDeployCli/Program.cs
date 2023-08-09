@@ -61,79 +61,76 @@ services.AddLogging(setup =>
 
 var sp = services.BuildServiceProvider();
 
-var option = Parser.Default.ParseArguments<DefaultOptions, StatusOptions>(args);
-await option.MapResult(async (DefaultOptions prompt) =>
+start:
+
+AnsiConsole.Markup("[green]Welcome to the Palace Deploy CLI[/]");
+AnsiConsole.WriteLine();
+
+
+var table = new Table();
+table.AddColumn("Action").AddColumn("Description");
+table.AddRow("1", "Install latest version of palace host");
+table.AddRow("2", "Install latest version of palace server");
+table.AddRow("3", "Quit");
+
+AnsiConsole.Write(table);
+
+var selectedAction = AnsiConsole.Prompt(new TextPrompt<int>("Choose your action :"));
+
+if (selectedAction == 3)
 {
-	AnsiConsole.WriteLine("Welcome to the Palace Deploy CLI");
-	AnsiConsole.WriteLine("Choose action :");
-	AnsiConsole.WriteLine();
-	AnsiConsole.WriteLine("1 - Install latest version of palace host");
-	AnsiConsole.WriteLine("2 - Install latest version of palace server");
-	AnsiConsole.WriteLine("3 - Quit");
-
-	var selectedAction = AnsiConsole.Prompt(
-        new TextPrompt<int>("Choose :")
-        );
-
-	if (selectedAction == 3)
-	{
-		return 0;
-	}
-
-	var dlManager = sp.GetRequiredService<DownloadManager>();
-	var deployService = sp.GetRequiredService<DeployService>();
-	string zipFileName = null;
-
-	switch (selectedAction)
-	{
-		case 1:
-			zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceHostUrl);
-			if (zipFileName == null)
-			{
-				AnsiConsole.WriteLine("Download failed");
-				return -1;
-			}
-			var serviceManager = sp.GetRequiredService<ServiceManager>();
-			var stop = serviceManager.StopService();
-			if (!stop)
-			{
-				AnsiConsole.WriteLine("Stop service failed");
-				return -1;
-			}
-			var deployHost = deployService.UnZipHost(zipFileName);
-			if (!deployHost)
-			{
-				AnsiConsole.WriteLine("Deploy failed");
-				return -1;
-			}
-			var start = serviceManager.StartService();
-
-			break;
-		case 2:
-			zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceServerUrl);
-			if (zipFileName == null)
-			{
-				AnsiConsole.WriteLine("Download failed");
-				return -1;
-			}
-			var iisManager = sp.GetRequiredService<IISManager>();
-			var stopWorker = iisManager.StopIISWorkerProcess();
-			iisManager.WaitForStop();
-			var deployServer = deployService.UnZipServer(zipFileName);
-			if (!deployServer)
-			{
-				AnsiConsole.WriteLine("Deploy failed");
-				return -1;
-			}
-			var startWorker = iisManager.StartIISWorkerProcess();
-			break;
-	}
 	return 0;
-},
-errors =>
-{
-    return Task.FromResult(-1);
-});
+}
 
-return await Task.FromResult(0);
+var dlManager = sp.GetRequiredService<DownloadManager>();
+var deployService = sp.GetRequiredService<DeployService>();
+string zipFileName = null;
+
+switch (selectedAction)
+{
+	case 1:
+		zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceHostUrl);
+		if (zipFileName == null)
+		{
+			AnsiConsole.WriteLine("Download failed");
+			return -1;
+		}
+		var serviceManager = sp.GetRequiredService<ServiceManager>();
+		var stop = serviceManager.StopService();
+		if (!stop)
+		{
+			AnsiConsole.WriteLine("Stop service failed");
+			return -1;
+		}
+		var deployHost = deployService.UnZipHost(zipFileName);
+		if (!deployHost)
+		{
+			AnsiConsole.WriteLine("Deploy failed");
+			return -1;
+		}
+		var start = serviceManager.StartService();
+
+		break;
+	case 2:
+		zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceServerUrl);
+		if (zipFileName == null)
+		{
+			AnsiConsole.WriteLine("Download failed");
+			return -1;
+		}
+		var iisManager = sp.GetRequiredService<IISManager>();
+		var stopWorker = iisManager.StopIISWorkerProcess();
+		iisManager.WaitForStop();
+		var deployServer = deployService.UnZipServer(zipFileName);
+		if (!deployServer)
+		{
+			AnsiConsole.WriteLine("Deploy failed");
+			return -1;
+		}
+		var startWorker = iisManager.StartIISWorkerProcess();
+		break;
+}
+
+goto start;
+
 
