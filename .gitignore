@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+appsettings.local.json
+/src/Palace.Server/Datas/key-05b16a56-bb2a-43c3-8335-919bdda1ffc3.xml
