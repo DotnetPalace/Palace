@@ -59,8 +59,8 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
             return;
         }
 
-        var mainFileName = System.IO.Path.Combine(_settings.InstallationDirectory, message.ServiceSettings.ServiceName, message.ServiceSettings.MainAssembly);
-        var installationFolder = System.IO.Path.Combine(_settings.InstallationDirectory, message.ServiceSettings.ServiceName);
+        var mainFileName = System.IO.Path.Combine(_settings.InstallationFolder, message.ServiceSettings.ServiceName, message.ServiceSettings.MainAssembly);
+        var installationFolder = System.IO.Path.Combine(_settings.InstallationFolder, message.ServiceSettings.ServiceName);
         if (!System.IO.File.Exists(mainFileName))
         {
             _logger.LogWarning("MainAssembly {mainFileName} not found in {installationFolder}", mainFileName, installationFolder);
