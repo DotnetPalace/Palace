@@ -81,6 +81,15 @@ public partial class Index : ComponentBase
         });
 	}
 
+	async Task UnInstallService(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
+	{
+		await Bus.PublishTopic(Settings.UnInstallServiceTopicName, new Palace.Shared.Messages.UnInstallService
+		{
+			HostName = host.HostName,
+			ServiceSettings = serviceSettings
+		});
+	}
+
 	async Task StartService(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
 	{
 		await Bus.PublishTopic(Settings.StartServiceTopicName, new Palace.Shared.Messages.StartService
@@ -90,12 +99,12 @@ public partial class Index : ComponentBase
 		});
 	}
 
-	async Task StopService(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
+	async Task StopService(string hostName, string serviceName)
 	{
 		await Bus.PublishTopic(Settings.StopServiceTopicName, new Palace.Shared.Messages.StopService
 		{
 			HostName = hostName,
-			ServiceName = serviceSettings.ServiceName,
+			ServiceName = serviceName,
 		});
 	}
 

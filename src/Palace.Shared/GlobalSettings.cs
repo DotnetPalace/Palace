@@ -17,9 +17,12 @@ public class GlobalSettings
     public string HostStoppedQueueName { get; set; } = "palace.hoststopped";
 
     public string InstallServiceTopicName { get; set; } = "palace.installservice";
-    public string InstallationReportQueueName { get; set; } = "palace.installationreport";
+	public string UnInstallServiceTopicName { get; set; } = "palace.uninstallservice";
+	public string InstallationReportQueueName { get; set; } = "palace.installationreport";
+    public string UnInstallationReportQueueName { get; set; } = "palace.uninstallationreport";
 
-    public string StartServiceTopicName { get; set; } = "palace.startservice";
+
+	public string StartServiceTopicName { get; set; } = "palace.startservice";
 
 	public string StopServiceTopicName { get; set; } = "palace.stopservice";
 	public string StopServiceReportQueueName { get; set; } = "palace.stopservicereport";
