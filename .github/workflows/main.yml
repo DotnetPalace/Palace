@@ -29,11 +29,11 @@ jobs:
     - name: Pack Palace Client
       run: dotnet pack --no-build --configuration ${{env.DOTNET_CONFIGURATION}} ${{github.workspace}}\src\Palace.Client\Palace.Client.csproj --output .
 
-    - name: Push Nuget Github
-      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/dotnetpalace/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
+    # - name: Push Nuget Github
+    #   run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/dotnetpalace/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
 
     - name: Push Nuget
-      run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.nuget_github}} --skip-duplicate
+      run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
 
 
     - name: Create Fake local AppSettings
