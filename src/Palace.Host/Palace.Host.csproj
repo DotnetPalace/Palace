@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <Version>2.0.42.0</Version>
+	  <PackageReleaseNotes>
+		  2.0.43.0 : Allow uninstall service
+	  </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

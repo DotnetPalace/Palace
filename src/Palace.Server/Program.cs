@@ -98,6 +98,8 @@ builder.Services.AddArianeBus(config =>
     config.RegisterQueueReader<Palace.Server.MessageReaders.ServiceStartingReport>(new QueueName(settings.StartingServiceReportQueueName));
     config.RegisterQueueReader<Palace.Server.MessageReaders.HostHealthCheck>(new QueueName(settings.HostHealthCheckQueueName));
     config.RegisterQueueReader<Palace.Server.MessageReaders.StopServiceReport>(new QueueName(settings.StopServiceReportQueueName));
+    config.RegisterQueueReader<Palace.Server.MessageReaders.ServiceUnInstallationReport>(new QueueName(settings.UnInstallationReportQueueName));
+    
 });
 
 builder.Services.AddValidatorsFromAssembly(currentAssembly);

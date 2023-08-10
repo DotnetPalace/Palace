@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
+using Palace.Server.Models;
+
 namespace Palace.Server.Services;
 
 public class Orchestrator
@@ -275,6 +277,10 @@ public class Orchestrator
         var directoryPart = fileName.Replace(".zip", "", StringComparison.InvariantCultureIgnoreCase);
 
 		var packageBackupDirectory = Path.Combine(_settings.BackupFolder, directoryPart);
+        if (!Directory.Exists(packageBackupDirectory))
+        {
+            Directory.CreateDirectory(packageBackupDirectory);
+        }
 		var directoryList = Directory.GetDirectories(packageBackupDirectory);
         if (directoryList.Any())
         {
@@ -319,4 +325,20 @@ public class Orchestrator
         var version = parts[parts.Length - 2];
         availablePackage.CurrentVersion = version;
     }
+
+	internal void RemoveMicroServiceInfo(ExtendedMicroServiceInfo rmi)
+	{
+        if (rmi is null) 
+        {
+            return;
+		}
+		
+        var serviceList = GetServiceList();
+		var rms = serviceList.SingleOrDefault(i => i.Key == rmi.Key);
+		if (rms != null)
+		{
+			serviceList.Remove(rms);
+			OnServiceChanged?.Invoke(rms);
+		}
+	}
 }
