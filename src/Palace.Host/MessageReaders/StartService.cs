@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Management;
-using System.Reflection;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 using ArianeBus;
 
-using Microsoft.Extensions.Logging;
-
-using Palace.Host.Configuration;
 using Palace.Shared;
 
 namespace Palace.Host.MessageReaders;
@@ -23,8 +12,6 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
     private readonly Configuration.GlobalSettings _settings;
     private readonly IServiceBus _bus;
     private ServiceState _serviceState = ServiceState.Offline;
-    private int _processId = 0;
-    private string? _errorMessage = null;
 
     public StartService(ILogger<StartService> logger,
         Configuration.GlobalSettings settings,
@@ -37,9 +24,6 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
 
     public override async Task ProcessMessageAsync(Shared.Messages.StartService message, CancellationToken cancellationToken)
     {
-        _processId = 0;
-        _errorMessage = null;
-
         if (message is null)
         {
             _logger.LogError("message is null");
@@ -51,7 +35,6 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
             _logger.LogTrace("message is too old");
             return;
         }
-
 
         if (!message.HostName.Equals(_settings.HostName))
         {
@@ -74,14 +57,27 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
 			return;
         }
 
+        string startReport = null!;
+        int processId = 0;
+        bool isStarted = false;
         try
         {
-            StartMicroService(message.ServiceSettings, mainFileName);
-        }
+            (startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(mainFileName, message.ServiceSettings.Arguments);
+            if (isStarted)
+			{
+				_serviceState = ServiceState.Running;
+				_logger.LogInformation("Service {mainFileName} started with {processId} {report}", mainFileName, processId, startReport);
+			}
+			else
+			{
+				_serviceState = ServiceState.StartFail;
+				_logger.LogError("Service {mainFileName} start failed with {report}", mainFileName, startReport);
+			}
+		}
         catch (Exception ex)
         {
             _serviceState = ServiceState.StartFail;
-            _errorMessage = ex.Message;
+            startReport = ex.Message;
             ex.Data.Add("ServiceName", mainFileName);
             ex.Data.Add("ServiceLocation", installationFolder);
             _logger.LogError(ex, ex.Message);
@@ -93,50 +89,8 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
             InstallationFolder = installationFolder,
             ServiceName = message.ServiceSettings.ServiceName,
             ServiceState = _serviceState,
-            ProcessId = _processId,
-            FailReason = _errorMessage
+            ProcessId = processId,
+            FailReason = !isStarted ? startReport : null
         });
     }
-
-    public void StartMicroService(Shared.MicroServiceSettings serviceSettings, string mainFileName)
-    {
-        _logger.LogInformation("Try to start {mainFileName}", mainFileName);
-        var psi = new ProcessStartInfo("dotnet");
-
-        psi.Arguments = $"{mainFileName} {serviceSettings.Arguments}".Trim();
-
-        psi.CreateNoWindow = false;
-        psi.UseShellExecute = false;
-        psi.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-        psi.RedirectStandardError = true;
-        psi.ErrorDialog = false;
-
-        var process = new Process();
-        process.StartInfo = psi;
-        process.EnableRaisingEvents = true;
-        process.ErrorDataReceived += (s, arg) =>
-        {
-            if (string.IsNullOrWhiteSpace(arg.Data))
-            {
-                return;
-            }
-            _logger.LogCritical(arg.Data);
-            _serviceState = Shared.ServiceState.StartFail;
-            // TODO: Send Error message
-        };
-
-        var start = process.Start();
-        if (!start)
-        {
-            _serviceState = Shared.ServiceState.StartFail;
-        }
-        else
-        {
-            _processId = process.Id;
-            _serviceState = Shared.ServiceState.Starting;
-        }
-        process.BeginErrorReadLine();
-    }
-
-    
 }

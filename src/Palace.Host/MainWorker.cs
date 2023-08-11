@@ -35,12 +35,17 @@ public class MainWorker : BackgroundService
         var installedServiceList = await ProcessHelper.GetInstalledServiceList(_settings.InstallationFolder);
         var serviceSettingsList = installedServiceList.Select(x => x.ServiceName).ToList();
 
+        _logger.LogInformation("{count} found already installed services", installedServiceList.Count);
+
         var runningServiceList = ProcessHelper.GetRunningProcess(serviceSettingsList.ToArray());
         foreach (var item in runningServiceList)
         {
             installedServiceList.RemoveAll(i => i.ServiceName == i.ServiceName);
 		}
-        await PublishInstalledServices(installedServiceList);
+
+		_logger.LogInformation("{count} found already running services", runningServiceList.Count);
+
+		await PublishInstalledServices(installedServiceList);
 
         // Lancer tous les services qui ne sont pas en état running
         // et marqué dans les settings comme always started

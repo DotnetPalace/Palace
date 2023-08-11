@@ -202,6 +202,7 @@ public class Orchestrator
         rms.EnvironmentName = microserviceInfo.EnvironmentName;
         rms.LastHitDate = microserviceInfo.LastHitDate;
         rms.Log = microserviceInfo.Log;
+        rms.FailReason = microserviceInfo.FailReason;
 
         OnServiceChanged?.Invoke(rms);
     }
