@@ -1,0 +1,25 @@
+﻿.table-fixed-header {
+    display: block;
+    width: 100%;
+    overflow-y: auto;
+    /* Définissez la hauteur selon vos besoins */
+    height: 200px;
+}
+
+    .table-fixed-header thead tr {
+        display: block;
+        position: relative;
+    }
+
+    .table-fixed-header tbody {
+        display: block;
+        overflow-y: auto;
+        /* Laissez de la place pour l'en-tête */
+        height: 150px;
+    }
+
+    .table-fixed-header th, .table-fixed-header td {
+        width: 33.3333%;
+        /* Pour gérer la largeur des colonnes */
+        float: left;
+    }

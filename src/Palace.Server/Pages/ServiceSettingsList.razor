@@ -1,12 +1,10 @@
 ﻿@page "/services"
 <PageTitle>Palace service list</PageTitle>
 
-<br />
-<a href="/EditService/new" class="btn btn-success">Add Service</a>
-<br />
-<br />
+<div class="p-2">
+<a href="/EditService/new" class="btn btn-success mb-3">Add Service</a>
 
-<table class="table table-bordered">
+<table class="table table-bordered w-100">
 	<thead>
 		<tr>
 			<th>Group</th>
@@ -47,3 +45,5 @@
 </table>
 
 <Toast @ref="toast" />
+
+</div>

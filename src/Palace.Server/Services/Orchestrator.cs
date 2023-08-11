@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System.Collections.Concurrent;
+
+using Microsoft.Extensions.Caching.Memory;
 
 using Palace.Server.Models;
 
@@ -6,9 +8,9 @@ namespace Palace.Server.Services;
 
 public class Orchestrator
 {
-	private List<Models.ExtendedMicroServiceInfo>? _extendedMicroServiceInfoList = null;
-    private List<Models.HostInfo>? _hostInfoList = null;
-    private List<Models.PackageInfo>? _packageList = null;
+	private readonly ConcurrentDictionary<string, Models.ExtendedMicroServiceInfo> _extendedMicroServiceInfoList = new();
+    private readonly ConcurrentDictionary<string, Models.HostInfo> _hostInfoList = new();
+    private readonly ConcurrentDictionary<string, Models.PackageInfo> _packageList = new();
 
 	private readonly ILogger<Orchestrator> _logger;
     private readonly Configuration.GlobalSettings _settings;
@@ -22,16 +24,17 @@ public class Orchestrator
     {
         _logger = logger;
         _settings = settings;
+        LoadPackageList();
+	}
+
+    public IEnumerable<Models.PackageInfo> GetPackageInfoList()
+    {
+        return _packageList.Select(i => i.Value);
     }
 
-    public List<Models.PackageInfo> GetPackageInfoList()
+    private void LoadPackageList()
     {
-        if (_packageList != null)
-		{
-			return _packageList;
-		}
-        var result = new List<Models.PackageInfo>();
-
+        _packageList.Clear();
         var zipFileList = from f in Directory.GetFiles(_settings.RepositoryFolder, "*.zip", SearchOption.AllDirectories)
                           let fileInfo = new FileInfo(f)
                           select fileInfo;
@@ -45,28 +48,18 @@ public class Orchestrator
                 Size = item.Length
             };
             SetCurrentVersion(info);
-            result.Add(info);
+            _packageList.TryAdd(info.PackageFileName, info);
         }
-        _packageList = result;
-        return result;
     }
 
-    public List<Models.ExtendedMicroServiceInfo> GetServiceList()
+    public IEnumerable<Models.ExtendedMicroServiceInfo> GetServiceList()
     {
-        if (_extendedMicroServiceInfoList is null)
-        {
-            _extendedMicroServiceInfoList = new();
-        }
-        return _extendedMicroServiceInfoList;
+        return _extendedMicroServiceInfoList.Select(i => i.Value);
     }
 
-    public List<Models.HostInfo> GetHostList()
+    public IEnumerable<Models.HostInfo> GetHostList()
     {
-        if (_hostInfoList is null)
-        {
-            _hostInfoList = new();
-        }
-		return _hostInfoList;
+		return _hostInfoList.Select(i => i.Value);
 	}
 
 	public void BackupAndUpdateRepositoryFile(string zipFileFullPath)
@@ -159,44 +152,41 @@ public class Orchestrator
 
         if (availablePackage is not null)
         {
+			LoadPackageList();
 			OnPackageChanged?.Invoke(availablePackage);
-            _packageList = null;
 		}
 	}
 
-
     public void AddOrUpdateHost(Models.HostInfo hostInfo)
     {
-        var list = GetHostList();
-        var existing = list.SingleOrDefault(i => i.HostName == hostInfo.HostName);
-        if (existing == null)
+        _hostInfoList.TryGetValue(hostInfo.HostName, out var existing);
+        if (existing is null)
         {
-            list.Add(hostInfo);
+            existing = hostInfo;
+            _hostInfoList.TryAdd(hostInfo.HostName, hostInfo);
         }
-        else
-        {
-            existing.LastHitDate = DateTime.Now;
-            existing.ExternalIp = hostInfo.ExternalIp;
-            existing.Version = hostInfo.Version;
-            existing.CreationDate = hostInfo.CreationDate;
-            existing.HostState = hostInfo.HostState;
-        }
-        OnHostChanged?.Invoke(hostInfo);
+
+		existing.LastHitDate = DateTime.Now;
+		existing.ExternalIp = hostInfo.ExternalIp;
+		existing.Version = hostInfo.Version;
+		existing.CreationDate = hostInfo.CreationDate;
+		existing.HostState = hostInfo.HostState;
+
+		OnHostChanged?.Invoke(hostInfo);
     }
 
     public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
     {
-        var serviceList = GetServiceList();
-
-        var rms = serviceList.SingleOrDefault(i => i.Key == microserviceInfo.Key);
-        if (rms == null)
+        _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var rms);
+		if (rms is null)
         {
-            rms = new Models.ExtendedMicroServiceInfo();
-            rms.HostName = microserviceInfo.HostName;
-            rms.ServiceName = microserviceInfo.ServiceName;
-            serviceList.Add(rms);
-        }
-        rms.Location = microserviceInfo.Location;
+			rms = new Models.ExtendedMicroServiceInfo();
+			rms.HostName = microserviceInfo.HostName;
+			rms.ServiceName = microserviceInfo.ServiceName;
+			_extendedMicroServiceInfoList.TryAdd(rms.Key, rms);
+		}
+
+		rms!.Location= microserviceInfo.Location;
         rms.UserInteractive = microserviceInfo.UserInteractive;
         rms.Version = microserviceInfo.Version;
         rms.LastWriteTime = microserviceInfo.LastWriteTime;
@@ -225,7 +215,7 @@ public class Orchestrator
             {
                 File.Delete(fileName);
                 await Task.Delay(1000);
-                _packageList = null;
+                LoadPackageList();
             }
             catch (Exception ex)
             {
@@ -260,7 +250,7 @@ public class Orchestrator
             fileInfo.LastWriteTime = DateTime.Now;
             fileInfo.CreationTime = DateTime.Now;
             File.Copy(fileInfo.FullName, destPackage, true);
-            _packageList = null;
+            LoadPackageList();
             OnPackageChanged?.Invoke(package);
         }
         catch (Exception ex)
@@ -332,13 +322,11 @@ public class Orchestrator
         {
             return;
 		}
-		
-        var serviceList = GetServiceList();
-		var rms = serviceList.SingleOrDefault(i => i.Key == rmi.Key);
-		if (rms != null)
+
+        _extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
+		if (existing is not null)
 		{
-			serviceList.Remove(rms);
-			OnServiceChanged?.Invoke(rms);
+			OnServiceChanged?.Invoke(existing);
 		}
 	}
 }
