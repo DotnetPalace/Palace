@@ -38,6 +38,7 @@ public class MainWorker : BackgroundService
 			var rmi = new RunningMicroserviceInfo
 			{
 				ServiceName = _settings.ServiceName,
+				HostName = _settings.HostName,
 				Version = version,
 				Location = fileInfo.FullName,
 				UserInteractive = System.Environment.UserInteractive,
@@ -50,6 +51,7 @@ public class MainWorker : BackgroundService
 				ServiceState = ServiceState.Running,
 				WorkingSet = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64,
 			};
+
 			await _bus.EnqueueMessage(_settings.ServiceHealthQueueName, new Shared.Messages.ServiceHealthCheck
 			{
 				HostName = _settings.HostName,

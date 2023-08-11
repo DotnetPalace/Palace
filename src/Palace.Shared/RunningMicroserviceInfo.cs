@@ -3,6 +3,7 @@
 public class RunningMicroserviceInfo
 {
     public string ServiceName { get; set; } = null!;
+    public string HostName { get; set; } = null!;
     public string Version { get; set; } = null!;
     public string? Location { get; set; }
     public bool UserInteractive { get; set; }
