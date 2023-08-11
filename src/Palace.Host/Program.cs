@@ -4,6 +4,8 @@ using ArianeBus;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 
+using LogRPush;
+
 using Palace.Host;
 using Palace.Host.Extensions;
 
@@ -62,7 +64,23 @@ IHost host = Host.CreateDefaultBuilder(args)
             configure.DefaultRequestHeaders.Add("Authorization", $"Basic {settings.ApiKey}");
             configure.DefaultRequestHeaders.UserAgent.ParseAdd($"Palace/{version} ({System.Environment.OSVersion}; {System.Environment.MachineName}; {settings.HostName})");
         });
+
+        if (settings.LogServerUrl is not null)
+        {
+            services.AddLogRPush(config =>
+            {
+                config.HostName = "PalaceHost";
+                config.LogServerUrlList.Add(settings.LogServerUrl);
+                config.EnvironmentName = hostingContext.HostingEnvironment.EnvironmentName;
+            });
+        }
     })
     .Build();
+
+var settings = host.Services.GetRequiredService<Palace.Host.Configuration.GlobalSettings>();
+if (settings.LogServerUrl is not null)
+{
+    host.Services.UseLogRPush();
+}
 
 await host.RunAsync();
