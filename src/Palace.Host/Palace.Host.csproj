@@ -4,8 +4,9 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.0.44.0</Version>
+	  <Version>2.0.45.1</Version>
 	  <PackageReleaseNotes>
+		  2.0.44.1 : Fix installation bug
 		  2.0.44.0 : Add LogR
 		  2.0.43.0 : Allow uninstall service
 	  </PackageReleaseNotes>

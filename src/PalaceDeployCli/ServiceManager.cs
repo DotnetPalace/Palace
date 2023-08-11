@@ -5,61 +5,77 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PalaceDeployCli
+namespace PalaceDeployCli;
+
+public class ServiceManager
 {
-	public class ServiceManager
+	public ServiceManager(PalaceDeployCliSettings settings)
 	{
-		public ServiceManager(PalaceDeployCliSettings settings)
-		{
-			this.Settings = settings;
-		}
-
-		protected PalaceDeployCliSettings Settings { get; set; }
-
-		public bool StopService()
-		{
-			var serviceController = new ServiceController(Settings.ServiceName);
-			if (serviceController is null
-				|| serviceController.Container is null)
-			{
-				// not installed
-				return true;
-			}
-
-
-			if (serviceController.Status.Equals(ServiceControllerStatus.Stopped)
-				|| serviceController.Status.Equals(ServiceControllerStatus.StopPending))
-			{
-				Console.WriteLine("Service {0} is already stopped or stopping", Settings.ServiceName);
-				return false;
-			}
-
-			serviceController.Stop();
-			serviceController.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
-			return true;
-		}
-
-		public bool StartService()
-		{
-			var serviceController = new ServiceController(Settings.ServiceName);
-            if (serviceController is null
-				|| serviceController.Container is null)
-            {
-				// not installed
-                return true;
-            }
-
-
-            if (serviceController.Status.Equals(ServiceControllerStatus.Running))
-			{
-				Console.WriteLine("Service {0} is already running", Settings.ServiceName);
-				return false;
-			}
-
-			serviceController.Start();
-			serviceController.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(60));
-			return true;
-		}
-
+		this.Settings = settings;
 	}
+
+	protected PalaceDeployCliSettings Settings { get; set; }
+
+	public bool StopService() 
+	{
+		var isServiceInstalled = IsServiceInstalled(Settings.ServiceName);
+		if (!isServiceInstalled)
+		{
+			Console.WriteLine("The service {0} is not installed", Settings.ServiceName);
+			return true;
+		}
+
+		var serviceController = new ServiceController(Settings.ServiceName);
+		if (serviceController is null)
+		{
+			// not installed
+			return true;
+		}
+
+		if (serviceController.Status.Equals(ServiceControllerStatus.Stopped)
+			|| serviceController.Status.Equals(ServiceControllerStatus.StopPending))
+		{
+			Console.WriteLine("Service {0} is already stopped or stopping", Settings.ServiceName);
+			return true;
+		}
+
+		serviceController.Stop();
+		serviceController.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
+		return true;
+	}
+
+	public bool StartService()
+	{
+		var isServiceInstalled = IsServiceInstalled(Settings.ServiceName);
+		if (!isServiceInstalled)
+		{
+			return true;
+		}
+
+		var serviceController = new ServiceController(Settings.ServiceName);
+        if (serviceController is null)
+        {
+			// not installed
+            return true;
+        }
+
+		serviceController.Start();
+		serviceController.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(60));
+		return true;
+	}
+
+	private bool IsServiceInstalled(string serviceName)
+	{
+		try
+		{
+			var service = new ServiceController(serviceName);
+			var status = service.Status; 
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
 }
