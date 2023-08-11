@@ -37,7 +37,8 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
 			Location = message.InstallationFolder,
 			ProcessId = message.ProcessId,
 			ServiceState = message.ServiceState,
-			CommandLine = $"{message.CommandLine}"
+			CommandLine = $"{message.CommandLine}",
+            FailReason = message.FailReason
 		};
 
 		rmi.HostName = message.HostName;
