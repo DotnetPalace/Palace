@@ -66,6 +66,17 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
             report.Success = true;
         }
 
+        try
+        {
+            await ProcessHelper.WaitForProcessDown(message.ServiceSettings.ServiceName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Wait for process down failed");
+			report.Success = false;
+			report.FailReason = ex.Message;
+        }
+
         if (report.Success)
         {
             var installResult = InstallLocalService(message, downloadResult);
