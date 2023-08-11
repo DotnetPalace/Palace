@@ -42,7 +42,8 @@ public class MainWorker : BackgroundService
 		}
         await PublishInstalledServices(installedServiceList);
 
-        // Lancer tous les services qui ne sont pas en état running et marqué dans les settings comme always started
+        // Lancer tous les services qui ne sont pas en état running
+        // et marqué dans les settings comme always started
         foreach (var item in installedServiceList.Where(i => i.AlwaysStarted))
         {
             // ProcessHelper.StartProcess(item.ServiceName, _settings.InstallationDirectory);
@@ -60,7 +61,7 @@ public class MainWorker : BackgroundService
 			});
 
             await Task.Delay(_settings.ScanIntervalInSeconds * 1000, stoppingToken);
-            _logger.LogInformation("Service up {date}", DateTime.Now);
+            _logger.LogTrace("Service up {date}", DateTime.Now);
         }
     }
 

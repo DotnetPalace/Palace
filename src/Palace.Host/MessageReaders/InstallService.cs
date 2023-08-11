@@ -270,7 +270,10 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
 		{
 			try
 			{
-				System.IO.File.Delete(destFile);
+				if (!System.IO.File.Exists(destFile))
+				{
+					System.IO.File.Delete(destFile);
+				}
 				System.IO.File.Copy(sourceFile, destFile, true);
 				_logger.LogDebug($"Copy {sourceFile} to {destFile}");
 				copySuccess = true;
