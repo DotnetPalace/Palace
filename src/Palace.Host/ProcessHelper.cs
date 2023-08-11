@@ -124,4 +124,23 @@ internal static class ProcessHelper
 
 		return (report.ToString(), processId, isStared);
 	}
+
+	public static async Task WaitForProcessDown(string mainFileName)
+	{
+		var loop = 0;
+		while (true)
+		{
+			var runningProcesses = GetRunningProcess(mainFileName);
+			if (runningProcesses.Count == 0)
+			{
+				return;
+			}
+			loop++;
+			if (loop > 30)
+			{
+				throw new Exception("Wait for process down timeout");
+			}
+			await Task.Delay(1 * 1000);
+		}
+	}
 }
