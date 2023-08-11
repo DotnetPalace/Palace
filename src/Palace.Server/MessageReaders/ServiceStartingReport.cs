@@ -34,6 +34,7 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
         var rmi = new Models.ExtendedMicroServiceInfo
 		{
 			ServiceName = message.ServiceName,
+            HostName = message.HostName,
 			Location = message.InstallationFolder,
 			ProcessId = message.ProcessId,
 			ServiceState = message.ServiceState,
