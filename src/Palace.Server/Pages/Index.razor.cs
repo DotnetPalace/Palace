@@ -42,9 +42,9 @@ public partial class Index : ComponentBase
         var db = await DbContextFactory.CreateDbContextAsync();
         serviceSettingsList = await db.MicroServiceSettings.ToListAsync();
 
-        hostList = Orchestrator.GetHostList();
-        runningServiceList = Orchestrator.GetServiceList();
-        packageInfoList = Orchestrator.GetPackageInfoList();
+        hostList = Orchestrator.GetHostList().ToList();
+        runningServiceList = Orchestrator.GetServiceList().ToList();
+        packageInfoList = Orchestrator.GetPackageInfoList().ToList();
 
 		Orchestrator.OnHostChanged += Orchestrator_OnHostChanged;
         Orchestrator.OnServiceChanged += Orchestrator_OnServiceChanged;
@@ -53,19 +53,19 @@ public partial class Index : ComponentBase
 
 	private void Orchestrator_OnPackageChanged(PackageInfo obj)
 	{
-		packageInfoList = Orchestrator.GetPackageInfoList();
+		packageInfoList = Orchestrator.GetPackageInfoList().ToList();
 		InvokeAsync(StateHasChanged);
 	}
 
 	private void Orchestrator_OnServiceChanged(ExtendedMicroServiceInfo obj)
     {
-        runningServiceList = Orchestrator.GetServiceList();
+        runningServiceList = Orchestrator.GetServiceList().ToList();
         InvokeAsync(StateHasChanged);
     }
 
     void Orchestrator_OnHostChanged(Models.HostInfo hostInfo)
 	{
-		hostList = Orchestrator.GetHostList();
+        hostList = Orchestrator.GetHostList().ToList();
         InvokeAsync(StateHasChanged);
 	}
 

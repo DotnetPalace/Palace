@@ -1,6 +1,7 @@
 ﻿@page "/uploadpackage"
 
 <PageTitle>Palace Server - UploadPackage</PageTitle>
+<div class="p-3">
 <EditForm Model="uploadedFile">
     <CustomValidator @ref="customValidator"></CustomValidator>
     <ValidationSummary></ValidationSummary>
@@ -21,4 +22,4 @@
 {
     <div class="alert-warning">Uploading...</div>
 }
-
+</div>

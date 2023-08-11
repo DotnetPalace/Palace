@@ -9,7 +9,7 @@
     </div>
 
     <main>
-        <article class="content px-4">
+        <div class="content">
             <AuthorizeView Roles="admin">
                 <Authorized>
                     @Body
@@ -18,7 +18,7 @@
                     <Palace.Server.Pages.Login/>
                 </NotAuthorized>
             </AuthorizeView>
-        </article>
+        </div>
     </main>
 </div>
 

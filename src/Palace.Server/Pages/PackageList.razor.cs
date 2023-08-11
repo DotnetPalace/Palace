@@ -29,7 +29,7 @@ public partial class PackageList
 
     void UpdateLists()
     {
-        availablePackageList = Orchestrator.GetPackageInfoList();
+        availablePackageList = Orchestrator.GetPackageInfoList().ToList();
     }
 
 

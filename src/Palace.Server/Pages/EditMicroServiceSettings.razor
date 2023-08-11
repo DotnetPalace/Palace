@@ -1,108 +1,109 @@
 ﻿@page "/editservice/{ServiceName}"
 
-<h3>Edit Settings for service : @serviceSettings.ServiceName</h3>
-
-<EditForm Model="serviceSettings" OnValidSubmit="ValidateAndSave">
-    <ValidationSummary></ValidationSummary>
-    <DataAnnotationsValidator/>
-    <CustomValidator @ref="customValidator"></CustomValidator>
-    @if (_isNew)
-    {
-        <div class="mb-3">
-            <label class="form-label">ServiceName :</label>
-            <InputText type="text" @bind-Value="serviceSettings.ServiceName" class="form-control" />
-            <small>
-                <ValidationMessage For="() => serviceSettings.ServiceName" />
-            </small>
-        </div>
-    }
-    <div class="mb-3">
-        <label class="form-label">AlwaysStarted :</label>
-        <InputCheckbox @bind-Value="serviceSettings.AlwaysStarted" class="form-check-input" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Arguments :</label>
-        <InputText type="text" @bind-Value="serviceSettings.Arguments" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.Arguments" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Group Name :</label>
-        <InputText type="text" @bind-Value="serviceSettings.GroupName" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.GroupName" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">MainAssembly :</label>
-        <InputText type="text" @bind-Value="serviceSettings.MainAssembly" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.MainAssembly" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">PackageFileName :</label>
-        <InputSelect class="form-select" @bind-Value="serviceSettings.PackageFileName">
-            <option value="">Choose package</option>
-            @foreach (var item in packageFileNameList)
-            {
-                if (item == serviceSettings.PackageFileName)
+<div class="p-3">
+	<h3>Edit Settings for service : @serviceSettings.ServiceName</h3>
+	<EditForm Model="serviceSettings" OnValidSubmit="ValidateAndSave">
+		<ValidationSummary></ValidationSummary>
+		<DataAnnotationsValidator />
+		<CustomValidator @ref="customValidator"></CustomValidator>
+		@if (_isNew)
+		{
+			<div class="mb-3">
+				<label class="form-label">ServiceName :</label>
+				<InputText type="text" @bind-Value="serviceSettings.ServiceName" class="form-control" />
+				<small>
+					<ValidationMessage For="() => serviceSettings.ServiceName" />
+				</small>
+			</div>
+		}
+		<div class="mb-3">
+			<label class="form-label">AlwaysStarted :</label>
+			<InputCheckbox @bind-Value="serviceSettings.AlwaysStarted" class="form-check-input" />
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Arguments :</label>
+			<InputText type="text" @bind-Value="serviceSettings.Arguments" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.Arguments" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Group Name :</label>
+			<InputText type="text" @bind-Value="serviceSettings.GroupName" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.GroupName" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">MainAssembly :</label>
+			<InputText type="text" @bind-Value="serviceSettings.MainAssembly" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.MainAssembly" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">PackageFileName :</label>
+			<InputSelect class="form-select" @bind-Value="serviceSettings.PackageFileName">
+				<option value="">Choose package</option>
+				@foreach (var item in packageFileNameList)
 				{
-					<option value="@item" selected>@item</option>
+					if (item == serviceSettings.PackageFileName)
+					{
+						<option value="@item" selected>@item</option>
+					}
+					else
+					{
+						<option value="@item">@item</option>
+					}
 				}
-				else
-				{
-					<option value="@item">@item</option>
-				}
-            }
-        </InputSelect>
-        <small>
-            <ValidationMessage For="() => serviceSettings.PackageFileName" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Thread limit before alert :</label>
-        <InputNumber @bind-Value="serviceSettings.ThreadLimitBeforeAlert" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.ThreadLimitBeforeAlert" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Thread limit before restart :</label>
-        <InputNumber @bind-Value="serviceSettings.ThreadLimitBeforeRestart" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.ThreadLimitBeforeRestart" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">No health check count before alert :</label>
-        <InputNumber @bind-Value="serviceSettings.NoHealthCheckCountCountBeforeAlert" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.NoHealthCheckCountCountBeforeAlert" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">No health check count before restart :</label>
-        <InputNumber @bind-Value="serviceSettings.NoHealthCheckCountBeforeRestart" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.NoHealthCheckCountBeforeRestart" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Max working set before alert :</label>
-        <InputNumber @bind-Value="serviceSettings.MaxWorkingSetLimitBeforeAlert" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.MaxWorkingSetLimitBeforeAlert" />
-        </small>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Max working set before restart :</label>
-        <InputNumber @bind-Value="serviceSettings.MaxWorkingSetLimitBeforeRestart" class="form-control" />
-        <small>
-            <ValidationMessage For="() => serviceSettings.MaxWorkingSetLimitBeforeRestart" />
-        </small>
-    </div>
-    <br/>
-    <button type="submit" class="btn btn-primary">Save</button>
-</EditForm>
+			</InputSelect>
+			<small>
+				<ValidationMessage For="() => serviceSettings.PackageFileName" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Thread limit before alert :</label>
+			<InputNumber @bind-Value="serviceSettings.ThreadLimitBeforeAlert" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.ThreadLimitBeforeAlert" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Thread limit before restart :</label>
+			<InputNumber @bind-Value="serviceSettings.ThreadLimitBeforeRestart" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.ThreadLimitBeforeRestart" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">No health check count before alert :</label>
+			<InputNumber @bind-Value="serviceSettings.NoHealthCheckCountCountBeforeAlert" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.NoHealthCheckCountCountBeforeAlert" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">No health check count before restart :</label>
+			<InputNumber @bind-Value="serviceSettings.NoHealthCheckCountBeforeRestart" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.NoHealthCheckCountBeforeRestart" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Max working set before alert :</label>
+			<InputNumber @bind-Value="serviceSettings.MaxWorkingSetLimitBeforeAlert" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.MaxWorkingSetLimitBeforeAlert" />
+			</small>
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Max working set before restart :</label>
+			<InputNumber @bind-Value="serviceSettings.MaxWorkingSetLimitBeforeRestart" class="form-control" />
+			<small>
+				<ValidationMessage For="() => serviceSettings.MaxWorkingSetLimitBeforeRestart" />
+			</small>
+		</div>
+		<br />
+		<button type="submit" class="btn btn-primary">Save</button>
+	</EditForm>
+</div>
