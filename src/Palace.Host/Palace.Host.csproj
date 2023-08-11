@@ -4,8 +4,9 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.0.42.0</Version>
+	  <Version>2.0.44.0</Version>
 	  <PackageReleaseNotes>
+		  2.0.44.0 : Add LogR
 		  2.0.43.0 : Allow uninstall service
 	  </PackageReleaseNotes>
   </PropertyGroup>
@@ -20,6 +21,7 @@
     <PackageReference Include="ArianeBus" Version="1.0.10.4" />
     <PackageReference Include="Azure.Identity" Version="1.9.0" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.5.0" />
+    <PackageReference Include="LogRPush" Version="1.1.11" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />

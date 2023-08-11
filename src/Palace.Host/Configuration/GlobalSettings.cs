@@ -16,4 +16,6 @@ public class GlobalSettings : Shared.GlobalSettings
     public int ScanIntervalInSeconds { get; set; } = 20;
     public int WaitingUpdateTimeoutInSecond { get; set; } = 30;
     public bool StopAllMicroServicesWhenStop { get; set; } = false;
+
+    public string LogServerUrl { get; set; } = null!;
 }
