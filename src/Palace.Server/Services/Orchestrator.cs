@@ -254,7 +254,7 @@ public class Orchestrator
         _packageList.Clear();
         LoadPackageList();
 		_bus.PublishTopic(_settings.ServerResetTopicName, new Palace.Shared.Messages.ServerReset());
-        OnHostChanged?.Invoke(null);
+        OnHostChanged?.Invoke(new HostInfo());
 	}
 
 	private void LoadPackageList()

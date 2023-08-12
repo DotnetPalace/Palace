@@ -7,6 +7,8 @@ public class PalaceSettings
     public string HostName { get; set; } = System.Environment.MachineName;
 
     public string AzureBusConnectionString { get; set; } = null!;
+    public string? QueuePrefix { get; set; }
+
     public string StopTopicName { get; set; } = "palace.stopservice";
 	public string ServiceHealthQueueName { get; set; } = "palace.servicehealth";
     public string StopServiceReportQueueName { get; set; } = "palace.stopservicereport";

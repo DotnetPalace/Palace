@@ -18,6 +18,6 @@
 <div>Last Update : @ServiceInfo.LastHitDate</div>
 <div>Last WriteTime : @ServiceInfo.LastWriteTime</div>
 <div>
-	<button type="button" class="btn btn-danger" @onclick="OnStopService">Stop</button>
-	<button type="button" class="btn btn-warning" @onclick="OnRecycleService">Recycle</button>
+	<ActionButton type="button" ButtonType="btn-danger" @onclick="OnStopService">Stop</ActionButton>
+	<ActionButton type="button" ButtonType="btn-warning" @onclick="OnRecycleService">Recycle</ActionButton>
 </div>

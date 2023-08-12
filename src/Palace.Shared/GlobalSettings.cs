@@ -4,6 +4,7 @@ public class GlobalSettings
 {
     public string AzureBusConnectionString { get; private set; } = null!;
     public void SetAzureBusConnectionString(string connectionString) => AzureBusConnectionString = connectionString;
+    public string? QueuePrefix { get; set; }
 
     public Guid ApiKey { get; private set; }
     public void SetApiKey(Guid guid) => ApiKey = guid;

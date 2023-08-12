@@ -1,0 +1,17 @@
+﻿@if (string.IsNullOrWhiteSpace(disabled))
+{
+	<button class="btn @ButtonType" @attributes="@CatpuredAttributes" @onclick="Click">
+		@ChildContent
+	</button>
+
+}
+else
+{
+	<button class="btn @ButtonType" @attributes="@CatpuredAttributes" disabled>
+		@if (showLoader)
+		{
+			<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+		}
+		@ChildContent
+	</button>
+}
