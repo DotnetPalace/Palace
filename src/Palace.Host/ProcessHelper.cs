@@ -65,21 +65,13 @@ internal static class ProcessHelper
 		psi.CreateNoWindow = false;
 		psi.UseShellExecute = false;
 		psi.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-		psi.RedirectStandardError = false;
-		psi.RedirectStandardOutput = true;
+		psi.RedirectStandardError = true;
+		psi.RedirectStandardOutput = false;
 		psi.ErrorDialog = false;
 
 		var process = new Process();
 		process.StartInfo = psi;
 		process.EnableRaisingEvents = true;
-		process.OutputDataReceived += (s, arg) =>
-		{
-			if (string.IsNullOrWhiteSpace(arg.Data))
-			{
-				return;
-			}
-			report.AppendLine(arg.Data);
-		};
 		process.ErrorDataReceived += (s, arg) =>
 		{
 			hasError = true;
@@ -102,7 +94,6 @@ internal static class ProcessHelper
 			isStared = false;
 		}
 
-		// process.BeginOutputReadLine();
 		process.BeginErrorReadLine();
 
 		int loop = 0;
