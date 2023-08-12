@@ -7,6 +7,13 @@ public class HostInfo
     public string ExternalIp { get; set; } = null!;
     public string MainFileName { get; set; } = null!;
     public string Version { get; set; } = null!;
+	public bool UIDisplayMore { get; set; } = false;
+    public long TotalDriveSize { get; set; }
+    public long TotalFreeSpaceOfDriveSize { get; set; }
+    public string? OsDescription { get; set; }
+    public string? OsVersion { get; set; }
+    public int ProcessId { get; set; }
+    public double PercentCpu { get; set; }
 
     public DateTime CreationDate { get; set; } = DateTime.Now;
     public DateTime? LastHitDate { get; set; }

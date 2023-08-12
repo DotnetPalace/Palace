@@ -56,14 +56,24 @@ public class MainWorker : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
         {
+            var currentDrive = System.IO.Path.GetPathRoot(System.Reflection.Assembly.GetExecutingAssembly().Location!);
+            var driveInfo = new System.IO.DriveInfo(currentDrive!);
+            var process = System.Diagnostics.Process.GetCurrentProcess();
+            var percentCpu = process.TotalProcessorTime.TotalMilliseconds / (Environment.ProcessorCount * process.TotalProcessorTime.TotalMilliseconds) * 100;
             await _bus.EnqueueMessage(_settings.HostHealthCheckQueueName, new Shared.Messages.HostHealthCheck
             {
                 HostName = _settings.HostName,
                 MachineName = System.Environment.MachineName,
                 ExternalIp = _ip,
-			    MainFileName = System.Reflection.Assembly.GetExecutingAssembly().Location!,
-				Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString()
-			});
+                MainFileName = System.Reflection.Assembly.GetExecutingAssembly().Location!,
+                Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(),
+                TotalDriveSize = driveInfo.TotalSize,
+                TotalFreeSpaceOfDriveSize = driveInfo.TotalFreeSpace,
+                OsDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+                OsVersion = System.Environment.OSVersion.ToString(),
+                ProcessId = process.Id,
+                PercentCpu = percentCpu
+            });
 
             await Task.Delay(_settings.ScanIntervalInSeconds * 1000, stoppingToken);
             _logger.LogTrace("Service up {date}", DateTime.Now);

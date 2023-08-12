@@ -1,22 +1,27 @@
 # Palace V2
 
-µService hoster suite
+µServices cluster manager
+
+[![NuGet](https://img.shields.io/nuget/v/Palace.Client.svg)](https://www.nuget.org/packages/Palace.Client/)
 
 ## What is Palace?
 
-Palace is a µService hoster suite. It is designed to be a simple, yet powerful, way to host µServices.
+Palace is a µServices cluster manager. 
 
-- No docker
-- No swarm
-- No kubernetes
+It is designed to be a very simple, yet powerful, way to host µServices without bullshit.
+
+- No specific tooling or configuration like yaml files
+- No Docker
+- No Swarm
+- No Kubernetes
 - No Podman
-- No virtualization
-- No containers- Only 1 zip file by µService with a very small size versus docker imageRequierment : - Palace only works with dotnet core applications (V6+).
-- 1 Azure bus account
+- No Virtualization
+- No Container- Only 1 zip file by µService with a very small size vs docker imageRequierment : - Palace only works with dotnet core applications (V6+) in windows server (at moment).
+- 1 Azure Bus mandatory account 
 
 ## What does Palace allow you to do ?
 
-- Palace allows for on-the-fly installation of µServices on any server where a host is installed.
+- Palace allows for on-the-fly installation of µServices on any server where a palace.host is installed.
 - Palace allows for the rapid deployment and updating of microservices on any server where a host is installed, even if they are not in operation.
 - Palace also monitors both the hosts and the services and alerts in case of failure.
 - Thanks to Azure Bus, Palace can bypass all firewalls; there's no need for a specific network.
