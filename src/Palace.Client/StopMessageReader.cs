@@ -44,6 +44,11 @@ public class StopMessageReader : MessageReaderBase<StopService>
             || message.HostName != _settings.HostName)
         {
             // Not for me
+            _logger.LogTrace("message is not for me svc {s1} <-> {s2} host {h1} <-> {h2}", 
+                message.ServiceName, 
+                _settings.ServiceName, 
+                message.HostName, 
+                _settings.HostName);
             return;
         }
 
@@ -51,7 +56,7 @@ public class StopMessageReader : MessageReaderBase<StopService>
         _timer.Interval = _settings.TimeoutInSecondBeforeKillService * 1000;
         _timer.Elapsed += ExitTimerElapsed;
 
-        _logger.LogInformation($"Try to close the service {_settings.ServiceName}");
+        _logger.LogInformation($"Try to close the service {message.ServiceName} on {message.HostName}");
 
         await _bus.EnqueueMessage(_settings.StopServiceReportQueueName, new StopServiceReport
         {
