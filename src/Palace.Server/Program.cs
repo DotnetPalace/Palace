@@ -12,6 +12,8 @@ using Palace.Server.Services;
 using FluentValidation;
 using LogRWebMonitor;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Palace.Tests")]
+
 var builder = WebApplication.CreateBuilder(args);
 
 var currentAssembly = typeof(Program).Assembly;

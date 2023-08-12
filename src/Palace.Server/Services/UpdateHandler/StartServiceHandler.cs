@@ -98,7 +98,10 @@ public class StartServiceHandler : IUpdateHandler
             _logger.LogInformation("Service {serviceName} is {serviceState} for host {host}", _processMicroserviceUpdate.ServiceInfo.ServiceName, msi.ServiceState, _processMicroserviceUpdate.HostName);
             _processMicroserviceUpdate.CurrentWorkflow = $"{msi.ServiceState}";
             _processMicroserviceUpdate.ServiceInfo.ServiceState = msi.ServiceState;
-            _processMicroserviceUpdate.ManualResetEvent.Set();
+            if (!_processMicroserviceUpdate.ManualResetEvent.SafeWaitHandle.IsClosed)
+            {
+                _processMicroserviceUpdate.ManualResetEvent.Set();
+            }
         }
     }
 

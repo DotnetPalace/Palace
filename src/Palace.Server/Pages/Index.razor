@@ -27,7 +27,7 @@
 		<tr>
 			<th>Group</th>
 			<th>Serivce Name</th>
-			@foreach (var host in hostList)
+			@foreach (var host in hostList.OrderBy(i => i.HostName))
 			{
 				var hostStyle = host.HostState == Palace.Shared.HostState.Down ? "table-danger" : "";
 				<th class="@hostStyle">
@@ -36,7 +36,7 @@
 					<div>State : @host.HostState</div>
 				</th>
 			}
-			@foreach (var ghostHost in ghostHostList)
+			@foreach (var ghostHost in ghostHostList.OrderBy(i => i))
 			{
 				<th>@ghostHost</th>
 			}
@@ -53,7 +53,7 @@
 					<div>Version Package : <a href="/package/@packageInfo?.PackageFileName">@packageInfo?.CurrentVersion</a></div>
 					<div>Date Package : @packageInfo?.LastWriteTime</div>
 				</td>
-				@foreach (var host in hostList)
+				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
 					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == host.HostName && i.ServiceName == service.ServiceName);
 					var serviceStyle = runningService?.ServiceState == ServiceState.Down ? "table-danger" : "";
@@ -94,7 +94,7 @@
 						}
 					</td>
 				}
-				@foreach (var ghostHost in ghostHostList)
+				@foreach (var ghostHost in ghostHostList.OrderBy(i => i))
 				{
 					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == ghostHost && i.ServiceName == service.ServiceName);
 					<td>
@@ -120,7 +120,7 @@
 					<div>Version : @ghostService.Version</div>
 					<div>State : @ghostService.ServiceState</div>
 				</td>
-				@foreach (var host in hostList)
+				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
 					<td>
 						@if (ghostService.HostName == host.HostName)

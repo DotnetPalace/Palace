@@ -42,11 +42,23 @@ public class UpdaterService : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			var toStartList = _processList.Where(i => i.Value.CurrentWorkflow == "Start").ToList();
+			var toStartList = from p in _processList
+								where p.Value.CurrentWorkflow == "Start"
+								select p;
+
 			foreach (var item in toStartList)
 			{
-                RunUpdateTask(item.Value, stoppingToken);                
-            }
+				var otherHosts = from p in _processList
+								 where p.Value.ServiceInfo.ServiceName == item.Value.ServiceInfo.ServiceName
+								 where p.Value.HostName != item.Value.HostName
+								 select p;
+
+				// One update by host for the same service
+				if (!otherHosts.Any())
+				{
+					RunUpdateTask(item.Value, stoppingToken);
+				}
+			}
 			await Task.Delay(1 * 1000, stoppingToken);
 		}
 	}
@@ -112,16 +124,16 @@ public class UpdaterService : BackgroundService
 			foreach (var service in services)
 			{
 				var settings = settingsList.Single(i => i.ServiceName == service.ServiceName);
-				var pmu = new MicroserviceUpdateContext
+				var muc = new MicroserviceUpdateContext
 				{
 					HostName = host,
 					ServiceSettings = settings,
 					ServiceInfo = service,
 					CurrentWorkflow = "Start"
 				};
-				if (!_processList.ContainsKey(pmu.Key))
+				if (!_processList.ContainsKey(muc.Key))
 				{
-                    _processList.TryAdd(pmu.Key, pmu);
+                    _processList.TryAdd(muc.Key, muc);
                 }
             }
 		}
