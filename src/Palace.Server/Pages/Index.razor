@@ -8,7 +8,7 @@
 }
 
 <table class="table table-bordered w-100 h-100">
-	<thead>
+	<thead class="table-light">
 		<tr>
 			<th colspan="2"></th>
 			@if (hostList.Count > 0)
@@ -31,9 +31,7 @@
 			{
 				var hostStyle = host.HostState == Palace.Shared.HostState.Down ? "table-danger" : "";
 				<th class="@hostStyle">
-					@host.HostName
-					<div>Version : @host.Version</div>
-					<div>State : @host.HostState</div>
+					<RunningHostInfo HostInfo="host"/>
 				</th>
 			}
 			@foreach (var ghostHost in ghostHostList.OrderBy(i => i))
@@ -43,15 +41,26 @@
 		</tr>
 	</thead>
 	<tbody class="table-group-divider">
+		@{
+			var oldRowSpan = 0;
+		}
 		@foreach (var service in serviceSettingsList.OrderBy(i => i.GroupName != null ? i.GroupName : "zzzz").ThenBy(i => i.ServiceName))
 		{
+			var rowSpan = serviceSettingsList.Count(i => i.GroupName == service.GroupName);
 			var packageInfo = packageInfoList.SingleOrDefault(i => i.PackageFileName == service.PackageFileName);
 			<tr>
-				<td>@service.GroupName</td>
+				@if (oldRowSpan != rowSpan)
+				{
+					oldRowSpan = rowSpan;
+					<td rowspan="@rowSpan">
+						<span>@service.GroupName</span>
+					</td>
+				}
 				<td>
 					<a href="/editservice/@service.ServiceName">@service.ServiceName</a>
 					<div>Version Package : <a href="/package/@packageInfo?.PackageFileName">@packageInfo?.CurrentVersion</a></div>
 					<div>Date Package : @packageInfo?.LastWriteTime</div>
+					@* <ActionButton ButtonType="btn-warning">Recycle all hosts</ActionButton> *@
 				</td>
 				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
@@ -60,16 +69,26 @@
 					<td class="@serviceStyle">
 						@if (runningService is not null)
 						{
-							<div>
-								State : @runningService.ServiceState
-								<small>@runningService.Log</small>
-								<span>@runningService.FailReason</span>
-							</div>
-							<div>
-								Version : @runningService.Version
-							</div>
+							<table class="table table-borderless table-sm">
+								<tbody>
+									<tr>
+										<td class="w-25">State</td>
+										<td class="w-75">
+											<b>@runningService.ServiceState</b>
+											<small>@runningService.Log</small>
+											<span class="text-danger">@runningService.FailReason</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="w-25">Version</td>
+										<td class="w-75">
+											@runningService.Version
+										</td>
+									</tr>
+								</tbody>
+							</table>
 							@if (runningService.ServiceState == ServiceState.Offline
-								|| runningService.ServiceState == ServiceState.Updated)
+									|| runningService.ServiceState == ServiceState.Updated)
 							{
 								<div>
 									<ActionButton type="button" ButtonType="btn-primary" @onclick="(() => StartService(host, service))">Start</ActionButton>
@@ -79,9 +98,9 @@
 							}
 							else if (runningService.ServiceState == ServiceState.Running)
 							{
-								<RunningService ServiceInfo="runningService" 
-									OnStopService="(() => StopService(host.HostName, service.ServiceName))"
-									OnRecycleService="(() => RecycleService(host.HostName, service))" />
+								<RunningServiceInfo ServiceInfo="runningService"
+												OnStopService="(() => StopService(host.HostName, service.ServiceName))"
+												OnRecycleService="(() => RecycleService(host.HostName, service))" />
 							}
 							else if (runningService.ServiceState == ServiceState.Down)
 							{
@@ -100,7 +119,7 @@
 					<td>
 						@if (runningService is not null)
 						{
-							<RunningService ServiceInfo="runningService"
+							<RunningServiceInfo ServiceInfo="runningService"
 											OnStopService="(() => StopService(ghostHost, service.ServiceName))"
 											OnRecycleService="(() => RecycleService(ghostHost, service))" />
 
@@ -110,7 +129,7 @@
 			</tr>
 		}
 
-		@foreach(var ghostService in ghostServiceList.OrderBy(i => i.ServiceName))
+		@foreach (var ghostService in ghostServiceList.OrderBy(i => i.ServiceName))
 		{
 			<tr class="table-secondary">
 				<td>

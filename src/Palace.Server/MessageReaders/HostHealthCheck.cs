@@ -37,7 +37,14 @@ public class HostHealthCheck : ArianeBus.MessageReaderBase<Palace.Shared.Message
 			ExternalIp = message.ExternalIp,
 			LastHitDate = message.Now,
 			Version = message.Version,
-            HostState = HostState.Running
+            HostState = HostState.Running,
+            MainFileName = message.MainFileName,
+            TotalDriveSize = message.TotalDriveSize,
+            TotalFreeSpaceOfDriveSize = message.TotalFreeSpaceOfDriveSize,
+            OsDescription = message.OsDescription,
+            OsVersion = message.OsVersion,
+            ProcessId = message.ProcessId,
+            PercentCpu = message.PercentCpu
 		};
 		_orchestrator.AddOrUpdateHost(hostInfo);
 	}

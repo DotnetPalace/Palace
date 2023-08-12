@@ -15,4 +15,10 @@ public class HostHealthCheck : IMessage
 	public string MainFileName { get; set; } = null!;
 	public string Version { get; set; } = null!;
     public DateTime Timeout => DateTime.Now.AddSeconds(15);
+	public long TotalDriveSize { get; set; }
+	public long TotalFreeSpaceOfDriveSize { get; set; }
+	public string? OsDescription { get; set; }
+	public string? OsVersion { get; set; }
+    public int ProcessId { get; set; }
+    public double PercentCpu { get; set; }
 }

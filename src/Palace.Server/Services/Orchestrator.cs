@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 using ArianeBus;
 
@@ -154,10 +155,16 @@ public class Orchestrator
         existing.LastHitDate = DateTime.Now;
         existing.ExternalIp = hostInfo.ExternalIp;
         existing.Version = hostInfo.Version;
-        existing.CreationDate = hostInfo.CreationDate;
         existing.HostState = hostInfo.HostState;
+        existing.MainFileName = hostInfo.MainFileName;
+        existing.TotalDriveSize = hostInfo.TotalDriveSize;
+        existing.TotalFreeSpaceOfDriveSize = hostInfo.TotalFreeSpaceOfDriveSize;
+        existing.OsDescription = hostInfo.OsDescription;
+        existing.OsVersion = hostInfo.OsVersion;
+        existing.ProcessId = hostInfo.ProcessId;
+        existing.PercentCpu = hostInfo.PercentCpu;
 
-        OnHostChanged?.Invoke(hostInfo);
+		OnHostChanged?.Invoke(hostInfo);
     }
 
     public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
