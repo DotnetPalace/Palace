@@ -138,4 +138,7 @@ app.UseLogRWebMonitor();
 
 await app.Services.StartMigration();
 
+var bus = app.Services.GetRequiredService<ArianeBus.IServiceBus>();
+await bus.PublishTopic(settings.ServerResetTopicName, new Palace.Shared.Messages.ServerReset());
+
 app.Run();

@@ -29,4 +29,6 @@ public class GlobalSettings
 
 	public string StartingServiceReportQueueName { get; set; } = "palace.startingservicereport";
     public string ServiceHealthQueueName { get; set; }= "palace.servicehealth";
+
+    public string ServerResetTopicName { get; set; } = "palace.serverreset";
 }

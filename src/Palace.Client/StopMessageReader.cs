@@ -34,7 +34,7 @@ public class StopMessageReader : MessageReaderBase<StopService>
             return;
         }
 
-		_logger.LogTrace("Receive stop message for {hostName}/{servcieName}", message.ServiceName, message.HostName);
+		_logger.LogTrace("Receive stop message for {hostName}/{servcieName}/{origin}", message.ServiceName, message.HostName, message.Origin);
 
         if (string.IsNullOrWhiteSpace(message.HostName))
         {

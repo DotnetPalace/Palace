@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
+using ArianeBus;
+
 using Microsoft.Extensions.Caching.Memory;
 
 using Palace.Server.Models;
@@ -8,48 +10,31 @@ namespace Palace.Server.Services;
 
 public class Orchestrator
 {
-	private readonly ConcurrentDictionary<string, Models.ExtendedMicroServiceInfo> _extendedMicroServiceInfoList = new();
+    private readonly ConcurrentDictionary<string, Models.ExtendedMicroServiceInfo> _extendedMicroServiceInfoList = new();
     private readonly ConcurrentDictionary<string, Models.HostInfo> _hostInfoList = new();
     private readonly ConcurrentDictionary<string, Models.PackageInfo> _packageList = new();
 
-	private readonly ILogger<Orchestrator> _logger;
+    private readonly ILogger<Orchestrator> _logger;
     private readonly Configuration.GlobalSettings _settings;
+	private readonly IServiceBus _bus;
 
-    public event Action<Models.PackageInfo> OnPackageChanged = default!;
+	public event Action<Models.PackageInfo> OnPackageChanged = default!;
     public event Action<Models.HostInfo> OnHostChanged = default!;
     public event Action<Models.ExtendedMicroServiceInfo> OnServiceChanged = default!;
 
-    public Orchestrator( ILogger<Orchestrator> logger,
-        Configuration.GlobalSettings settings)
+    public Orchestrator(ILogger<Orchestrator> logger,
+        Configuration.GlobalSettings settings,
+        ArianeBus.IServiceBus bus)
     {
         _logger = logger;
         _settings = settings;
-        LoadPackageList();
-	}
+		_bus = bus;
+		LoadPackageList();
+    }
 
     public IEnumerable<Models.PackageInfo> GetPackageInfoList()
     {
         return _packageList.Select(i => i.Value);
-    }
-
-    private void LoadPackageList()
-    {
-        _packageList.Clear();
-        var zipFileList = from f in Directory.GetFiles(_settings.RepositoryFolder, "*.zip", SearchOption.AllDirectories)
-                          let fileInfo = new FileInfo(f)
-                          select fileInfo;
-
-        foreach (var item in zipFileList)
-        {
-            var info = new Models.PackageInfo
-            {
-                PackageFileName = item.Name,
-                LastWriteTime = item.LastWriteTime,
-                Size = item.Length
-            };
-            SetCurrentVersion(info);
-            _packageList.TryAdd(info.PackageFileName, info);
-        }
     }
 
     public IEnumerable<Models.ExtendedMicroServiceInfo> GetServiceList()
@@ -59,10 +44,10 @@ public class Orchestrator
 
     public IEnumerable<Models.HostInfo> GetHostList()
     {
-		return _hostInfoList.Select(i => i.Value);
-	}
+        return _hostInfoList.Select(i => i.Value);
+    }
 
-	public void BackupAndUpdateRepositoryFile(string zipFileFullPath)
+    public void BackupAndUpdateRepositoryFile(string zipFileFullPath)
     {
         var zipFileName = Path.GetFileName(zipFileFullPath.ToLower());
 
@@ -152,10 +137,10 @@ public class Orchestrator
 
         if (availablePackage is not null)
         {
-			LoadPackageList();
-			OnPackageChanged?.Invoke(availablePackage);
-		}
-	}
+            LoadPackageList();
+            OnPackageChanged?.Invoke(availablePackage);
+        }
+    }
 
     public void AddOrUpdateHost(Models.HostInfo hostInfo)
     {
@@ -166,27 +151,27 @@ public class Orchestrator
             _hostInfoList.TryAdd(hostInfo.HostName, hostInfo);
         }
 
-		existing.LastHitDate = DateTime.Now;
-		existing.ExternalIp = hostInfo.ExternalIp;
-		existing.Version = hostInfo.Version;
-		existing.CreationDate = hostInfo.CreationDate;
-		existing.HostState = hostInfo.HostState;
+        existing.LastHitDate = DateTime.Now;
+        existing.ExternalIp = hostInfo.ExternalIp;
+        existing.Version = hostInfo.Version;
+        existing.CreationDate = hostInfo.CreationDate;
+        existing.HostState = hostInfo.HostState;
 
-		OnHostChanged?.Invoke(hostInfo);
+        OnHostChanged?.Invoke(hostInfo);
     }
 
     public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
     {
         _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var emsi);
-		if (emsi is null)
+        if (emsi is null)
         {
-			emsi = new Models.ExtendedMicroServiceInfo();
-			emsi.HostName = microserviceInfo.HostName;
-			emsi.ServiceName = microserviceInfo.ServiceName;
-			_extendedMicroServiceInfoList.TryAdd(emsi.Key, emsi);
-		}
+            emsi = new Models.ExtendedMicroServiceInfo();
+            emsi.HostName = microserviceInfo.HostName;
+            emsi.ServiceName = microserviceInfo.ServiceName;
+            _extendedMicroServiceInfoList.TryAdd(emsi.Key, emsi);
+        }
 
-		emsi!.Location= microserviceInfo.Location;
+        emsi!.Location = microserviceInfo.Location;
         emsi.UserInteractive = microserviceInfo.UserInteractive;
         emsi.Version = microserviceInfo.Version;
         emsi.LastWriteTime = microserviceInfo.LastWriteTime;
@@ -262,7 +247,38 @@ public class Orchestrator
         return null;
     }
 
-    private string GetNewBackupDirectory(string fileName)
+    public void GlobalReset()
+    {
+        _extendedMicroServiceInfoList.Clear();
+        _hostInfoList.Clear();
+        _packageList.Clear();
+        LoadPackageList();
+		_bus.PublishTopic(_settings.ServerResetTopicName, new Palace.Shared.Messages.ServerReset());
+        OnHostChanged?.Invoke(null);
+	}
+
+	private void LoadPackageList()
+	{
+		_packageList.Clear();
+		var zipFileList = from f in Directory.GetFiles(_settings.RepositoryFolder, "*.zip", SearchOption.AllDirectories)
+						  let fileInfo = new FileInfo(f)
+						  select fileInfo;
+
+		foreach (var item in zipFileList)
+		{
+			var info = new Models.PackageInfo
+			{
+				PackageFileName = item.Name,
+				LastWriteTime = item.LastWriteTime,
+				Size = item.Length
+			};
+			SetCurrentVersion(info);
+			_packageList.TryAdd(info.PackageFileName, info);
+		}
+	}
+
+
+	private string GetNewBackupDirectory(string fileName)
     {
         var version = 1;
         var directoryPart = fileName.Replace(".zip", "", StringComparison.InvariantCultureIgnoreCase);
