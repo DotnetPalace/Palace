@@ -148,9 +148,10 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
         }
         catch (Exception ex)
         {
+            ex.Data["downloadUrl"] = downloadUrl;
             _logger.LogError(ex, ex.Message);
             result.Success = false;
-            result.FailReason = ex.Message;
+            result.FailReason = $"{ex.Message} {downloadUrl}";
             return result;
         }
 
