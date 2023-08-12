@@ -16,32 +16,34 @@ public class ServiceManager
 
 	protected PalaceDeployCliSettings Settings { get; set; }
 
-	public bool StopService() 
+	public async Task StopService() 
 	{
 		var isServiceInstalled = IsServiceInstalled(Settings.ServiceName);
 		if (!isServiceInstalled)
 		{
 			Console.WriteLine("The service {0} is not installed", Settings.ServiceName);
-			return true;
+			return;
 		}
 
 		var serviceController = new ServiceController(Settings.ServiceName);
 		if (serviceController is null)
 		{
 			// not installed
-			return true;
+			Console.WriteLine("The service {0} is not referenced", Settings.ServiceName);
+			return;
 		}
 
 		if (serviceController.Status.Equals(ServiceControllerStatus.Stopped)
 			|| serviceController.Status.Equals(ServiceControllerStatus.StopPending))
 		{
 			Console.WriteLine("Service {0} is already stopped or stopping", Settings.ServiceName);
-			return true;
+			return;
 		}
 
 		serviceController.Stop();
 		serviceController.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
-		return true;
+
+		await Task.Delay(5 * 1000);
 	}
 
 	public bool StartService()

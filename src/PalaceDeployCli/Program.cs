@@ -63,9 +63,10 @@ var sp = services.BuildServiceProvider();
 
 start:
 
-AnsiConsole.Markup("[green]Welcome to the Palace Deploy CLI[/]");
-AnsiConsole.WriteLine();
+var version = typeof(Program).Assembly.GetName().Version;
 
+AnsiConsole.Markup($"[green]Welcome to the Palace Deploy CLI ({version}) [/]");
+AnsiConsole.WriteLine();
 
 var table = new Table();
 table.AddColumn("Action").AddColumn("Description");
@@ -96,12 +97,7 @@ switch (selectedAction)
 			return -1;
 		}
 		var serviceManager = sp.GetRequiredService<ServiceManager>();
-		var stop = serviceManager.StopService();
-		if (!stop)
-		{
-			AnsiConsole.WriteLine("Stop service failed");
-			return -1;
-		}
+		await serviceManager.StopService();
 		var deployHost = deployService.UnZipHost(zipFileName);
 		if (!deployHost)
 		{

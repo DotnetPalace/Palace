@@ -177,34 +177,34 @@ public class Orchestrator
 
     public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
     {
-        _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var rms);
-		if (rms is null)
+        _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var emsi);
+		if (emsi is null)
         {
-			rms = new Models.ExtendedMicroServiceInfo();
-			rms.HostName = microserviceInfo.HostName;
-			rms.ServiceName = microserviceInfo.ServiceName;
-			_extendedMicroServiceInfoList.TryAdd(rms.Key, rms);
+			emsi = new Models.ExtendedMicroServiceInfo();
+			emsi.HostName = microserviceInfo.HostName;
+			emsi.ServiceName = microserviceInfo.ServiceName;
+			_extendedMicroServiceInfoList.TryAdd(emsi.Key, emsi);
 		}
 
-		rms!.Location= microserviceInfo.Location;
-        rms.UserInteractive = microserviceInfo.UserInteractive;
-        rms.Version = microserviceInfo.Version;
-        rms.LastWriteTime = microserviceInfo.LastWriteTime;
-        rms.ThreadCount = microserviceInfo.ThreadCount;
-        rms.ProcessId = microserviceInfo.ProcessId;
-        rms.ServiceState = microserviceInfo.ServiceState;
-        rms.StartedDate = microserviceInfo.StartedDate;
-        rms.CommandLine = microserviceInfo.CommandLine;
-        rms.PeakPagedMem = microserviceInfo.PeakPagedMem;
-        rms.PeakVirtualMem = microserviceInfo.PeakVirtualMem;
-        rms.PeakWorkingSet = microserviceInfo.PeakWorkingSet;
-        rms.WorkingSet = microserviceInfo.WorkingSet;
-        rms.EnvironmentName = microserviceInfo.EnvironmentName;
-        rms.LastHitDate = microserviceInfo.LastHitDate;
-        rms.Log = microserviceInfo.Log;
-        rms.FailReason = microserviceInfo.FailReason;
+		emsi!.Location= microserviceInfo.Location;
+        emsi.UserInteractive = microserviceInfo.UserInteractive;
+        emsi.Version = microserviceInfo.Version;
+        emsi.LastWriteTime = microserviceInfo.LastWriteTime;
+        emsi.ThreadCount = microserviceInfo.ThreadCount;
+        emsi.ProcessId = microserviceInfo.ProcessId;
+        emsi.ServiceState = microserviceInfo.ServiceState;
+        emsi.StartedDate = microserviceInfo.StartedDate;
+        emsi.CommandLine = microserviceInfo.CommandLine;
+        emsi.PeakPagedMem = microserviceInfo.PeakPagedMem;
+        emsi.PeakVirtualMem = microserviceInfo.PeakVirtualMem;
+        emsi.PeakWorkingSet = microserviceInfo.PeakWorkingSet;
+        emsi.WorkingSet = microserviceInfo.WorkingSet;
+        emsi.EnvironmentName = microserviceInfo.EnvironmentName;
+        emsi.LastHitDate = microserviceInfo.LastHitDate;
+        emsi.Log = microserviceInfo.Log;
+        emsi.FailReason = microserviceInfo.FailReason;
 
-        OnServiceChanged?.Invoke(rms);
+        OnServiceChanged?.Invoke(emsi);
     }
 
     public async Task<string?> RemovePackage(string packageFileName)
