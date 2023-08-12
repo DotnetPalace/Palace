@@ -2,7 +2,8 @@
 
 public class StopService : IMessage
 {
-    public string ServiceName { get; set; } = null!;
-    public string HostName { get; set; } = null!;
-    public DateTime Timeout => DateTime.Now.AddSeconds(15);
+    public required string ServiceName { get; set; } = null!;
+    public required string HostName { get; set; } = null!;
+    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+    public required string Origin { get; set; } = null!;
 }

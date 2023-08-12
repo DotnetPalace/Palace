@@ -43,7 +43,9 @@ public sealed class StopServiceHandler : IUpdateHandler
         {
             HostName = context.HostName,
             ServiceName = context.ServiceSettings.ServiceName,
-        });
+            Origin = "Update",
+            Timeout = DateTime.Now.AddSeconds(3)
+		});
 
         // 3 - Attendre le retour offline
         _logger.LogInformation("Wait for service {serviceName} offline for host {host}", context.ServiceInfo.ServiceName, context.HostName);

@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Palace Server</a>
         <button title="Navigation menu" class="navbar-toggler">
@@ -24,6 +26,9 @@
             </NavLink>
         </div>
     </nav>
+    <div class="text-center">
+        <button class="btn btn-danger" @onclick="GlobalReset">Reset</button>
+    </div>
     <div class="text-center">
         <small class="text-white">Version : @version</small>
     </div>

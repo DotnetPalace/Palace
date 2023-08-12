@@ -105,6 +105,7 @@ public partial class Index : ComponentBase
 		{
 			HostName = hostName,
 			ServiceName = serviceName,
+            Origin = "Manual"
 		});
 	}
 
