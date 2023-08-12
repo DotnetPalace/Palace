@@ -281,7 +281,7 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
 		{
 			try
 			{
-				if (!System.IO.File.Exists(destFile))
+				if (System.IO.File.Exists(destFile))
 				{
 					System.IO.File.Delete(destFile);
 				}

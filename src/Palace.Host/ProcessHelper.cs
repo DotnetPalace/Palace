@@ -65,7 +65,7 @@ internal static class ProcessHelper
 		psi.CreateNoWindow = false;
 		psi.UseShellExecute = false;
 		psi.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-		psi.RedirectStandardError = true;
+		psi.RedirectStandardError = false;
 		psi.RedirectStandardOutput = true;
 		psi.ErrorDialog = false;
 
@@ -102,7 +102,7 @@ internal static class ProcessHelper
 			isStared = false;
 		}
 
-		process.BeginOutputReadLine();
+		// process.BeginOutputReadLine();
 		process.BeginErrorReadLine();
 
 		int loop = 0;
