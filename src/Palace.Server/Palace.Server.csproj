@@ -4,8 +4,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.0.8.1</Version>
+    <Version>2.0.9.1</Version>
 	  <PackageReleaseNotes>
+		  2.0.9.1 : Global prefix for queues and topics + cosmetic
 		  2.0.8.1 : Server reset
 		  2.0.7.1 : One update by host for the same service + WebDesign
 		  2.0.6.1 : Fix send health check message (without hostname)

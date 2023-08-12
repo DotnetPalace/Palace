@@ -12,7 +12,9 @@
         <div class="content">
             <AuthorizeView Roles="admin">
                 <Authorized>
-                    @Body
+                    <CascadingValue Value="this">
+                        @Body
+                    </CascadingValue>
                 </Authorized>
                 <NotAuthorized>
                     <Palace.Server.Pages.Login/>

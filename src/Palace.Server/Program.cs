@@ -94,6 +94,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddArianeBus(config =>
 {
+    config.PrefixName = settings.QueuePrefix;
     config.BusConnectionString = settings.AzureBusConnectionString;
     config.RegisterQueueReader<Palace.Server.MessageReaders.ServiceInstallationReport>(new QueueName(settings.InstallationReportQueueName));
     config.RegisterQueueReader<Palace.Server.MessageReaders.ServiceHealthCheck>(new QueueName(settings.ServiceHealthQueueName));

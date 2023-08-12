@@ -72,9 +72,9 @@
 								|| runningService.ServiceState == ServiceState.Updated)
 							{
 								<div>
-									<button type="button" class="btn btn-primary" @onclick="(() => StartService(host, service))">Start</button>
-									<button type="button" class="btn btn-secondary" @onclick="(() => InstallService(host, service))">ReInstall</button>
-									<button type="button" class="btn btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</button>
+									<ActionButton type="button" ButtonType="btn-primary" @onclick="(() => StartService(host, service))">Start</ActionButton>
+									<ActionButton type="button" ButtonType="btn-secondary" @onclick="(() => InstallService(host, service))">ReInstall</ActionButton>
+									<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</ActionButton>
 								</div>
 							}
 							else if (runningService.ServiceState == ServiceState.Running)
@@ -85,12 +85,12 @@
 							}
 							else if (runningService.ServiceState == ServiceState.Down)
 							{
-								<button type="button" class="btn btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</button>
+								<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</ActionButton>
 							}
 						}
 						else
 						{
-							<button type="button" class="btn btn-primary" @onclick="(() => InstallService(host, service))">Install</button>
+							<ActionButton type="button" ButtonType="btn-primary" @onclick="(() => InstallService(host, service))">Install</ActionButton>
 						}
 					</td>
 				}
@@ -133,7 +133,7 @@
 							<div>
 								Version : @ghostService.Version
 							</div>
-							<button type="button" class="btn btn-danger" @onclick="(() => StopService(host.HostName, ghostService.ServiceName))">Stop</button>
+							<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => StopService(host.HostName, ghostService.ServiceName))">Stop</ActionButton>
 						}
 					</td>
 				}

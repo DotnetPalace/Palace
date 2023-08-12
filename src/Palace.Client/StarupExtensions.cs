@@ -24,6 +24,7 @@ public static class StarupExtensions
 
         services.AddArianeBus(config =>
         {
+            config.PrefixName = settings.QueuePrefix;
             config.BusConnectionString = settings.AzureBusConnectionString;
             config.RegisterTopicReader<StopMessageReader>(new TopicName(settings.StopTopicName), new SubscriptionName(settings.Key));
         });

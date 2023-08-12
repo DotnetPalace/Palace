@@ -29,16 +29,14 @@ IHost host = Host.CreateDefaultBuilder(args)
         var section = hostingContext.Configuration.GetSection("Palace");
         var settings = new Palace.Host.Configuration.GlobalSettings();
         section.Bind(settings);
-        settings.Initialize();
-        services.AddSingleton(settings);
+        settings.Initialize(); 
+        services.AddSingleton(settings); 
 
         services.AddMemoryCache();
         services.AddLogging(configure =>
         {
             configure.AddConsole();
         });
-
-        services.AddHostedService<MainWorker>();
 
         var vaultUri = new Uri($"https://{settings.KeyVaultName}.vault.azure.net");
         var credential = new ClientSecretCredential(settings.KeyVaultTenantId, settings.KeyVaultClientId, settings.KeyVaultClientSecret);
@@ -50,8 +48,11 @@ IHost host = Host.CreateDefaultBuilder(args)
         var azureBusConnectionStringSecret = client.GetSecretAsync("AzureBusConnectionString").Result;
         settings.SetAzureBusConnectionString(azureBusConnectionStringSecret.Value.Value);
 
-        services.AddArianeBus(config =>
+		services.AddHostedService<MainWorker>();
+
+		services.AddArianeBus(config =>
         {
+            config.PrefixName = settings.QueuePrefix;
             config.BusConnectionString = settings.AzureBusConnectionString;
             config.RegisterTopicReader<Palace.Host.MessageReaders.InstallService>(new TopicName(settings.InstallServiceTopicName), new SubscriptionName(settings.HostName));
             config.RegisterTopicReader<Palace.Host.MessageReaders.StartService>(new TopicName(settings.StartServiceTopicName), new SubscriptionName(settings.HostName));

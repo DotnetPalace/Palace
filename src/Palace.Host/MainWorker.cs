@@ -81,7 +81,7 @@ public class MainWorker : BackgroundService
     }
 
     async Task PublishInstalledServices(List<Palace.Shared.MicroServiceSettings> serviceSettingsList)
-    {
+    { 
 		foreach (var serviceSettings in serviceSettingsList)
 		{
 			var report = new Shared.Messages.ServiceInstallationReport

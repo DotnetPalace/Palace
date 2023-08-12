@@ -32,6 +32,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 		var keyVaultTenantId = section.GetValue<string>("KeyVaultTenantId");
 		var KeyVaultClientId = section.GetValue<string>("KeyVaultClientId");
 		var KeyVaultClientSecret = section.GetValue<string>("KeyVaultClientSecret");
+		var prefixQueue = section.GetValue<string>("PrefixQueue");
 
 		var vaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
 		var credential = new ClientSecretCredential(keyVaultTenantId, KeyVaultClientId, KeyVaultClientSecret);
@@ -45,6 +46,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
 		services.AddPalaceClient(config =>
 		{
+			config.QueuePrefix = prefixQueue;
 			config.ServiceName = nameof(DemoSvc1);
 			config.AzureBusConnectionString = azureBusConnectionString;
 			config.StopServiceReportQueueName = "palace.stopservicereport";

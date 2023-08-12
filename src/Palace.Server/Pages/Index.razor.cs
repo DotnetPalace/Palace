@@ -4,15 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using Palace.Server.Models;
+using Palace.Server.Pages.Shared;
 using Palace.Server.Services.UpdateHandler;
 
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Palace.Server.Pages;
 
-public partial class Index : ComponentBase
+public sealed partial class Index : ComponentBase, IDisposable
 {
-    [Inject]
+	[CascadingParameter]
+	public MainLayout Parent { get; set; } = default!;
+
+	[Inject]
     Services.Orchestrator Orchestrator { get; set; } = default!;
 
     [Inject]
@@ -60,7 +64,8 @@ public partial class Index : ComponentBase
 	private void Orchestrator_OnServiceChanged(ExtendedMicroServiceInfo obj)
     {
         runningServiceList = Orchestrator.GetServiceList().ToList();
-        InvokeAsync(StateHasChanged);
+		Parent.ActionTerminated();
+		InvokeAsync(StateHasChanged);
     }
 
     void Orchestrator_OnHostChanged(Models.HostInfo hostInfo)
@@ -139,4 +144,14 @@ public partial class Index : ComponentBase
             await handler.ProcessUpdateAsync(context, cancellationToken);
         });
     }
+
+    public void Dispose()
+    {
+        if (Orchestrator is not null)
+        {
+			Orchestrator.OnHostChanged -= Orchestrator_OnHostChanged;
+			Orchestrator.OnServiceChanged -= Orchestrator_OnServiceChanged;
+			Orchestrator.OnPackageChanged -= Orchestrator_OnPackageChanged;
+		}
+	}
 }
