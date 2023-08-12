@@ -4,7 +4,7 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.0.47.1</Version>
+	  <Version>2.0.48.2</Version>
 	  <PackageReleaseNotes>
 		  2.0.48.2 : Fix bug (delete not existing file)
 		             Do not capture standard output
