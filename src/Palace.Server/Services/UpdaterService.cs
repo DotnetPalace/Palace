@@ -50,13 +50,16 @@ public class UpdaterService : BackgroundService
 			{
 				var otherHosts = from p in _processList
 								 where p.Value.ServiceInfo.ServiceName == item.Value.ServiceInfo.ServiceName
-								 where p.Value.HostName != item.Value.HostName
+									&& p.Value.HostName != item.Value.HostName
+									&& p.Value.CurrentWorkflow != "Start"
 								 select p;
 
 				// One update by host for the same service
 				if (!otherHosts.Any())
 				{
+					item.Value.CurrentWorkflow = "Starting";
 					RunUpdateTask(item.Value, stoppingToken);
+					await Task.Delay(2 * 1000);
 				}
 			}
 			await Task.Delay(1 * 1000, stoppingToken);

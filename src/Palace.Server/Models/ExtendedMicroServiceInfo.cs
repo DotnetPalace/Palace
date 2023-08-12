@@ -2,7 +2,6 @@
 
 public class ExtendedMicroServiceInfo : RunningMicroserviceInfo
 {
-    public string HostName { get; set; } = null!;
     public DateTime CreationDate { get; set; } = DateTime.Now;
     public bool UIDisplayMore { get; set; } = false;
     public string? FailReason { get; set; }

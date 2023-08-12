@@ -42,8 +42,6 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
             FailReason = message.FailReason
 		};
 
-		rmi.HostName = message.HostName;
-
 		_orchestrator.AddOrUpdateMicroServiceInfo(rmi);
 	}
 }

@@ -5,8 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>Palace.Client</PackageId> 
-		<Version>2.0.14.1</Version>
+		<Version>2.0.15.1</Version>
 		<PackageReleaseNotes>
+			2.0.15.1 More logs for stop
 			2.0.14.1 More logs for stop
 			2.0.13.1 Fix send health check message (without hostname)
 			2.0.12.0 remove Palace.Shared dependency, replaced by symbolic links

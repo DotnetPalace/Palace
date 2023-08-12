@@ -20,8 +20,12 @@ namespace PalaceDeployCli
 		{
 			using var serverManager = new ServerManager();
 			var w3wp = serverManager.ApplicationPools[Settings.PalaceServerWorkerProcessName];
-			var result = w3wp.Stop();
-			return $"{result}";
+			if (w3wp.State != ObjectState.Stopped)
+			{
+				var result = w3wp.Stop();
+				return $"{result}";
+			}
+			return "Stopped";
 		}
 
 		public void WaitForStop()
