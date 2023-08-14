@@ -5,7 +5,7 @@ namespace Palace.Server.Pages;
 public partial class ServiceSettingsList
 {
     [Inject]
-    IDbContextFactory<Services.PalaceDbContext> DbContextFactory { get; set; } = default!;
+    Services.ServiceSettingsRepository ServiceSettingsRepository { get; set; } = default!;
     [Inject]
     Services.ClipboardService ClipboardService { get; set; } = default!;
 	[Inject]
@@ -18,10 +18,9 @@ public partial class ServiceSettingsList
     List<Palace.Shared.MicroServiceSettings> serviceSettingsList = new();
 
     protected override async Task OnInitializedAsync()
-    { 
-        var db = await DbContextFactory.CreateDbContextAsync();
-        serviceSettingsList = await db.MicroServiceSettings.ToListAsync();
-    }
+    {
+        serviceSettingsList = (await ServiceSettingsRepository.GetAll()).ToList();
+	}
 
     async Task CopyToClipboard(object item)
 	{
@@ -36,11 +35,14 @@ public partial class ServiceSettingsList
 
     async Task SaveSettings(MicroServiceSettings settings)
     {
-		var validation = await Validator.ValidateAsync(settings);
-		var db = await DbContextFactory.CreateDbContextAsync();
-		db.MicroServiceSettings.Attach(settings);
-		db.Entry(settings).State = EntityState.Modified;
-		var changeCount = await db.SaveChangesAsync();
-        toast.Show("Settings saved", ToastLevel.Info);
+        var result = await ServiceSettingsRepository.SaveServiceSettings(settings);
+        if (result.success)
+        {
+			toast.Show($"save failed with message : {result.brokenRules.FirstOrDefault()?.ErrorMessage}", ToastLevel.Error);
+		}
+		else
+        {
+			toast.Show("Settings saved", ToastLevel.Info);
+		}
 	}
 }

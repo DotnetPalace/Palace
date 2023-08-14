@@ -1,0 +1,39 @@
+﻿<div class="row">
+	<div class="col-2">
+		<button class="btn btn-secondary btn-sm" @onclick="(() => isExpanded = !isExpanded)">
+			@string.Format("{0}", isExpanded ? "-" : "+")
+		</button>
+	</div>
+	<div class="col-10">
+		<table class="table table-sm table-borderless m-0 p-0">
+			<tbody>
+				<tr>
+					<td colspan="2"><a href="/editservice/@ServiceSettings.ServiceName">@ServiceSettings.ServiceName</a></td>
+				</tr>
+				<tr>
+					<td class="col-25">Package Version</td>
+					<td class="col-75">@PackageInfo?.CurrentVersion</td>
+				</tr>
+				<tr>
+					<td>Package Date</td>
+					<td>@PackageInfo?.LastWriteTime</td>
+				</tr>
+				<tr>
+					<td>Alway started</td>
+					<td><ToggleSwitch @bind-Value="ServiceSettings.AlwaysStarted" Changed="SaveServiceSettings" /></td>
+				</tr>
+				@if (isExpanded)
+				{
+					<tr>
+						<td>Package FileName</td>
+						<td>@ServiceSettings.PackageFileName</td>
+					</tr>
+					<tr>
+						<td>Main Assembly</td>
+						<td>@ServiceSettings.MainAssembly</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>

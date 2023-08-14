@@ -26,6 +26,16 @@ article {
     padding: 0px !important;
 }
 
+.table td {
+    padding : 1px 1px 1px 1px;
+}
+
+.table th {
+    padding: 1px 1px 1px 1px;
+    margin: 0;
+}
+
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
