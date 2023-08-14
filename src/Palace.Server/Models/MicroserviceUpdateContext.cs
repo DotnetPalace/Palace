@@ -11,6 +11,7 @@ public sealed class MicroserviceUpdateContext : IDisposable
     public Models.ExtendedMicroServiceInfo ServiceInfo { get; set; } = default!;
     public string CurrentWorkflow { get; set; } = null!;
     public ServiceState InitialServiceState { get; set; }
+    public string Origin { get; set; } = null!;
 
     public void Dispose()
     {

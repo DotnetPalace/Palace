@@ -41,9 +41,10 @@ public sealed class StopServiceHandler : IUpdateHandler
         _logger.LogInformation("Send stop service {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
         await _bus.PublishTopic(_settings.StopServiceTopicName, new Palace.Shared.Messages.StopService
         {
+            ActionId = context.Id,
             HostName = context.HostName,
             ServiceName = context.ServiceSettings.ServiceName,
-            Origin = "Update",
+            Origin = context.Origin,
             Timeout = DateTime.Now.AddSeconds(3)
 		});
 

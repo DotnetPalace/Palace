@@ -50,7 +50,8 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
         {
             HostName = _settings.HostName,
             ServiceName = message.ServiceSettings.ServiceName,
-            Trigger = message.Trigger
+            Trigger = message.Trigger,
+            ActionSourceId = message.ActionId
         };
 
 		// On recupere le zip sur le serveur

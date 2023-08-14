@@ -1,4 +1,6 @@
-﻿using Palace.Server.Services;
+﻿using System.Diagnostics;
+
+using Palace.Server.Services;
 using Palace.Shared.Messages;
 
 namespace Palace.Server.MessageReaders;
@@ -7,13 +9,16 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
 {
 	private readonly Orchestrator _orchestrator;
     private readonly ILogger<ServiceStartingReport> _logger;
+	private readonly LongActionService _longActionService;
 
-    public ServiceStartingReport(Orchestrator orchestrator,
-		ILogger<ServiceStartingReport> logger)
+	public ServiceStartingReport(Orchestrator orchestrator,
+		ILogger<ServiceStartingReport> logger,
+        LongActionService longActionService)
     {
 		_orchestrator = orchestrator;
         _logger = logger;
-    }
+		_longActionService = longActionService;
+	}
 
     public override async Task ProcessMessageAsync(StartingServiceReport message, CancellationToken cancellationToken)
 	{
@@ -31,17 +36,37 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
             return;
         }
 
-        var rmi = new Models.ExtendedMicroServiceInfo
-		{
-			ServiceName = message.ServiceName,
-            HostName = message.HostName,
-			Location = message.InstallationFolder,
-			ProcessId = message.ProcessId,
-			ServiceState = message.ServiceState,
-			CommandLine = $"{message.CommandLine}",
-            FailReason = message.FailReason
-		};
+        var key = $"{message.HostName}-{message.ServiceName}".ToLower();
+        var emsi = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
+        if (emsi is not null)
+        {
+            emsi.ServiceState = message.ServiceState;
+            emsi.CommandLine = $"{message.CommandLine}";
+            emsi.FailReason = message.FailReason;
+            emsi.ProcessId = message.ProcessId;
+            emsi.Location = message.InstallationFolder;
+		}
+		else
+        {
+			emsi = new Models.ExtendedMicroServiceInfo
+			{
+				ServiceName = message.ServiceName,
+				HostName = message.HostName,
+				Location = message.InstallationFolder,
+				ProcessId = message.ProcessId,
+				ServiceState = message.ServiceState,
+				CommandLine = $"{message.CommandLine}",
+				FailReason = message.FailReason
+			};
+		}
 
-		_orchestrator.AddOrUpdateMicroServiceInfo(rmi);
+		_orchestrator.AddOrUpdateMicroServiceInfo(emsi);
+
+        await _longActionService.SetActionCompleted(new Models.ActionResult
+        {
+            ActionId = message.ActionSourceId,
+            Success = message.ServiceState == ServiceState.Running,
+            FailReason = message.FailReason
+        });
 	}
 }

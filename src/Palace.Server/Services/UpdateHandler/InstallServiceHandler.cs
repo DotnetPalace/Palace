@@ -46,6 +46,7 @@ public class InstallServiceHandler : IUpdateHandler
         var downloadUrl = $"{_settings.CurrentUrl}/api/palace/download/{context.ServiceSettings.PackageFileName}";
         await _bus.PublishTopic(_settings.InstallServiceTopicName, new Palace.Shared.Messages.InstallService
         {
+            ActionId = Guid.NewGuid(),
             HostName = context.HostName,
             ServiceSettings = context.ServiceSettings,
             DownloadUrl = downloadUrl,

@@ -3,11 +3,11 @@
 public class MicroServiceSettings
 {
     public Guid Id { get; set; }
-    public string ServiceName { get; set; } = null!;
-    public string MainAssembly { get; set; } = null!;
+    public string ServiceName { get; set; } = string.Empty;
+    public string MainAssembly { get; set; } = string.Empty;
     public string? Arguments { get; set; }
     public bool AlwaysStarted { get; set; } = true;
-    public string PackageFileName { get; set; } = null!;
+    public string PackageFileName { get; set; } = string.Empty;
 
     public string? GroupName { get; set; } 
 

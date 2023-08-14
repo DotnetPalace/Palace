@@ -1,0 +1,20 @@
+﻿<div class="toast show @LongAction.BgColor" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+	<div class="toast-header">
+		<strong class="me-auto">@LongAction.Title</strong>
+		<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fermer" @onclick="CloseAction"></button>
+	</div>
+	<div class="toast-body">
+		<strong>@LongAction.Description</strong>
+		<ol class="list-unstyled">
+		@foreach (var log in LongAction.LogList)
+		{
+			<li>
+				<span>@log.Message</span>
+			</li>
+		}
+		</ol>
+	</div>
+</div>
+
+
+

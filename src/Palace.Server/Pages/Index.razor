@@ -1,14 +1,14 @@
 ﻿@page "/"
 @{
-	var ghostHostList = runningServiceList.Select(i => i.HostName).Distinct().ToList();
+	var ghostHostList = serviceInfoList.Select(i => i.HostName).Distinct().ToList();
 	ghostHostList.RemoveAll(i => hostList.Any(j => j.HostName == i));
 
-	var ghostServiceList = runningServiceList.ToList();
+	var ghostServiceList = serviceInfoList.ToList();
 	ghostServiceList.RemoveAll(i => serviceSettingsList.Any(j => j.ServiceName.Equals(i.ServiceName, StringComparison.InvariantCultureIgnoreCase)));
 }
 
 <table class="table table-bordered w-100 h-100">
-	<thead class="table-light">
+	<thead>
 		<tr>
 			<th colspan="2"></th>
 			@if (hostList.Count > 0)
@@ -64,65 +64,45 @@
 				</td>
 				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
-					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == host.HostName && i.ServiceName == service.ServiceName);
-					var serviceStyle = runningService?.ServiceState == ServiceState.Down ? "table-danger" : "";
+					var serviceInfo = serviceInfoList.SingleOrDefault(i => i.HostName == host.HostName && i.ServiceName == service.ServiceName);
+					var serviceStyle = serviceInfo?.ServiceState == ServiceState.Down ? "table-danger" : "";
 					<td class="@serviceStyle">
-						@if (runningService is not null)
+						@if (serviceInfo is not null)
 						{
-							<table class="table table-borderless table-sm">
-								<tbody>
-									<tr>
-										<td class="w-25">State</td>
-										<td class="w-75">
-											<b>@runningService.ServiceState</b>
-											<small>@runningService.Log</small>
-											<span class="text-danger">@runningService.FailReason</span>
-										</td>
-									</tr>
-									<tr>
-										<td class="w-25">Version</td>
-										<td class="w-75">
-											@runningService.Version
-										</td>
-									</tr>
-								</tbody>
-							</table>
-							@if (runningService.ServiceState == ServiceState.Offline
-									|| runningService.ServiceState == ServiceState.Updated)
+							<RunningServiceInfo ServiceInfo="serviceInfo" />
+							@if (serviceInfo.ServiceState == ServiceState.Offline
+									|| serviceInfo.ServiceState == ServiceState.Updated)
 							{
 								<div>
-									<ActionButton type="button" ButtonType="btn-primary" @onclick="(() => StartService(host, service))">Start</ActionButton>
-									<ActionButton type="button" ButtonType="btn-secondary" @onclick="(() => InstallService(host, service))">ReInstall</ActionButton>
-									<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</ActionButton>
+									<LongActionButton type="button" ButtonType="btn-primary" CreateLongAction="(() => CreateStartAction(service, serviceInfo))">Start</LongActionButton>
+									<LongActionButton type="button" ButtonType="btn-secondary" CreateLongAction="(() => CreateInstallServiceAction(host, service))">ReInstall</LongActionButton>
+									<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateUnInstallServiceAction(host, service))">UnInstall</LongActionButton>
 								</div>
 							}
-							else if (runningService.ServiceState == ServiceState.Running)
+							else if (serviceInfo.ServiceState == ServiceState.Running)
 							{
-								<RunningServiceInfo ServiceInfo="runningService"
-												OnStopService="(() => StopService(host.HostName, service.ServiceName))"
-												OnRecycleService="(() => RecycleService(host.HostName, service))" />
+								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(serviceInfo))">Stop</LongActionButton>
+								<LongActionButton type="button" ButtonType="btn-warning" CreateLongAction="(() => CreateRecycleServiceAction(host.HostName, service))" >Recycle</LongActionButton>
 							}
-							else if (runningService.ServiceState == ServiceState.Down)
+							else if (serviceInfo.ServiceState == ServiceState.Down)
 							{
-								<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => UnInstallService(host, service))">UnInstall</ActionButton>
+								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateUnInstallServiceAction(host, service))">UnInstall</LongActionButton>
 							}
 						}
 						else
 						{
-							<ActionButton type="button" ButtonType="btn-primary" @onclick="(() => InstallService(host, service))">Install</ActionButton>
+							<LongActionButton type="button" ButtonType="btn-primary" CreateLongAction="(() => CreateInstallServiceAction(host, service))">Install</LongActionButton>
 						}
 					</td>
 				}
 				@foreach (var ghostHost in ghostHostList.OrderBy(i => i))
 				{
-					var runningService = runningServiceList.SingleOrDefault(i => i.HostName == ghostHost && i.ServiceName == service.ServiceName);
+					var serviceInfo = serviceInfoList.SingleOrDefault(i => i.HostName == ghostHost && i.ServiceName == service.ServiceName);
 					<td>
-						@if (runningService is not null)
+						@if (serviceInfo is not null)
 						{
-							<RunningServiceInfo ServiceInfo="runningService"
-											OnStopService="(() => StopService(ghostHost, service.ServiceName))"
-											OnRecycleService="(() => RecycleService(ghostHost, service))" />
-
+							<RunningServiceInfo ServiceInfo="serviceInfo" />
+							<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(serviceInfo))">Stop</LongActionButton>
 						}
 					</td>
 				}
@@ -152,7 +132,7 @@
 							<div>
 								Version : @ghostService.Version
 							</div>
-							<ActionButton type="button" ButtonType="btn-danger" @onclick="(() => StopService(host.HostName, ghostService.ServiceName))">Stop</ActionButton>
+							<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(host.HostName, ghostService.ServiceName))">Stop</LongActionButton>
 						}
 					</td>
 				}

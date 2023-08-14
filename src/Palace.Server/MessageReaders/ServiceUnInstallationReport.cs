@@ -6,12 +6,15 @@ public class ServiceUnInstallationReport : ArianeBus.MessageReaderBase<Palace.Sh
 {
 	private readonly Orchestrator _orchestrator;
 	private readonly ILogger<ServiceUnInstallationReport> _logger;
+	private readonly LongActionService _longActionService;
 
 	public ServiceUnInstallationReport(Orchestrator orchestrator,
-		ILogger<ServiceUnInstallationReport> logger)
+		ILogger<ServiceUnInstallationReport> logger,
+		Services.LongActionService longActionService)
     {
 		_orchestrator = orchestrator;
 		_logger = logger;
+		_longActionService = longActionService;
 	}
 
     public override async Task ProcessMessageAsync(Shared.Messages.ServiceUnInstallationReport message, CancellationToken cancellationToken)
@@ -31,12 +34,10 @@ public class ServiceUnInstallationReport : ArianeBus.MessageReaderBase<Palace.Sh
 		}
 
 		// On recherche le service 
-		var rmi = _orchestrator.GetServiceList()
-					.Where(x => x.ServiceName == message.ServiceName
-						&& x.HostName == message.HostName)
-					.SingleOrDefault();
+		var key = $"{message.HostName}-{message.ServiceName}".ToLower();
+		var emsi = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
 
-		if (rmi is null)
+		if (emsi is null)
 		{
 			_logger.LogError("Service {serviceNAme} not found in host {hostName}", message.ServiceName, message.HostName);
 			return;
@@ -45,12 +46,26 @@ public class ServiceUnInstallationReport : ArianeBus.MessageReaderBase<Palace.Sh
 		if (!message.Success)
 		{
 			_logger.LogError("Service {serviceNAme} not uninstalled in host {hostName}", message.ServiceName, message.HostName);
-			rmi.FailReason = message.FailReason;
-			_orchestrator.AddOrUpdateMicroServiceInfo(rmi);
+			emsi.FailReason = message.FailReason;
+			_orchestrator.AddOrUpdateMicroServiceInfo(emsi);
+
+			await _longActionService.SetActionCompleted(new Models.ActionResult
+			{
+				ActionId = message.ActionSourceId,
+				Success = false,
+				FailReason = message.FailReason
+			});
+
 			return;
 		}
 
 		// On supprime le service de la liste
-		_orchestrator.RemoveMicroServiceInfo(rmi);
+		_orchestrator.RemoveMicroServiceInfo(emsi);
+
+		await _longActionService.SetActionCompleted(new Models.ActionResult
+		{
+			ActionId = message.ActionSourceId,
+			Success = true,
+		});
 	}
 }

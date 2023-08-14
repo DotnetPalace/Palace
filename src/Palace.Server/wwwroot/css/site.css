@@ -8,10 +8,6 @@ h1:focus {
     outline: none;
 }
 
-a, .btn-link {
-    color: #0071c1;
-}
-
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -23,13 +19,11 @@ a, .btn-link {
 }
 
 .content {
-    /*padding-top: 1.1rem;*/
     padding: 0px !important;
 }
 
 article {
     padding: 0px !important;
-
 }
 
 .valid.modified:not([type=checkbox]) {

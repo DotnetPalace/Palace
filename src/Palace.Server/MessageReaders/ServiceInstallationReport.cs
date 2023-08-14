@@ -6,13 +6,16 @@ public class ServiceInstallationReport : ArianeBus.MessageReaderBase<Palace.Shar
 {
     private readonly Orchestrator _orchestrator;
     private readonly ILogger<ServiceInstallationReport> _logger;
+	private readonly LongActionService _longActionService;
 
-    public ServiceInstallationReport(Services.Orchestrator orchestrator,
-        ILogger<ServiceInstallationReport> logger)
+	public ServiceInstallationReport(Services.Orchestrator orchestrator,
+        ILogger<ServiceInstallationReport> logger,
+        Services.LongActionService longActionService)
     {
         _orchestrator = orchestrator;
         _logger = logger;
-    }
+		_longActionService = longActionService;
+	}
 
     public override async Task ProcessMessageAsync(Shared.Messages.ServiceInstallationReport message, CancellationToken cancellationToken)
     {
@@ -38,8 +41,14 @@ public class ServiceInstallationReport : ArianeBus.MessageReaderBase<Palace.Shar
         {
             serviceInfo.ServiceState = ServiceState.InstallationFailed;
             serviceInfo.FailReason = message.FailReason;
-        }
-        else
+			await _longActionService.SetActionCompleted(new Models.ActionResult
+			{
+				ActionId = message.ActionSourceId,
+				Success = false,
+				FailReason = message.FailReason
+			});
+		}
+		else
         {
             if (message.Trigger == "FromUpdate")
             {
@@ -49,10 +58,16 @@ public class ServiceInstallationReport : ArianeBus.MessageReaderBase<Palace.Shar
             {
                 serviceInfo.ServiceState = ServiceState.Offline;
             }
-        }
+			await _longActionService.SetActionCompleted(new Models.ActionResult
+			{
+				ActionId = message.ActionSourceId,
+				Success = true
+			});
+		}
 
-        _orchestrator.AddOrUpdateMicroServiceInfo(serviceInfo);
-    }
+		_orchestrator.AddOrUpdateMicroServiceInfo(serviceInfo);
+
+	}
 
 }
 
