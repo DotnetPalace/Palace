@@ -1,6 +1,8 @@
+using SQLitePCL;
+
 namespace Palace.Server.Pages.Components;
 
-public partial class StackedToast
+public sealed partial class StackedToast : IDisposable
 {
     [Parameter]
     public Models.StackedToastInfo StackedToastInfo { get; set; } = default!;
@@ -72,5 +74,15 @@ public partial class StackedToast
 			StackedToastInfo.OnClose?.Invoke();
             StateHasChanged();
         });
+    }
+
+    public void Dispose()
+    {
+        if (_countdown is not null)
+        {
+            _countdown.Stop();
+            _countdown.Elapsed -= HideToast;
+            _countdown.Dispose();
+        }
     }
 }
