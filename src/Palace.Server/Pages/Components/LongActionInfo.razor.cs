@@ -56,7 +56,7 @@ public sealed partial class LongActionInfo : ComponentBase, IDisposable
 	public void Dispose()
 	{
 		LongAction.Completed -= ActionCompleted;
-        LongAction.LogList.AddingNew -= AddLog;
+        LongAction.LogList.ListChanged -= AddLog;
         LongAction = null!;
 	}
 }
