@@ -64,7 +64,7 @@ public partial class StackedToast
         }
     }
 
-    async void HideToast(object source, System.Timers.ElapsedEventArgs args)
+    async void HideToast(object? source, System.Timers.ElapsedEventArgs args)
     {
         display = "hide";
         await InvokeAsync(() =>
