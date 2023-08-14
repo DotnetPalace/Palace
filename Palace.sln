@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{0372F8FA-E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PalaceDeployCli", "src\PalaceDeployCli\PalaceDeployCli.csproj", "{A411D71F-4494-4FBA-95D2-F3347F69017E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Palace.Tests", "src\Palace.Tests\Palace.Tests.csproj", "{12C41496-834E-4D83-847C-959B83EF092E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palace.Tests", "src\Palace.Tests\Palace.Tests.csproj", "{12C41496-834E-4D83-847C-959B83EF092E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

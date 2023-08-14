@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 
 using Palace.Server.Models;
 using Palace.Server.Pages.Shared;
+using Palace.Server.Services;
 using Palace.Server.Services.UpdateHandler;
 
 using static System.Formats.Asn1.AsnWriter;
@@ -21,9 +22,6 @@ public sealed partial class Index : ComponentBase, IDisposable
     Services.Orchestrator Orchestrator { get; set; } = default!;
 
     [Inject]
-    IDbContextFactory<Services.PalaceDbContext> DbContextFactory { get; set; } = default!;
-
-    [Inject]
     ArianeBus.IServiceBus Bus { get; set; } = default!;
 
     [Inject]
@@ -35,7 +33,10 @@ public sealed partial class Index : ComponentBase, IDisposable
     [Inject]
     IServiceScopeFactory ServiceScopeFactory { get; set; } = default!;
 
-    List<MicroServiceSettings> serviceSettingsList = new();
+	[Inject]
+	ServiceSettingsRepository ServiceSettingsRepository { get; set; } = default!;
+
+	List<MicroServiceSettings> serviceSettingsList = new();
     List<HostInfo> hostList = new();
     List<ExtendedMicroServiceInfo> serviceInfoList = new();
     List<PackageInfo> packageInfoList = new();
@@ -52,15 +53,18 @@ public sealed partial class Index : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        var db = await DbContextFactory.CreateDbContextAsync();
-        serviceSettingsList = await db.MicroServiceSettings.ToListAsync();
-
-        hostList = Orchestrator.GetHostList().ToList();
-        serviceInfoList = Orchestrator.GetServiceList().ToList();
-        packageInfoList = Orchestrator.GetPackageInfoList().ToList();
+        await LoadLists();
     }
 
-    void Orchestrator_OnPackageChanged(PackageInfo obj)
+    async Task LoadLists()
+    {
+        serviceSettingsList = (await ServiceSettingsRepository.GetAll()).ToList();
+		hostList = Orchestrator.GetHostList().ToList();
+		serviceInfoList = Orchestrator.GetServiceList().ToList();
+		packageInfoList = Orchestrator.GetPackageInfoList().ToList();
+	}
+
+	void Orchestrator_OnPackageChanged(PackageInfo obj)
     {
         packageInfoList = Orchestrator.GetPackageInfoList().ToList();
         InvokeAsync(StateHasChanged);

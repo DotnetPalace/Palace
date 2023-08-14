@@ -3,13 +3,13 @@
 	public Models.HostInfo HostInfo { get; set; } = default!;
 }
 <div class="row">
-	<div class="col-1">
+	<div class="col-2">
 		<button class="btn btn-secondary btn-sm" @onclick="(() => HostInfo.UIDisplayMore = !HostInfo.UIDisplayMore)">
 			@string.Format("{0}", HostInfo.UIDisplayMore ? "-" : "+")
 		</button>
 	</div>
-	<div class="col-11">
-		<table class="table table-sm table-borderless">
+	<div class="col-10">
+		<table class="table table-sm table-borderless m-0 p-0">
 			<thead>
 				<tr>
 					<th colspan="2">

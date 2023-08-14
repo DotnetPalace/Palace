@@ -81,6 +81,17 @@ public partial class MainLayout
 		StateHasChanged();
 	}
 
+	public void ShowToast(string title, string message, ToastLevel level)
+	{
+		stackedToastList.Add(new StackedToastInfo
+		{
+			Content = message,
+			Title = title,
+			TypeName = "toast",
+		});
+		StateHasChanged();
+	}
+
 	void RemoveToast(Models.StackedToastInfo sti)
 	{
 		stackedToastList.Remove(sti);

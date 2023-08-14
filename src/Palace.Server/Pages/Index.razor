@@ -57,9 +57,7 @@
 					</td>
 				}
 				<td>
-					<a href="/editservice/@service.ServiceName">@service.ServiceName</a>
-					<div>Version Package : <a href="/package/@packageInfo?.PackageFileName">@packageInfo?.CurrentVersion</a></div>
-					<div>Date Package : @packageInfo?.LastWriteTime</div>
+					<ServiceSettingsInfo PackageInfo="packageInfo" ServiceSettings="service" OnSettingSaved="LoadLists"/>
 					@* <ActionButton ButtonType="btn-warning">Recycle all hosts</ActionButton> *@
 				</td>
 				@foreach (var host in hostList.OrderBy(i => i.HostName))
@@ -81,7 +79,10 @@
 							}
 							else if (serviceInfo.ServiceState == ServiceState.Running)
 							{
-								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(serviceInfo))">Stop</LongActionButton>
+								@if (!service.AlwaysStarted)
+								{
+									<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(serviceInfo))">Stop</LongActionButton>
+								}
 								<LongActionButton type="button" ButtonType="btn-warning" CreateLongAction="(() => CreateRecycleServiceAction(host.HostName, service))" >Recycle</LongActionButton>
 							}
 							else if (serviceInfo.ServiceState == ServiceState.Down)

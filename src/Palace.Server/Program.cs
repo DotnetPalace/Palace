@@ -61,6 +61,7 @@ builder.Services.AddHostedService<UpdaterService>();
 builder.Services.AddHostedService<CleanerService>();
 builder.Services.AddHostedService<HealthCheckerService>();
 builder.Services.AddSingleton<LongActionService>();
+builder.Services.AddTransient<ServiceSettingsRepository>();
 
 builder.Services.AddTransient<Palace.Server.Services.UpdateHandler.IUpdateHandler, 
     Palace.Server.Services.UpdateHandler.SaveServiceStateHandler>();
