@@ -18,6 +18,7 @@ public class Orchestrator
     private readonly ILogger<Orchestrator> _logger;
     private readonly Configuration.GlobalSettings _settings;
 	private readonly IServiceBus _bus;
+	private readonly LongActionService _longActionService;
 
 	public event Action<Models.PackageInfo> OnPackageChanged = default!;
     public event Action<Models.HostInfo> OnHostChanged = default!;
@@ -25,11 +26,13 @@ public class Orchestrator
 
     public Orchestrator(ILogger<Orchestrator> logger,
         Configuration.GlobalSettings settings,
-        ArianeBus.IServiceBus bus)
+        ArianeBus.IServiceBus bus,
+        LongActionService longActionService)
     {
         _logger = logger;
         _settings = settings;
 		_bus = bus;
+		_longActionService = longActionService;
 		LoadPackageList();
     }
 
@@ -167,7 +170,14 @@ public class Orchestrator
 		OnHostChanged?.Invoke(hostInfo);
     }
 
-    public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
+    public Models.ExtendedMicroServiceInfo? GetExtendedMicroServiceInfoByKey(string key)
+    {
+        _extendedMicroServiceInfoList.TryGetValue(key, out var result);
+		return result;
+    }
+
+
+	public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
     {
         _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var emsi);
         if (emsi is null)

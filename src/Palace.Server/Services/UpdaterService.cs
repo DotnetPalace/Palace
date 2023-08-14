@@ -132,7 +132,8 @@ public class UpdaterService : BackgroundService
 					HostName = host,
 					ServiceSettings = settings,
 					ServiceInfo = service,
-					CurrentWorkflow = "Start"
+					CurrentWorkflow = "Start",
+					Origin = "Update"
 				};
 				if (!_processList.ContainsKey(muc.Key))
 				{

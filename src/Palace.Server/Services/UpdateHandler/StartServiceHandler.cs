@@ -50,9 +50,10 @@ public class StartServiceHandler : IUpdateHandler
         // 6 - Si le service était démarré, envoyer une demande de démarrage
         await _bus.PublishTopic(_settings.StartServiceTopicName, new Palace.Shared.Messages.StartService
         {
+            ActionId = context.Id,
             HostName = context.HostName,
             ServiceSettings = context.ServiceSettings,
-        });
+        }); ;
 
         // 7 - Attendre le retour du service démarré
         var loop = 0;

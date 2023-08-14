@@ -6,13 +6,16 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 {
 	private readonly Orchestrator _orchestrator;
     private readonly ILogger<StopServiceReport> _logger;
+	private readonly LongActionService _longActionService;
 
-    public StopServiceReport(Services.Orchestrator orchestrator,
-		ILogger<StopServiceReport> logger)
+	public StopServiceReport(Services.Orchestrator orchestrator,
+		ILogger<StopServiceReport> logger,
+        LongActionService longActionService)
     {
 		_orchestrator = orchestrator;
         _logger = logger;
-    }
+		_longActionService = longActionService;
+	}
 
     public override async Task ProcessMessageAsync(Shared.Messages.StopServiceReport message, CancellationToken cancellationToken)
 	{
@@ -41,5 +44,21 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 			microServiceInfo.LastHitDate = message.ActionDate;
 			_orchestrator.AddOrUpdateMicroServiceInfo(microServiceInfo);
 		}
-	}
+
+		if (message.Origin != "Recycle")
+		{
+			await _longActionService.SetActionCompleted(new Models.ActionResult
+			{
+				ActionId = message.ActionSourceId,
+				Success = message.State == ServiceState.TryToStop
+			});
+		}
+		else if (message.Origin == "Recycle")
+		{
+			await _longActionService.AddLog(message.ActionSourceId, new Models.ActionLog
+			{
+				Message = message.State == ServiceState.TryToStop ? "Service stopped" : "not stopped"
+			});
+        }
+    }
 }

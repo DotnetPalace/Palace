@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Xml;
 
 namespace Palace.Shared.Messages;
 
 public class UnInstallService : IMessage
 {
-    public string HostName { get; set; } = default!;
-    public MicroServiceSettings ServiceSettings { get; set; } = default!;
+    public required Guid ActionId { get; set; }
+    public required string HostName { get; set; } = default!;
+    public required MicroServiceSettings ServiceSettings { get; set; } = default!;
     public DateTime Timeout => DateTime.Now.AddSeconds(15);
 }

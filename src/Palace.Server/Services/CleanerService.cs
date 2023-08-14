@@ -19,7 +19,7 @@ public class CleanerService : BackgroundService
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			CleanBackups();
-			await Task.Delay(5 * 60 * 1000, stoppingToken);
+			await Task.Delay(2 * 60 * 1000, stoppingToken);
 		}
 	}
 

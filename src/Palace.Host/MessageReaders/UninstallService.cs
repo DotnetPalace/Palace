@@ -53,6 +53,7 @@ internal class UninstallService : ArianeBus.MessageReaderBase<Palace.Shared.Mess
 		{
 			HostName = _settings.HostName,
 			ServiceName = message.ServiceSettings.ServiceName,
+			ActionSourceId = message.ActionId
 		};
 
 		// On verifie si le service est déjà en cours

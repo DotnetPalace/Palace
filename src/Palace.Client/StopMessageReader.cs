@@ -74,9 +74,11 @@ public class StopMessageReader : MessageReaderBase<StopService>
 
         await _bus.EnqueueMessage(_settings.StopServiceReportQueueName, new StopServiceReport
         {
+            ActionSourceId = message.ActionId,
             ServiceName = _settings.ServiceName,
             HostName = _settings.MachineName,
-            State = Shared.ServiceState.TryToStop
+            State = Shared.ServiceState.TryToStop,
+            Origin = message.Origin
         });
 
         _hostApplicationLifetime.StopApplication();
