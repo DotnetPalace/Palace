@@ -1,18 +1,24 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
+using Palace.Server.Pages.Shared;
+
 namespace Palace.Server.Pages;
 
 public partial class EditMicroServiceSettings : ComponentBase
 {
+    [CascadingParameter]
+    public MainLayout Parent { get; set; } = default!;
+
     [Inject] 
-    IDbContextFactory<Services.PalaceDbContext> DbContextFactory { get; set; } = default!;
+    Services.ServiceSettingsRepository ServiceSettingsRepository { get; set; } = default!;
     [Inject] 
     NavigationManager NavigationManager { get; set; } = default!;
     [Inject]
     FluentValidation.IValidator<Palace.Shared.MicroServiceSettings> Validator { get; set; } = default!;
     [Inject]
     Services.Orchestrator Orchestrator { get; set; } = default!;
+
 
     [Parameter]
     public string PalaceName { get; set; } = null!;
@@ -21,20 +27,14 @@ public partial class EditMicroServiceSettings : ComponentBase
 
     Palace.Shared.MicroServiceSettings serviceSettings = new();
     Pages.Components.CustomValidator customValidator = new();
-    bool _isNew = false;
     List<string> packageFileNameList = new();
+    List<Palace.Shared.ArgumentsByHost> argumentsByHosts = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var db = await DbContextFactory.CreateDbContextAsync();
-        if (ServiceName == "new")
+        if (ServiceName != "new")
         {
-            serviceSettings.Id = Guid.NewGuid();
-            _isNew = true;
-        }
-        else
-        {
-            var data = db.MicroServiceSettings.FirstOrDefault(i => i.ServiceName == ServiceName);
+            var data = await ServiceSettingsRepository.GetByServiceName(ServiceName);
             if (data == null)
             {
                 NavigationManager.NavigateTo($"/servicelist");
@@ -45,45 +45,35 @@ public partial class EditMicroServiceSettings : ComponentBase
 
         var packageList = Orchestrator.GetPackageInfoList();
         packageFileNameList = packageList.Select(i => i.PackageFileName).ToList();
-    }
 
-    async Task ValidateAndSave()
+        if (serviceSettings.Id != Guid.Empty)
+		{
+            argumentsByHosts = await ServiceSettingsRepository.GetArgumentsByService(serviceSettings.Id);
+		    var currentHostNameList = Orchestrator.GetHostList().Select(i => i.HostName).ToList();
+            var missingHosts = currentHostNameList.Except(argumentsByHosts.Select(i => i.HostName)).ToList();
+            foreach (var hostName in missingHosts)
+		    {
+				argumentsByHosts.Add(new Palace.Shared.ArgumentsByHost
+			    {
+                    Id = Guid.Empty,
+                    ServiceSettingId = serviceSettings.Id,
+				    HostName = hostName,
+				    Arguments = string.Empty
+			    });
+		    }
+		}
+	}
+
+	async Task ValidateAndSave()
     {
-        Sanitize(serviceSettings);
-        var validation = await Validator.ValidateAsync(serviceSettings);
-        if (!validation.IsValid)
+        var result = await ServiceSettingsRepository.SaveServiceSettings(serviceSettings);
+        if (!result.success)
         {
-            customValidator.DisplayErrors(validation);
+            customValidator.DisplayErrors(result.brokenRules);
             return;
         }
-        var db = await DbContextFactory.CreateDbContextAsync();
-        if (_isNew)
-        {
-            db.MicroServiceSettings.Add(serviceSettings);
-            db.Entry(serviceSettings).State = EntityState.Added;
-        }
-        else
-        {
-            db.MicroServiceSettings.Attach(serviceSettings);
-            db.Entry(serviceSettings).State = EntityState.Modified;
-        }
+        await ServiceSettingsRepository.SaveArgumentsByHost(argumentsByHosts);
 
-        try
-        {
-            var changeCount = await db.SaveChangesAsync();
-        }
-        catch(Exception ex)
-        {
-            customValidator.DisplayErrors(ex);
-        }
-    }
-
-    private void Sanitize(MicroServiceSettings serviceSettings)
-    {
-        serviceSettings.ServiceName = serviceSettings.ServiceName.Trim();
-        serviceSettings.MainAssembly = serviceSettings.MainAssembly.TrimEnd('/');
-        serviceSettings.Arguments = serviceSettings.Arguments?.Trim();
-        serviceSettings.GroupName = serviceSettings.GroupName?.Trim();
-        serviceSettings.PackageFileName = serviceSettings.PackageFileName.Trim();
+        Parent.ShowToast("Saved", $"Service {serviceSettings.ServiceName} saved", ToastLevel.Success);
     }
 }

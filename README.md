@@ -4,6 +4,8 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Palace.Client.svg)](https://www.nuget.org/packages/Palace.Client/)
 
+![Dashboard](/doc/dashboard.png)
+
 ## What is Palace?
 
 Palace is a µServices cluster manager. 

@@ -16,7 +16,18 @@
 						State
 					</td>
 					<td class="w-75">
-						<b>@ServiceInfo.ServiceState</b>
+						@if (ServiceInfo.ServiceState == ServiceState.Running)
+						{
+							<span class="text-success h4"><b>@ServiceInfo.ServiceState</b></span>
+						}
+						else if (ServiceInfo.ServiceState == ServiceState.Down)
+						{
+							<span class="text-danger h4"><b>@ServiceInfo.ServiceState</b></span>
+						}
+						else
+						{
+							<span class="h4"><b>@ServiceInfo.ServiceState</b></span>
+						}
 						<small>@ServiceInfo.Log</small>
 						<span class="text-danger">@ServiceInfo.FailReason</span>
 					</td>
@@ -24,26 +35,18 @@
 				<tr>
 					<td class="w-25">Version</td>
 					<td class="w-75">
-						@ServiceInfo.Version
+						@ServiceInfo.Version @ServiceInfo.EnvironmentName
 					</td>
+				</tr>
+				<tr>
+					<td class="w-25">Resources</td>
+					<td class="w-75">@ServiceInfo.ThreadCount Threads / WS @string.Format("{0:###,###,###}K", ServiceInfo.WorkingSet / 1024)</td>
 				</tr>
 				@if (ServiceInfo.UIDisplayMore)
 				{
 					<tr>
-						<td class="w-25">Environment</td>
-						<td class="w-75"><b>@ServiceInfo.EnvironmentName</b></td>
-					</tr>
-					<tr>
 						<td class="w-25">ProcessId</td>
 						<td class="w-75"><b>@ServiceInfo.ProcessId</b></td>
-					</tr>
-					<tr>
-						<td class="w-25">Thread Count</td>
-						<td class="w-75"><b>@ServiceInfo.ThreadCount</b></td>
-					</tr>
-					<tr>
-						<td class="w-25">WorkingSet</td>
-						<td class="w-75"><b>@string.Format("{0:###,###,###}K", ServiceInfo.WorkingSet / 1024)</b></td>
 					</tr>
 					<tr>
 						<td class="w-25">Started Date</td>

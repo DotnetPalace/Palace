@@ -83,8 +83,9 @@ public sealed partial class Index : ComponentBase, IDisposable
         InvokeAsync(StateHasChanged);
     }
 
-	Models.LongAction CreateInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
+	async Task<Models.LongAction> CreateInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
         var currentUri = new Uri(NavigationManager.Uri);
         var downloadUrl = $"{currentUri.Scheme}://{currentUri.Host}:{currentUri.Port}/api/palace/download/{serviceSettings.PackageFileName}";
         var actionId = Guid.NewGuid();
@@ -109,8 +110,9 @@ public sealed partial class Index : ComponentBase, IDisposable
         return result;
     }
 
-	Models.LongAction CreateUnInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
+	async Task<Models.LongAction> CreateUnInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
 		var actionId = Guid.NewGuid();
 		var result = new Models.LongAction
 		{
@@ -132,8 +134,9 @@ public sealed partial class Index : ComponentBase, IDisposable
 		return result;
     }
 
-    Models.LongAction? CreateRecycleServiceAction(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
+    async Task<Models.LongAction?> CreateRecycleServiceAction(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
         var serviceInfo = serviceInfoList.FirstOrDefault(s => s.ServiceName == serviceSettings.ServiceName);
         if (serviceInfo is null
             || serviceInfo.ServiceState != ServiceState.Running)
@@ -179,8 +182,9 @@ public sealed partial class Index : ComponentBase, IDisposable
         return result;
     }
 
-	Models.LongAction CreateStopAction(string hostName, string serviceName)
+	async Task<Models.LongAction> CreateStopAction(string hostName, string serviceName)
 	{
+        await Task.Yield();
 		var actionId = Guid.NewGuid();
 		var result = new Models.LongAction
 		{
@@ -204,19 +208,21 @@ public sealed partial class Index : ComponentBase, IDisposable
 		return result;
 	}
 
-	Models.LongAction CreateStopAction(Models.ExtendedMicroServiceInfo serviceInfo)
+	async Task<Models.LongAction> CreateStopAction(Models.ExtendedMicroServiceInfo serviceInfo)
     {
+        await Task.Yield();
         var actionId = Guid.NewGuid();
 		serviceInfo.ServiceState = ServiceState.Stopping;
         StateHasChanged();
-        return CreateStopAction(serviceInfo.HostName, serviceInfo.ServiceName);
+        return await CreateStopAction(serviceInfo.HostName, serviceInfo.ServiceName);
     }
 
-    Models.LongAction CreateStartAction(Palace.Shared.MicroServiceSettings serviceSettings, Models.ExtendedMicroServiceInfo serviceInfo)
+    async Task<Models.LongAction> CreateStartAction(Palace.Shared.MicroServiceSettings serviceSettings, Models.ExtendedMicroServiceInfo serviceInfo)
     {
 		var actionId = Guid.NewGuid();
 		serviceInfo.ServiceState = ServiceState.Starting;
         StateHasChanged();
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(serviceInfo.HostName, serviceSettings.Id);
 		var result = new Models.LongAction
 		{
 			Id = actionId,
@@ -230,6 +236,7 @@ public sealed partial class Index : ComponentBase, IDisposable
                     ActionId = actionId,
 					HostName = serviceInfo.HostName,
 					ServiceSettings = serviceSettings,
+                    OverridedArguments = arguments is null ? null : arguments.Arguments
 				});
 
 				return publishTopic;

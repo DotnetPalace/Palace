@@ -16,7 +16,7 @@ public sealed partial class LongActionButton : ComponentBase, IDisposable
 	public bool IsExclusive { get; set; } = false;
 
 	[Parameter]
-	public Func<Models.LongAction?> CreateLongAction { get; set; } = default!;
+	public Func<Task<Models.LongAction?>> CreateLongAction { get; set; } = default!;
 
 	[Parameter(CaptureUnmatchedValues = true)]
 	public Dictionary<string, object> CatpuredAttributes { get; set; } = new();
@@ -33,7 +33,7 @@ public sealed partial class LongActionButton : ComponentBase, IDisposable
 		disabled = "disabled";
 		showLoader = true;
 		StateHasChanged();
-		var longAction = CreateLongAction.Invoke();
+		var longAction = await CreateLongAction.Invoke();
 		if (longAction is not null)
 		{
 			await Parent.StartLongAction(longAction);

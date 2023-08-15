@@ -6,17 +6,8 @@ public class ExtendedMicroServiceInfo : RunningMicroserviceInfo
     public bool UIDisplayMore { get; set; } = false;
     public string? FailReason { get; set; }
     public string? Log { get; set; }
+    public List<PerformanceCounter> ThreadCountHistory { get; set; } = new();
+    public List<PerformanceCounter> WorkingSetHistory { get; set; } = new();
 
     public string Key => $"{HostName}-{ServiceName}".ToLower();
-
-    public override string ToString()
-    {
-        var piList = GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-        var sb = new System.Text.StringBuilder();
-        foreach (var item in piList)
-        {
-            sb.AppendLine($"{item.Name} = {item.GetValue(this)}");
-        }
-        return sb.ToString();
-    }
 }

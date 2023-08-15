@@ -40,7 +40,17 @@ public class CustomValidator : ComponentBase
         CurrentEditContext.NotifyValidationStateChanged();
     }
 
-    public void DisplayErrors(Exception ex)
+	public void DisplayErrors(List<FluentValidation.Results.ValidationFailure> errors)
+	{
+		foreach (var error in errors)
+		{
+			_messageStore.Add(CurrentEditContext.Field(error.PropertyName), error.ErrorMessage);
+		}
+		CurrentEditContext.NotifyValidationStateChanged();
+	}
+
+
+	public void DisplayErrors(Exception ex)
     {
         _messageStore.Add(CurrentEditContext.Field("all"), ex.Message);
         CurrentEditContext.NotifyValidationStateChanged();

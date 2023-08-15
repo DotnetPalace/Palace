@@ -401,6 +401,6 @@ appsettings.local.json
 /src/Palace.Server/Datas/key-05b16a56-bb2a-43c3-8335-919bdda1ffc3.xml
 /src/PalaceDeployCli/appsettings.local.json
 /src/Palace.Server/Datas/Palace.db
-/[Dd]atas
 /src/Palace.Server/Datas/Palace.db-shm
 /src/Palace.Server/Datas/Palace.db-wal
+/src/Palace.Server/Datas

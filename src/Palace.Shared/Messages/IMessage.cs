@@ -2,5 +2,5 @@
 
 public interface IMessage
 {
-    DateTime Timeout { get; }
+    DateTime Timeout { get; set; }
 }

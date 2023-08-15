@@ -176,8 +176,7 @@ public class Orchestrator
 		return result;
     }
 
-
-	public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
+    public void AddOrUpdateMicroServiceInfo(Models.ExtendedMicroServiceInfo microserviceInfo)
     {
         _extendedMicroServiceInfoList.TryGetValue(microserviceInfo.Key, out var emsi);
         if (emsi is null)
@@ -190,9 +189,23 @@ public class Orchestrator
 
         emsi!.Location = microserviceInfo.Location;
         emsi.UserInteractive = microserviceInfo.UserInteractive;
-        emsi.Version = microserviceInfo.Version;
+        if (string.IsNullOrWhiteSpace(microserviceInfo.Version))
+        {
+            emsi.Version = microserviceInfo.Version;
+        }
         emsi.LastWriteTime = microserviceInfo.LastWriteTime;
-        emsi.ThreadCount = microserviceInfo.ThreadCount;
+        if (microserviceInfo.ThreadCount > 0)
+        {
+            emsi.ThreadCount = microserviceInfo.ThreadCount;
+            emsi.ThreadCountHistory.Add(new PerformanceCounter
+            {
+                Value = microserviceInfo.ThreadCount,
+            });
+            if (emsi.ThreadCountHistory.Count > 100)
+            {
+                emsi.ThreadCountHistory.RemoveAt(0);
+            }
+        }
         emsi.ProcessId = microserviceInfo.ProcessId;
         emsi.ServiceState = microserviceInfo.ServiceState;
         emsi.StartedDate = microserviceInfo.StartedDate;
@@ -200,7 +213,19 @@ public class Orchestrator
         emsi.PeakPagedMem = microserviceInfo.PeakPagedMem;
         emsi.PeakVirtualMem = microserviceInfo.PeakVirtualMem;
         emsi.PeakWorkingSet = microserviceInfo.PeakWorkingSet;
-        emsi.WorkingSet = microserviceInfo.WorkingSet;
+        if (microserviceInfo.WorkingSet > 0)
+        {
+            emsi.WorkingSet = microserviceInfo.WorkingSet;
+            emsi.WorkingSetHistory.Add(new PerformanceCounter
+			{
+				Value = microserviceInfo.WorkingSet,
+			});
+            if (emsi.WorkingSetHistory.Count > 100)
+			{
+				emsi.WorkingSetHistory.RemoveAt(0);
+			}
+        }
+        emsi.CommandLine = microserviceInfo.CommandLine;
         emsi.EnvironmentName = microserviceInfo.EnvironmentName;
         emsi.LastHitDate = microserviceInfo.LastHitDate;
         emsi.Log = microserviceInfo.Log;
@@ -293,7 +318,6 @@ public class Orchestrator
 			_packageList.TryAdd(info.PackageFileName, info);
 		}
 	}
-
 
 	private string GetNewBackupDirectory(string fileName)
     {

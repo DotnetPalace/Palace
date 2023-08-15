@@ -62,7 +62,7 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
         bool isStarted = false;
         try
         {
-            (startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(mainFileName, message.ServiceSettings.Arguments);
+            (startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(mainFileName, message.OverridedArguments ?? message.ServiceSettings.Arguments);
             if (isStarted)
 			{
 				_serviceState = ServiceState.Running;

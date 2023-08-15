@@ -2,5 +2,5 @@
 
 public class ServerReset : IMessage
 {
-	public DateTime Timeout => DateTime.Now.AddSeconds(15);
+	public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
 }

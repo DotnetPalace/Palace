@@ -6,7 +6,7 @@
 		<ValidationSummary></ValidationSummary>
 		<DataAnnotationsValidator />
 		<CustomValidator @ref="customValidator"></CustomValidator>
-		@if (_isNew)
+		@if (serviceSettings.Id == Guid.Empty)
 		{
 			<div class="mb-3">
 				<label class="form-label">ServiceName :</label>
@@ -27,6 +27,22 @@
 				<ValidationMessage For="() => serviceSettings.Arguments" />
 			</small>
 		</div>
+		@if (serviceSettings.Id != Guid.Empty)
+		{
+			<table class="table table-borderless">
+				<tbody>
+				@foreach (var argumentsByHost in argumentsByHosts)
+				{
+					<tr>
+						<td class="col-20">Host @argumentsByHost.HostName Arguments</td>
+						<td class="col-80">
+							<input type="text" @bind-value="argumentsByHost.Arguments" class="form-control" />
+						</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		}
 		<div class="mb-3">
 			<label class="form-label">Group Name :</label>
 			<InputText type="text" @bind-Value="serviceSettings.GroupName" class="form-control" />

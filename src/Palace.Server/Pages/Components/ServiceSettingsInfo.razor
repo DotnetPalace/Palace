@@ -32,6 +32,15 @@
 						<td>Main Assembly</td>
 						<td>@ServiceSettings.MainAssembly</td>
 					</tr>
+					<tr>
+						<td>Zip File Size</td>
+						<td>
+							@if (PackageInfo is not null)
+							{
+								<FileSizeLabel FileSize="PackageInfo.Size"/>
+							}
+						</td>
+					</tr>
 				}
 			</tbody>
 		</table>

@@ -30,10 +30,10 @@ public class ServiceHealthCheck : ArianeBus.MessageReaderBase<Palace.Shared.Mess
             return;
         }
 
-
-        var rmi = new Models.ExtendedMicroServiceInfo
+		var emsi = new Models.ExtendedMicroServiceInfo
 		{
 			ServiceName = message.ServiceInfo.ServiceName,
+			HostName = message.HostName,
 			Version = message.ServiceInfo.Version,
 			Location = message.ServiceInfo.Location,
 			UserInteractive = message.ServiceInfo.UserInteractive,
@@ -50,8 +50,7 @@ public class ServiceHealthCheck : ArianeBus.MessageReaderBase<Palace.Shared.Mess
 			EnvironmentName = message.ServiceInfo.EnvironmentName,
 			LastHitDate = DateTime.Now,
 		};
-		rmi.HostName = message.HostName;
 
-		_orchestrator.AddOrUpdateMicroServiceInfo(rmi);
+		_orchestrator.AddOrUpdateMicroServiceInfo(emsi);
 	}
 }
