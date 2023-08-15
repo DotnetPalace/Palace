@@ -7,30 +7,33 @@ using Microsoft.Extensions.Hosting;
 
 using Palace.Server.Models;
 using Palace.Server.Services.UpdateHandler;
+using Palace.Server.Services.UpdateStrategies;
 
 namespace Palace.Server.Services;
 
 public class UpdaterService : BackgroundService
 {
 	private readonly Orchestrator _orchestrator;
-	private readonly IDbContextFactory<PalaceDbContext> _dbContextFactory;
 	private readonly Configuration.GlobalSettings _settings;
 	private readonly ILogger<UpdaterService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new();
+	private readonly IServiceScopeFactory _serviceScopeFactory;
+	private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+	private readonly UpdateStrategyBase _updateStrategyBase = default!;
 
 	public UpdaterService(Orchestrator orchestrator,
-		IDbContextFactory<PalaceDbContext> dbContextFactory,
 		Configuration.GlobalSettings settings,
 		ILogger<UpdaterService> logger,
+		IEnumerable<UpdateStrategyBase> updateStrategies,
 		IServiceScopeFactory serviceScopeFactory)
 	{
 		_orchestrator = orchestrator;
-		_dbContextFactory = dbContextFactory;
 		_settings = settings;
 		_logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-        _orchestrator.OnPackageChanged += OnPackageChanged;
+		_serviceScopeFactory = serviceScopeFactory;
+		_orchestrator.PackageChanged += OnPackageChanged;
+
+		_updateStrategyBase = updateStrategies.Single(i => i.Name.Equals(_settings.DefaultUpdateStrategyName, StringComparison.InvariantCultureIgnoreCase));
+		_updateStrategyBase.Initialize(_processList);
 	}
 
 	public override Task StartAsync(CancellationToken cancellationToken)
@@ -42,26 +45,7 @@ public class UpdaterService : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			var toStartList = from p in _processList
-								where p.Value.CurrentWorkflow == "Start"
-								select p;
-
-			foreach (var item in toStartList)
-			{
-				var otherHosts = from p in _processList
-								 where p.Value.ServiceInfo.ServiceName == item.Value.ServiceInfo.ServiceName
-									&& p.Value.HostName != item.Value.HostName
-									&& p.Value.CurrentWorkflow != "Start"
-								 select p;
-
-				// One update by host for the same service
-				if (!otherHosts.Any())
-				{
-					item.Value.CurrentWorkflow = "Starting";
-					RunUpdateTask(item.Value, stoppingToken);
-					await Task.Delay(2 * 1000);
-				}
-			}
+			_updateStrategyBase.ProcessNextUpdate(stoppingToken);
 			await Task.Delay(1 * 1000, stoppingToken);
 		}
 	}
@@ -71,43 +55,14 @@ public class UpdaterService : BackgroundService
 		return base.StopAsync(cancellationToken);
 	}
 
-    private void RunUpdateTask(Models.MicroserviceUpdateContext context, CancellationToken cancellationToken)
-    {
-        Task.Run(() => ProcessUpdate(context, cancellationToken));
-    }
-
-    private async Task ProcessUpdate(MicroserviceUpdateContext context, CancellationToken cancellationToken)
-	{
-        _logger.LogInformation("Update service detected {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
-
-        context.CurrentWorkflow = "Working";
-
-		using var scope = _serviceScopeFactory.CreateScope();
-		var handlers = scope.ServiceProvider.GetServices<IUpdateHandler>();
-
-		var handler = handlers.Single(i => i.Name == nameof(SaveServiceStateHandler));
-		handler.AddNextHandler(handlers.Single(i => i.Name == nameof(StopServiceHandler)));
-		handler.AddNextHandler(handlers.Single(i => i.Name == nameof(InstallServiceHandler)));
-		handler.AddNextHandler(handlers.Single(i => i.Name == nameof(StartServiceHandler)));
-
-		await handler.ProcessUpdateAsync(context, cancellationToken);
-
-		_processList.TryRemove(context.Key, out _);
-		_orchestrator.AddOrUpdateMicroServiceInfo(context.ServiceInfo);
-		context.Dispose();
-    }
-
 	private async void OnPackageChanged(PackageInfo package)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		using var scope = _serviceScopeFactory.CreateScope();
+		var serviceSettingRepository = scope.ServiceProvider.GetRequiredService<ServiceSettingsRepository>();
+		
+		var settingsList = await serviceSettingRepository.GetListByPackageFileName(package.PackageFileName);
 
-		// Recherche dans tous les settings si le package est présent
-		var query = from mss in db.MicroServiceSettings
-					where mss.PackageFileName == package.PackageFileName
-					select mss;
-
-		var settingsList = await query.ToListAsync();
-		if (settingsList.Count == 0)
+		if (settingsList.Count() == 0)
 		{
 			// Pas de service à mettre à jour correspondant à ce package
 			return;
@@ -119,27 +74,37 @@ public class UpdaterService : BackgroundService
 						.Where(i => serviceNameList.Contains(i.ServiceName))
 						.ToList();
 
-		var hostList = services.Select(i => i.HostName).Distinct().ToList();
+		var hostNameList = services.Select(i => i.HostName).Distinct().ToList();
 
-		// Boucler sur la liste des hosts qui ont ce package et leur demander de se mettre à jour
-		foreach (var host in hostList)
+		// Boucler sur la liste des hosts qui ont ce package
+		// et faire se mettre à jour
+		foreach (var serviceName in serviceNameList)
 		{
-			foreach (var service in services)
+			foreach (var host in hostNameList)
 			{
-				var settings = settingsList.Single(i => i.ServiceName == service.ServiceName);
+				var key = $"{host}-{serviceName}".ToLower();
+				var service = services.SingleOrDefault(i => i.Key == key);
+				if (service is null)
+				{
+					continue;
+				}
+
+				var serviceSettings = settingsList.Single(i => i.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+				var arguments = await serviceSettingRepository.GetArgumentsByHostForService(host, serviceSettings.Id);
 				var muc = new MicroserviceUpdateContext
 				{
 					HostName = host,
-					ServiceSettings = settings,
+					ServiceSettings = serviceSettings,
 					ServiceInfo = service,
-					CurrentWorkflow = "Start",
-					Origin = "Update"
+					CurrentStep = "Pending",
+					Origin = "Update",
+					OverridedArguments = arguments?.Arguments
 				};
 				if (!_processList.ContainsKey(muc.Key))
 				{
-                    _processList.TryAdd(muc.Key, muc);
-                }
-            }
+					_processList.TryAdd(muc.Key, muc);
+				}
+			}
 		}
 	}
 

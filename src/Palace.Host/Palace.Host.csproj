@@ -4,9 +4,10 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.0.53.3</Version>
+	  <Version>2.0.54.3</Version>
 	  <PackageReleaseNotes>
-		  2.0.53.3 : Allow to configure many service stating arguments by host
+		  2.0.54.3 : Allow to use 3 differents update strategies (by service, by host, chaos)
+		  2.0.53.3 : Allow to configure many service starting arguments by host
 		  2.0.52.3 : Tracking messages
 		  2.0.51.3 : More infos for host
 		  2.0.50.3 : Global prefix for queues and topics

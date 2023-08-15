@@ -95,6 +95,13 @@ public class ServiceSettingsRepository
 		return result;
 	}
 
+	internal async Task<IEnumerable<MicroServiceSettings>> GetListByPackageFileName(string packageFileName)
+	{
+		var db = await _dbContextFactory.CreateDbContextAsync();
+		var result = await db.MicroServiceSettings.Where(i => i.PackageFileName == packageFileName).ToListAsync();
+		return result;
+	}
+
 	internal async Task<int> SaveArgumentsByHost(List<ArgumentsByHost> argumentsByHosts)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();

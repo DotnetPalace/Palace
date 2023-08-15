@@ -10,7 +10,7 @@ public class PackageRepositoryWatcher : BackgroundService
     private readonly Orchestrator _orchestrator;
     private readonly ILogger<PackageRepositoryWatcher> _logger;
 
-    private ConcurrentDictionary<string, DateTime> _uploadedFiles = new();
+    private ConcurrentDictionary<string, DateTime> _uploadedFiles = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 
     public PackageRepositoryWatcher(Configuration.GlobalSettings settings,
         Services.Orchestrator orchestrator,

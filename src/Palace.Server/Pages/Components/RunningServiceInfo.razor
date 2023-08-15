@@ -39,8 +39,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td class="w-25">Resources</td>
-					<td class="w-75">@ServiceInfo.ThreadCount Threads / WS @string.Format("{0:###,###,###}K", ServiceInfo.WorkingSet / 1024)</td>
+					<td colspan="2">@ServiceInfo.ThreadCount Threads / WS @string.Format("{0:###,###,###}K", ServiceInfo.WorkingSet / 1024)</td>
 				</tr>
 				@if (ServiceInfo.UIDisplayMore)
 				{

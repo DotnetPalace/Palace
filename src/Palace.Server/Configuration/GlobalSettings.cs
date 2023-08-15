@@ -14,4 +14,5 @@ public class GlobalSettings : Palace.Shared.GlobalSettings
     public int BackupRetentionCount { get; set; } = 5;
 
     public string CurrentUrl { get; set; } = null!;
+    public string DefaultUpdateStrategyName { get; set; } = "ByHost";
 }

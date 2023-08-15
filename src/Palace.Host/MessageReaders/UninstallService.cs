@@ -56,8 +56,9 @@ internal class UninstallService : ArianeBus.MessageReaderBase<Palace.Shared.Mess
 			ActionSourceId = message.ActionId
 		};
 
+		var commandLine = $"{message.ServiceSettings.MainAssembly} {message.ServiceSettings.Arguments}".Trim();
 		// On verifie si le service est déjà en cours
-		var runningServiceList = ProcessHelper.GetRunningProcess(message.ServiceSettings.MainAssembly);
+		var runningServiceList = ProcessHelper.GetRunningProcess(commandLine);
 		if (runningServiceList.Count > 0)
 		{
 			_logger.LogTrace("service is running");

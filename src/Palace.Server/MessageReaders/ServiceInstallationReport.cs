@@ -41,12 +41,14 @@ public class ServiceInstallationReport : ArianeBus.MessageReaderBase<Palace.Shar
         {
             serviceInfo.ServiceState = ServiceState.InstallationFailed;
             serviceInfo.FailReason = message.FailReason;
-			await _longActionService.SetActionCompleted(new Models.ActionResult
-			{
-				ActionId = message.ActionSourceId,
-				Success = false,
-				FailReason = message.FailReason
-			});
+            var actionResult = new Models.ActionResult
+            {
+                ActionId = message.ActionSourceId,
+                Success = false,
+                FailReason = message.FailReason
+            };
+			await _longActionService.SetActionCompleted(actionResult);
+            _orchestrator.OnLongActionProgress(actionResult);
 		}
 		else
         {
@@ -58,11 +60,13 @@ public class ServiceInstallationReport : ArianeBus.MessageReaderBase<Palace.Shar
             {
                 serviceInfo.ServiceState = ServiceState.Offline;
             }
-			await _longActionService.SetActionCompleted(new Models.ActionResult
-			{
-				ActionId = message.ActionSourceId,
-				Success = true
-			});
+            var actionResult = new Models.ActionResult
+            {
+                ActionId = message.ActionSourceId,
+                Success = true
+            };
+			await _longActionService.SetActionCompleted(actionResult);
+            _orchestrator.OnLongActionProgress(actionResult);
 		}
 
 		_orchestrator.AddOrUpdateMicroServiceInfo(serviceInfo);

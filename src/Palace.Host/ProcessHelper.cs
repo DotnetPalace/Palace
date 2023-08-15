@@ -23,7 +23,7 @@ internal static class ProcessHelper
 				var cmdLine = $"{obj["CommandLine"]}";
 				foreach (var mainFileName in mainFileNames)
 				{
-					if (cmdLine.Contains($"{mainFileName}.dll"))
+					if (cmdLine.Contains(mainFileName))
 					{
 						result.Add((process.Id, mainFileName, cmdLine));
 					}
@@ -50,7 +50,7 @@ internal static class ProcessHelper
 		return result;
 	}
 
-	public static async Task<(string StartReport, int ProcessId, bool IsStarted)> StartMicroServiceProcess(string mainFileName, string? arguments = null)
+	public static async Task<(string StartReport, int ProcessId, bool IsStarted)> StartMicroServiceProcess(string commandLine)
 	{
 		var mre = new System.Threading.ManualResetEvent(false);
 		var psi = new ProcessStartInfo("dotnet");
@@ -60,7 +60,7 @@ internal static class ProcessHelper
 		bool isStared = false;
 		bool hasError = false;
 
-		psi.Arguments = $"{mainFileName} {arguments}".Trim();
+		psi.Arguments = commandLine;
 
 		psi.CreateNoWindow = false;
 		psi.UseShellExecute = false;
@@ -116,12 +116,12 @@ internal static class ProcessHelper
 		return (report.ToString(), processId, isStared);
 	}
 
-	public static async Task WaitForProcessDown(string mainFileName)
+	public static async Task WaitForProcessDown(string commandLine)
 	{
 		var loop = 0;
 		while (true)
 		{
-			var runningProcesses = GetRunningProcess(mainFileName);
+			var runningProcesses = GetRunningProcess(commandLine);
 			if (runningProcesses.Count == 0)
 			{
 				return;

@@ -45,9 +45,9 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         if (firstRender)
         {
-            Orchestrator.OnHostChanged += Orchestrator_OnHostChanged;
-            Orchestrator.OnServiceChanged += Orchestrator_OnServiceChanged;
-            Orchestrator.OnPackageChanged += Orchestrator_OnPackageChanged;
+            Orchestrator.HostChanged += Orchestrator_OnHostChanged;
+            Orchestrator.ServiceChanged += Orchestrator_OnServiceChanged;
+            Orchestrator.PackageChanged += Orchestrator_OnPackageChanged;
         }
     }
 
@@ -89,7 +89,8 @@ public sealed partial class Index : ComponentBase, IDisposable
         var currentUri = new Uri(NavigationManager.Uri);
         var downloadUrl = $"{currentUri.Scheme}://{currentUri.Host}:{currentUri.Port}/api/palace/download/{serviceSettings.PackageFileName}";
         var actionId = Guid.NewGuid();
-        var result = new Models.LongAction
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(host.HostName, serviceSettings.Id);
+		var result = new Models.LongAction
         {
             Id = actionId,
             Name = "InstallService",
@@ -102,7 +103,8 @@ public sealed partial class Index : ComponentBase, IDisposable
                     ActionId = actionId,
                     HostName = host.HostName,
                     ServiceSettings = serviceSettings,
-                    DownloadUrl = downloadUrl
+                    DownloadUrl = downloadUrl,
+                    OverridedArguments = arguments?.Arguments
                 });
                 return publish;
             }
@@ -114,6 +116,7 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         await Task.Yield();
 		var actionId = Guid.NewGuid();
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(host.HostName, serviceSettings.Id);
 		var result = new Models.LongAction
 		{
 			Id = actionId,
@@ -126,7 +129,8 @@ public sealed partial class Index : ComponentBase, IDisposable
 				{
                     ActionId = actionId,
 					HostName = host.HostName,
-					ServiceSettings = serviceSettings
+					ServiceSettings = serviceSettings,
+                    OverrideArguments = arguments?.Arguments
 				});
 				return pulishTask;
 			}
@@ -144,15 +148,17 @@ public sealed partial class Index : ComponentBase, IDisposable
             return null;
         }
 
-        var context = new MicroserviceUpdateContext()
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(hostName, serviceSettings.Id);
+		var context = new MicroserviceUpdateContext()
         {
             Id = Guid.NewGuid(),
-            CurrentWorkflow = "RecycleService",
+            CurrentStep = "RecycleService",
             HostName = hostName,
             ServiceSettings = serviceSettings,
             ServiceInfo = serviceInfo,
             InitialServiceState = ServiceState.Running,
-            Origin = "Recycle"
+            Origin = "Recycle",
+            OverridedArguments = arguments?.Arguments
         };
 
         var actionId = Guid.NewGuid();
@@ -250,9 +256,9 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         if (Orchestrator is not null)
         {
-			Orchestrator.OnHostChanged -= Orchestrator_OnHostChanged;
-			Orchestrator.OnServiceChanged -= Orchestrator_OnServiceChanged;
-			Orchestrator.OnPackageChanged -= Orchestrator_OnPackageChanged;
+			Orchestrator.HostChanged -= Orchestrator_OnHostChanged;
+			Orchestrator.ServiceChanged -= Orchestrator_OnServiceChanged;
+			Orchestrator.PackageChanged -= Orchestrator_OnPackageChanged;
 		}
 	}
 }

@@ -62,11 +62,13 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
 
 		_orchestrator.AddOrUpdateMicroServiceInfo(emsi);
 
-        await _longActionService.SetActionCompleted(new Models.ActionResult
-        {
-            ActionId = message.ActionSourceId,
-            Success = message.ServiceState == ServiceState.Running,
-            FailReason = message.FailReason
-        });
+		var actionResult = new Models.ActionResult
+		{
+			ActionId = message.ActionSourceId,
+			Success = message.ServiceState == ServiceState.Running,
+			FailReason = message.FailReason
+		};
+		await _longActionService.SetActionCompleted(actionResult);
+		_orchestrator.OnLongActionProgress(actionResult);
 	}
 }

@@ -43,7 +43,7 @@ internal class ServerReset : ArianeBus.MessageReaderBase<Palace.Shared.Messages.
 		}
 
 		var installedServiceList = await ProcessHelper.GetInstalledServiceList(_settings.InstallationFolder);
-		var serviceSettingsList = installedServiceList.Select(x => x.ServiceName).ToList();
+		var serviceSettingsList = installedServiceList.Select(x => x.MainAssembly).ToList();
 
 		_logger.LogInformation("{count} found already installed services", installedServiceList.Count);
 

@@ -69,7 +69,8 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
 
         try
         {
-            await ProcessHelper.WaitForProcessDown(message.ServiceSettings.ServiceName);
+            var commandLine = $"{message.ServiceSettings.MainAssembly} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
+            await ProcessHelper.WaitForProcessDown(commandLine);
         }
         catch (Exception ex)
         {

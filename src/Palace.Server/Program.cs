@@ -72,6 +72,13 @@ builder.Services.AddTransient<Palace.Server.Services.UpdateHandler.IUpdateHandle
 builder.Services.AddTransient<Palace.Server.Services.UpdateHandler.IUpdateHandler, 
     Palace.Server.Services.UpdateHandler.StartServiceHandler>();
 
+builder.Services.AddSingleton<Palace.Server.Services.UpdateStrategies.UpdateStrategyBase, 
+    Palace.Server.Services.UpdateStrategies.ByHostUpdateStrategy>();
+builder.Services.AddSingleton<Palace.Server.Services.UpdateStrategies.UpdateStrategyBase, 
+    Palace.Server.Services.UpdateStrategies.ChaosUpdateStrategy>();
+builder.Services.AddSingleton<Palace.Server.Services.UpdateStrategies.UpdateStrategyBase, 
+    Palace.Server.Services.UpdateStrategies.ByServiceUpdateStrategy>();
+
 var sqliteSettings = new Palace.Server.Configuration.SqliteSettings();
 sqliteSettings.ConnectionString = $"Data Source={settings.DataFolder}\\Palace.db";
 builder.Services.AddSingleton(sqliteSettings);

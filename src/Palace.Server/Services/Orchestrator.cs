@@ -11,18 +11,19 @@ namespace Palace.Server.Services;
 
 public class Orchestrator
 {
-    private readonly ConcurrentDictionary<string, Models.ExtendedMicroServiceInfo> _extendedMicroServiceInfoList = new();
-    private readonly ConcurrentDictionary<string, Models.HostInfo> _hostInfoList = new();
-    private readonly ConcurrentDictionary<string, Models.PackageInfo> _packageList = new();
+    private readonly ConcurrentDictionary<string, Models.ExtendedMicroServiceInfo> _extendedMicroServiceInfoList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, Models.HostInfo> _hostInfoList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, Models.PackageInfo> _packageList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 
     private readonly ILogger<Orchestrator> _logger;
     private readonly Configuration.GlobalSettings _settings;
 	private readonly IServiceBus _bus;
 	private readonly LongActionService _longActionService;
 
-	public event Action<Models.PackageInfo> OnPackageChanged = default!;
-    public event Action<Models.HostInfo> OnHostChanged = default!;
-    public event Action<Models.ExtendedMicroServiceInfo> OnServiceChanged = default!;
+	public event Action<Models.PackageInfo> PackageChanged = default!;
+    public event Action<Models.HostInfo> HostChanged = default!;
+    public event Action<Models.ExtendedMicroServiceInfo> ServiceChanged = default!;
+    public event Action<Models.ActionResult> LongActionProgress = default!;
 
     public Orchestrator(ILogger<Orchestrator> logger,
         Configuration.GlobalSettings settings,
@@ -142,7 +143,7 @@ public class Orchestrator
         if (availablePackage is not null)
         {
             LoadPackageList();
-            OnPackageChanged?.Invoke(availablePackage);
+            PackageChanged?.Invoke(availablePackage);
         }
     }
 
@@ -167,7 +168,7 @@ public class Orchestrator
         existing.ProcessId = hostInfo.ProcessId;
         existing.PercentCpu = hostInfo.PercentCpu;
 
-		OnHostChanged?.Invoke(hostInfo);
+		HostChanged?.Invoke(hostInfo);
     }
 
     public Models.ExtendedMicroServiceInfo? GetExtendedMicroServiceInfoByKey(string key)
@@ -227,11 +228,12 @@ public class Orchestrator
         }
         emsi.CommandLine = microserviceInfo.CommandLine;
         emsi.EnvironmentName = microserviceInfo.EnvironmentName;
+        emsi.Version = microserviceInfo.Version;
         emsi.LastHitDate = microserviceInfo.LastHitDate;
         emsi.Log = microserviceInfo.Log;
         emsi.FailReason = microserviceInfo.FailReason;
 
-        OnServiceChanged?.Invoke(emsi);
+        ServiceChanged?.Invoke(emsi);
     }
 
     public async Task<string?> RemovePackage(string packageFileName)
@@ -279,7 +281,7 @@ public class Orchestrator
             fileInfo.CreationTime = DateTime.Now;
             File.Copy(fileInfo.FullName, destPackage, true);
             LoadPackageList();
-            OnPackageChanged?.Invoke(package);
+            PackageChanged?.Invoke(package);
         }
         catch (Exception ex)
         {
@@ -296,8 +298,16 @@ public class Orchestrator
         _packageList.Clear();
         LoadPackageList();
 		_bus.PublishTopic(_settings.ServerResetTopicName, new Palace.Shared.Messages.ServerReset());
-        OnHostChanged?.Invoke(new HostInfo());
+        HostChanged?.Invoke(new HostInfo());
 	}
+
+    public void OnLongActionProgress(Models.ActionResult actionResult)
+    {
+        if (LongActionProgress is not null)
+		{
+			LongActionProgress(actionResult);
+		}
+    }
 
 	private void LoadPackageList()
 	{
@@ -384,7 +394,7 @@ public class Orchestrator
         _extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
 		if (existing is not null)
 		{
-			OnServiceChanged?.Invoke(existing);
+			ServiceChanged?.Invoke(existing);
 		}
 	}
 }
