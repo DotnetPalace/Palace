@@ -50,7 +50,9 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
             return;
         }
 
-        var runningProcesses = ProcessHelper.GetRunningProcess(mainFileName);
+		var commandLine = $"{mainFileName} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
+
+		var runningProcesses = ProcessHelper.GetRunningProcess(commandLine);
         if (runningProcesses.Any())
         {
 			_logger.LogWarning("MainAssembly {mainFileName} already running in {installationFolder}", mainFileName, installationFolder);
@@ -62,7 +64,7 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
         bool isStarted = false;
         try
         {
-            (startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(mainFileName, message.ServiceSettings.Arguments);
+			(startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(commandLine);
             if (isStarted)
 			{
 				_serviceState = ServiceState.Running;

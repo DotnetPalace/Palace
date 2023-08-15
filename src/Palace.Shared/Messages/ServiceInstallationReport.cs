@@ -10,5 +10,5 @@ public class ServiceInstallationReport : IMessage
     public string? InstallationFolder { get; set; }
     public DateTime ActionDate { get; set; } = DateTime.Now;
     public string Trigger { get; set; } = null!;
-    public DateTime Timeout => DateTime.Now.AddSeconds(15);
+    public DateTime Timeout { get; set; } = DateTime.Now.AddMinutes(2);
 }

@@ -5,6 +5,8 @@ using System.Threading;
 
 using ArianeBus;
 
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+
 using Palace.Server.Models;
 
 namespace Palace.Server.Services.UpdateHandler;
@@ -16,7 +18,7 @@ public class InstallServiceHandler : IUpdateHandler
     private readonly Configuration.GlobalSettings _settings;
     private readonly Orchestrator _orchestrator;
 
-    private MicroserviceUpdateContext? _processMicroserviceUpdate = null;
+    private MicroserviceUpdateContext? _context = null;
 
     public InstallServiceHandler(ILogger<InstallServiceHandler> logger,
         ArianeBus.IServiceBus bus,
@@ -27,7 +29,6 @@ public class InstallServiceHandler : IUpdateHandler
         _bus = bus;
         _settings = settings;
         _orchestrator = orchestrator;
-        _orchestrator.OnServiceChanged += OnServiceChanged;
     }
 
     public string Name => nameof(InstallServiceHandler);
@@ -35,7 +36,9 @@ public class InstallServiceHandler : IUpdateHandler
 
     public async Task ProcessUpdateAsync(MicroserviceUpdateContext context, CancellationToken cancellationToken)
     {
-        _processMicroserviceUpdate = context;
+		_orchestrator.LongActionProgress += OnProgress;
+
+		_context = context;
         context.ManualResetEvent = new(false);
 
         context.ServiceInfo.Log = "Try to install";
@@ -46,11 +49,12 @@ public class InstallServiceHandler : IUpdateHandler
         var downloadUrl = $"{_settings.CurrentUrl}/api/palace/download/{context.ServiceSettings.PackageFileName}";
         await _bus.PublishTopic(_settings.InstallServiceTopicName, new Palace.Shared.Messages.InstallService
         {
-            ActionId = Guid.NewGuid(),
+            ActionId = context.Id,
             HostName = context.HostName,
             ServiceSettings = context.ServiceSettings,
             DownloadUrl = downloadUrl,
-            Trigger = "FromUpdate"
+            Trigger = "FromUpdate",
+            OverridedArguments = context.OverridedArguments
         });
 
         // 5 - Attendre le retour d'installation réussie
@@ -81,31 +85,28 @@ public class InstallServiceHandler : IUpdateHandler
 
         if (NextHandler is not null)
         {
-            _orchestrator.AddOrUpdateMicroServiceInfo(context.ServiceInfo);
-            await NextHandler.ProcessUpdateAsync(context, cancellationToken);
+			_orchestrator.LongActionProgress -= OnProgress;
+			await NextHandler.ProcessUpdateAsync(context, cancellationToken);
         }
     }
 
-    private void OnServiceChanged(ExtendedMicroServiceInfo msi)
+    private void OnProgress(Models.ActionResult actionResult)
     {
-        if (_processMicroserviceUpdate is null)
+        if (_context is null)
         {
             return;
         }
 
-        if (msi.Key == _processMicroserviceUpdate.Key
-            && msi.ServiceState == ServiceState.Updated)
+        if (actionResult.ActionId == _context.Id)
         {
-            _logger.LogInformation("Service {serviceName} is {serviceState} for host {host}", _processMicroserviceUpdate.ServiceInfo.ServiceName, msi.ServiceState, _processMicroserviceUpdate.HostName);
-            _processMicroserviceUpdate.CurrentWorkflow = $"{msi.ServiceState}";
-            _processMicroserviceUpdate.ServiceInfo.ServiceState = msi.ServiceState;
-            _processMicroserviceUpdate.ManualResetEvent.Set();
+            _context.CurrentStep = $"{actionResult.StepName}";
+            _context.ManualResetEvent.Set();
         }
     }
 
     public void Dispose()
     {
-        _orchestrator.OnServiceChanged -= OnServiceChanged;
+        _orchestrator.LongActionProgress -= OnProgress;
         GC.SuppressFinalize(this);
     }
 }

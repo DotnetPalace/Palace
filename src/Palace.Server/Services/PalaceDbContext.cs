@@ -22,11 +22,15 @@ public class PalaceDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var microServiceSettings = modelBuilder.Entity<MicroServiceSettings>()
+        var microServiceSettingsTable = modelBuilder.Entity<MicroServiceSettings>()
             .ToTable("MicroServiceSetting")
+            .HasKey(i => i.Id);
+
+        var argumentsByHostsTable = modelBuilder.Entity<ArgumentsByHost>()
+            .ToTable("ArgumentsByHost")
             .HasKey(i => i.Id);
     }
 
     public DbSet<MicroServiceSettings> MicroServiceSettings { get; set; } = default!;
-
+    public DbSet<ArgumentsByHost> ArgumentsByHosts { get; set; } = default!;
 }

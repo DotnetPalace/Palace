@@ -45,9 +45,9 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         if (firstRender)
         {
-            Orchestrator.OnHostChanged += Orchestrator_OnHostChanged;
-            Orchestrator.OnServiceChanged += Orchestrator_OnServiceChanged;
-            Orchestrator.OnPackageChanged += Orchestrator_OnPackageChanged;
+            Orchestrator.HostChanged += Orchestrator_OnHostChanged;
+            Orchestrator.ServiceChanged += Orchestrator_OnServiceChanged;
+            Orchestrator.PackageChanged += Orchestrator_OnPackageChanged;
         }
     }
 
@@ -83,12 +83,14 @@ public sealed partial class Index : ComponentBase, IDisposable
         InvokeAsync(StateHasChanged);
     }
 
-	Models.LongAction CreateInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
+	async Task<Models.LongAction> CreateInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
         var currentUri = new Uri(NavigationManager.Uri);
         var downloadUrl = $"{currentUri.Scheme}://{currentUri.Host}:{currentUri.Port}/api/palace/download/{serviceSettings.PackageFileName}";
         var actionId = Guid.NewGuid();
-        var result = new Models.LongAction
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(host.HostName, serviceSettings.Id);
+		var result = new Models.LongAction
         {
             Id = actionId,
             Name = "InstallService",
@@ -101,7 +103,8 @@ public sealed partial class Index : ComponentBase, IDisposable
                     ActionId = actionId,
                     HostName = host.HostName,
                     ServiceSettings = serviceSettings,
-                    DownloadUrl = downloadUrl
+                    DownloadUrl = downloadUrl,
+                    OverridedArguments = arguments?.Arguments
                 });
                 return publish;
             }
@@ -109,9 +112,11 @@ public sealed partial class Index : ComponentBase, IDisposable
         return result;
     }
 
-	Models.LongAction CreateUnInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
+	async Task<Models.LongAction> CreateUnInstallServiceAction(Models.HostInfo host, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
 		var actionId = Guid.NewGuid();
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(host.HostName, serviceSettings.Id);
 		var result = new Models.LongAction
 		{
 			Id = actionId,
@@ -124,7 +129,8 @@ public sealed partial class Index : ComponentBase, IDisposable
 				{
                     ActionId = actionId,
 					HostName = host.HostName,
-					ServiceSettings = serviceSettings
+					ServiceSettings = serviceSettings,
+                    OverrideArguments = arguments?.Arguments
 				});
 				return pulishTask;
 			}
@@ -132,8 +138,9 @@ public sealed partial class Index : ComponentBase, IDisposable
 		return result;
     }
 
-    Models.LongAction? CreateRecycleServiceAction(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
+    async Task<Models.LongAction?> CreateRecycleServiceAction(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
     {
+        await Task.Yield();
         var serviceInfo = serviceInfoList.FirstOrDefault(s => s.ServiceName == serviceSettings.ServiceName);
         if (serviceInfo is null
             || serviceInfo.ServiceState != ServiceState.Running)
@@ -141,15 +148,17 @@ public sealed partial class Index : ComponentBase, IDisposable
             return null;
         }
 
-        var context = new MicroserviceUpdateContext()
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(hostName, serviceSettings.Id);
+		var context = new MicroserviceUpdateContext()
         {
             Id = Guid.NewGuid(),
-            CurrentWorkflow = "RecycleService",
+            CurrentStep = "RecycleService",
             HostName = hostName,
             ServiceSettings = serviceSettings,
             ServiceInfo = serviceInfo,
             InitialServiceState = ServiceState.Running,
-            Origin = "Recycle"
+            Origin = "Recycle",
+            OverridedArguments = arguments?.Arguments
         };
 
         var actionId = Guid.NewGuid();
@@ -179,8 +188,9 @@ public sealed partial class Index : ComponentBase, IDisposable
         return result;
     }
 
-	Models.LongAction CreateStopAction(string hostName, string serviceName)
+	async Task<Models.LongAction> CreateStopAction(string hostName, string serviceName)
 	{
+        await Task.Yield();
 		var actionId = Guid.NewGuid();
 		var result = new Models.LongAction
 		{
@@ -204,19 +214,21 @@ public sealed partial class Index : ComponentBase, IDisposable
 		return result;
 	}
 
-	Models.LongAction CreateStopAction(Models.ExtendedMicroServiceInfo serviceInfo)
+	async Task<Models.LongAction> CreateStopAction(Models.ExtendedMicroServiceInfo serviceInfo)
     {
+        await Task.Yield();
         var actionId = Guid.NewGuid();
 		serviceInfo.ServiceState = ServiceState.Stopping;
         StateHasChanged();
-        return CreateStopAction(serviceInfo.HostName, serviceInfo.ServiceName);
+        return await CreateStopAction(serviceInfo.HostName, serviceInfo.ServiceName);
     }
 
-    Models.LongAction CreateStartAction(Palace.Shared.MicroServiceSettings serviceSettings, Models.ExtendedMicroServiceInfo serviceInfo)
+    async Task<Models.LongAction> CreateStartAction(Palace.Shared.MicroServiceSettings serviceSettings, Models.ExtendedMicroServiceInfo serviceInfo)
     {
 		var actionId = Guid.NewGuid();
 		serviceInfo.ServiceState = ServiceState.Starting;
         StateHasChanged();
+		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(serviceInfo.HostName, serviceSettings.Id);
 		var result = new Models.LongAction
 		{
 			Id = actionId,
@@ -230,6 +242,7 @@ public sealed partial class Index : ComponentBase, IDisposable
                     ActionId = actionId,
 					HostName = serviceInfo.HostName,
 					ServiceSettings = serviceSettings,
+                    OverridedArguments = arguments is null ? null : arguments.Arguments
 				});
 
 				return publishTopic;
@@ -243,9 +256,9 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         if (Orchestrator is not null)
         {
-			Orchestrator.OnHostChanged -= Orchestrator_OnHostChanged;
-			Orchestrator.OnServiceChanged -= Orchestrator_OnServiceChanged;
-			Orchestrator.OnPackageChanged -= Orchestrator_OnPackageChanged;
+			Orchestrator.HostChanged -= Orchestrator_OnHostChanged;
+			Orchestrator.ServiceChanged -= Orchestrator_OnServiceChanged;
+			Orchestrator.PackageChanged -= Orchestrator_OnPackageChanged;
 		}
 	}
 }

@@ -16,7 +16,7 @@ public sealed class StopServiceHandler : IUpdateHandler
     private readonly Configuration.GlobalSettings _settings;
     private readonly Orchestrator _orchestrator;
 
-    private MicroserviceUpdateContext? _processMicroserviceUpdate = null;
+    private MicroserviceUpdateContext? _context = null;
 
     public StopServiceHandler(ILogger<StopServiceHandler> logger,
         ArianeBus.IServiceBus bus,
@@ -27,7 +27,6 @@ public sealed class StopServiceHandler : IUpdateHandler
         _bus = bus;
         _settings = settings;
         _orchestrator = orchestrator;
-        _orchestrator.OnServiceChanged += OnServiceChanged;
     }
 
     public string Name => nameof(StopServiceHandler);
@@ -35,7 +34,9 @@ public sealed class StopServiceHandler : IUpdateHandler
 
     public async Task ProcessUpdateAsync(MicroserviceUpdateContext context, CancellationToken cancellationToken)
     {
-        _processMicroserviceUpdate = context;
+		_orchestrator.LongActionProgress += OnProgress;
+		_context = context;
+        context.ManualResetEvent = new(false);
 
         // 2 - Envoyer une demande de stop
         _logger.LogInformation("Send stop service {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
@@ -45,7 +46,7 @@ public sealed class StopServiceHandler : IUpdateHandler
             HostName = context.HostName,
             ServiceName = context.ServiceSettings.ServiceName,
             Origin = context.Origin,
-            Timeout = DateTime.Now.AddSeconds(3)
+            Timeout = DateTime.Now.AddSeconds(3),
 		});
 
         // 3 - Attendre le retour offline
@@ -59,7 +60,7 @@ public sealed class StopServiceHandler : IUpdateHandler
                 break;
             }
 
-            var signalReceived = context.ManualResetEvent.WaitOne(30 * 1000);
+            var signalReceived = context.ManualResetEvent.WaitOne(15 * 1000);
             context.ManualResetEvent.Reset();
 
             if (signalReceived)
@@ -79,32 +80,28 @@ public sealed class StopServiceHandler : IUpdateHandler
 
         if (NextHandler is not null)
         {
-            _orchestrator.OnServiceChanged -= OnServiceChanged;
-            _orchestrator.AddOrUpdateMicroServiceInfo(context.ServiceInfo);
+            _orchestrator.LongActionProgress -= OnProgress;
             await NextHandler.ProcessUpdateAsync(context, cancellationToken);
         }
     }
 
-    private void OnServiceChanged(ExtendedMicroServiceInfo msi)
+    private void OnProgress(Models.ActionResult actionResult)
     {
-        if (_processMicroserviceUpdate is null)
+        if (_context is null)
         {
             return;
         }
 
-        if (msi.Key == _processMicroserviceUpdate.Key
-            && msi.ServiceState == ServiceState.Offline)
+        if (actionResult.ActionId == _context.Id)
         {
-            _logger.LogInformation("Service {serviceName} is {serviceState} for host {host}", _processMicroserviceUpdate.ServiceInfo.ServiceName, msi.ServiceState, _processMicroserviceUpdate.HostName);
-            _processMicroserviceUpdate.CurrentWorkflow = $"{msi.ServiceState}";
-            _processMicroserviceUpdate.ServiceInfo.ServiceState = msi.ServiceState;
-            _processMicroserviceUpdate.ManualResetEvent.Set();
+            _context.CurrentStep = $"{actionResult.StepName}";
+            _context.ManualResetEvent.Set();
         }
     }
 
     public void Dispose()
     {
-        _orchestrator.OnServiceChanged -= OnServiceChanged;
+        _orchestrator.LongActionProgress -= OnProgress;
         GC.SuppressFinalize(this);
     }
 }

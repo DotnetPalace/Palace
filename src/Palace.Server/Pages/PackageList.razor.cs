@@ -16,7 +16,7 @@ public partial class PackageList
 
     protected override void OnInitialized()
     {
-        Orchestrator.OnPackageChanged += async (package) =>
+        Orchestrator.PackageChanged += async (package) =>
         {
             await InvokeAsync(() =>
             {

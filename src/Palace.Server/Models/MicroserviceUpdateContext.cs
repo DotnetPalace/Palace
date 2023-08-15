@@ -9,9 +9,10 @@ public sealed class MicroserviceUpdateContext : IDisposable
     public string HostName { get; set; } = null!;
     public Palace.Shared.MicroServiceSettings ServiceSettings { get; set; } = default!;
     public Models.ExtendedMicroServiceInfo ServiceInfo { get; set; } = default!;
-    public string CurrentWorkflow { get; set; } = null!;
+    public string CurrentStep { get; set; } = null!;
     public ServiceState InitialServiceState { get; set; }
     public string Origin { get; set; } = null!;
+    public string? OverridedArguments { get; set; }
 
     public void Dispose()
     {

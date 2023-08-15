@@ -44,10 +44,14 @@ IHost host = Host.CreateDefaultBuilder(args)
 		var azureBusConnectionStringSecret = client.GetSecretAsync("AzureBusConnectionString").Result;
 		var azureBusConnectionString = azureBusConnectionStringSecret.Value.Value;
 
+		var hostName = args.GetParameterValue("--hostname");
+		var serviceName = args.GetParameterValue("--servicename");
+
 		services.AddPalaceClient(config =>
 		{
+			config.HostName = hostName ?? config.HostName;
+			config.ServiceName = serviceName ?? nameof(DemoSvc1);
 			config.QueuePrefix = prefixQueue;
-			config.ServiceName = nameof(DemoSvc1);
 			config.AzureBusConnectionString = azureBusConnectionString;
 			config.StopServiceReportQueueName = "palace.stopservicereport";
 			config.ServiceHealthQueueName = "palace.servicehealth";

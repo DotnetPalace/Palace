@@ -4,6 +4,8 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Palace.Client.svg)](https://www.nuget.org/packages/Palace.Client/)
 
+![Dashboard](/Doc/Dashboard.png)
+
 ## What is Palace?
 
 Palace is a µServices cluster manager. 
@@ -16,7 +18,12 @@ It is designed to be a very simple, yet powerful, way to host µServices without
 - No Kubernetes
 - No Podman
 - No Virtualization
-- No Container- Only 1 zip file by µService with a very small size vs docker imageRequierment : - Palace only works with dotnet core applications (V6+) in windows server (at moment).
+- No Container
+- Only 1 zip file by µService with a very small size vs docker image
+
+Requierment : 
+
+- Palace only works with dotnet core applications (V6+) in windows server (at moment).
 - 1 Azure Bus mandatory account 
 
 ## What does Palace allow you to do ?

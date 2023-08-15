@@ -33,10 +33,8 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
             return;
         }
 
-        var microServiceInfo = _orchestrator.GetServiceList()
-								 .Where(i => i.ServiceName == message.ServiceName
-										&& i.HostName == message.HostName)
-								 .SingleOrDefault();
+		var key = $"{message.HostName}-{message.ServiceName}";
+		var microServiceInfo = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
 
 		if (microServiceInfo is not null)
 		{
@@ -47,11 +45,14 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 
 		if (message.Origin != "Recycle")
 		{
-			await _longActionService.SetActionCompleted(new Models.ActionResult
+			var actionResult = new Models.ActionResult
 			{
 				ActionId = message.ActionSourceId,
-				Success = message.State == ServiceState.TryToStop
-			});
+				Success = message.State == ServiceState.TryToStop,
+				StepName = "StopService",
+			};
+			await _longActionService.SetActionCompleted(actionResult);
+			_orchestrator.OnLongActionProgress(actionResult);
 		}
 		else if (message.Origin == "Recycle")
 		{
@@ -60,5 +61,6 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 				Message = message.State == ServiceState.TryToStop ? "Service stopped" : "not stopped"
 			});
         }
+
     }
 }
