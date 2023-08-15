@@ -4,7 +4,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Palace.Client.svg)](https://www.nuget.org/packages/Palace.Client/)
 
-![Dashboard](/Doc/dashboard.png)
+![Dashboard](/Doc/Dashboard.png)
 
 ## What is Palace?
 
