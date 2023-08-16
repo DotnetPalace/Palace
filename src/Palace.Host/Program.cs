@@ -1,13 +1,13 @@
 #define WINDOWS
-using ArianeBus;
+using System.Reflection;
 
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
+using ArianeBus;
 
 using LogRPush;
 
 using Palace.Host;
 using Palace.Host.Extensions;
+using Palace.Shared;
 
 IHost host = Host.CreateDefaultBuilder(args)
 #if WINDOWS
@@ -29,26 +29,18 @@ IHost host = Host.CreateDefaultBuilder(args)
         var section = hostingContext.Configuration.GetSection("Palace");
         var settings = new Palace.Host.Configuration.GlobalSettings();
         section.Bind(settings);
-        settings.Initialize(); 
-        services.AddSingleton(settings); 
+        settings.InitializeFolders(); 
+        services.AddSingleton(settings);
 
-        services.AddMemoryCache();
-        services.AddLogging(configure =>
+        if (!string.IsNullOrWhiteSpace(settings.SecretConfigurationReaderName)
+             && !settings.SecretConfigurationReaderName.Equals("NoReader", StringComparison.InvariantCultureIgnoreCase))
         {
-            configure.AddConsole();
-        });
-
-        var vaultUri = new Uri($"https://{settings.KeyVaultName}.vault.azure.net");
-        var credential = new ClientSecretCredential(settings.KeyVaultTenantId, settings.KeyVaultClientId, settings.KeyVaultClientSecret);
-        var client = new SecretClient(vaultUri, credential);
-
-        var apiKeySecret = client.GetSecretAsync("ApiKey").Result;
-        settings.SetApiKey(new Guid(apiKeySecret.Value.Value));
-
-        var azureBusConnectionStringSecret = client.GetSecretAsync("AzureBusConnectionString").Result;
-        settings.SetAzureBusConnectionString(azureBusConnectionStringSecret.Value.Value);
+            settings.SetParmetersFromSecrets(services, hostingContext.Configuration).Wait();
+		}
 
 		services.AddHostedService<MainWorker>();
+		services.AddMemoryCache();
+		services.AddLogging();
 
 		services.AddArianeBus(config =>
         {
