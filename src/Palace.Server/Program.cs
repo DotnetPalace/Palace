@@ -31,20 +31,13 @@ section.Bind(settings);
 
 builder.Services.AddSingleton(settings);
 
-settings.PrepareFolders(); 
+settings.PrepareFolders();
 
-var vaultUri = new Uri($"https://{settings.KeyVaultName}.vault.azure.net");
-var credential = new ClientSecretCredential(settings.KeyVaultTenantId, settings.KeyVaultClientId, settings.KeyVaultClientSecret);
-var client = new SecretClient(vaultUri, credential);
-
-var apiKeySecret = await client.GetSecretAsync("ApiKey");
-settings.SetApiKey(new Guid(apiKeySecret.Value.Value));
-
-var azureBusConnectionStringSecret = await client.GetSecretAsync("AzureBusConnectionString");
-settings.SetAzureBusConnectionString(azureBusConnectionStringSecret.Value.Value);
-
-var adminKeySecret = await client.GetSecretAsync("AdminKey");
-settings.SetAdminKey(adminKeySecret.Value.Value);
+if (!string.IsNullOrWhiteSpace(settings.SecretConfigurationReaderName)
+	 && !settings.SecretConfigurationReaderName.Equals("NoReader", StringComparison.InvariantCultureIgnoreCase))
+{
+	await settings.SetParmetersFromSecrets(builder);
+}
 
 // Add services to the container.
 builder.Services.AddRazorPages();

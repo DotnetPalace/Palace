@@ -3,7 +3,7 @@
 public class GlobalSettings : Palace.Shared.GlobalSettings
 {
     public string ApplicationName { get; set; } = "Palace";
-    public string AdminKey { get; private set; } = null!;
+    public string AdminKey { get; set; } = null!;
     public void SetAdminKey(string key) => AdminKey = key;
      
     public string RepositoryFolder { get; set; } = @".\Repository";

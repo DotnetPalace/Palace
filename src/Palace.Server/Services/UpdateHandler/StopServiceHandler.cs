@@ -61,14 +61,14 @@ public sealed class StopServiceHandler : IUpdateHandler
             }
 
             var signalReceived = context.ManualResetEvent.WaitOne(15 * 1000);
-            context.ManualResetEvent.Reset();
 
             if (signalReceived)
             {
                 break;
             }
+			context.ManualResetEvent.Reset();
 
-            loop++;
+			loop++;
             context.ServiceInfo.Log = $"Try to stop service {loop}/2";
             _orchestrator.AddOrUpdateMicroServiceInfo(context.ServiceInfo);
             if (loop > 2)

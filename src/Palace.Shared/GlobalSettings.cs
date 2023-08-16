@@ -2,17 +2,11 @@
 
 public class GlobalSettings
 {
-    public string AzureBusConnectionString { get; private set; } = null!;
-    public void SetAzureBusConnectionString(string connectionString) => AzureBusConnectionString = connectionString;
+    public string AzureBusConnectionString { get; set; } = null!;
     public string? QueuePrefix { get; set; }
+    public Guid ApiKey { get; set; }
 
-    public Guid ApiKey { get; private set; }
-    public void SetApiKey(Guid guid) => ApiKey = guid;
-
-    public string KeyVaultTenantId { get; set; } = null!;
-    public string KeyVaultClientId { get; set; } = null!;
-    public string KeyVaultName { get; set; } = null!;
-    public string KeyVaultClientSecret { get; set; } = null!;
+    public string SecretConfigurationReaderName { get; set; } = "NoSecret";
 
     public string HostHealthCheckQueueName { get; set; } = "palace.hosthealthcheck";
     public string HostStoppedQueueName { get; set; } = "palace.hoststopped";

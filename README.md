@@ -1,6 +1,6 @@
 # Palace V2
 
-µServices cluster manager
+dotnet µServices cluster manager
 
 [![NuGet](https://img.shields.io/nuget/v/Palace.Client.svg)](https://www.nuget.org/packages/Palace.Client/)
 

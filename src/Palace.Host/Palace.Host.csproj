@@ -4,8 +4,9 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.0.54.3</Version>
+	  <Version>2.1.55.3</Version>
 	  <PackageReleaseNotes>
+		  2.1.55.3 : Implementation of a plugin mechanism to read configuration parameters through a secret reader.
 		  2.0.54.3 : Allow to use 3 differents update strategies (by service, by host, chaos)
 		  2.0.53.3 : Allow to configure many service starting arguments by host
 		  2.0.52.3 : Tracking messages
@@ -30,8 +31,6 @@
 
   <ItemGroup>
     <PackageReference Include="ArianeBus" Version="1.0.10.4" />
-    <PackageReference Include="Azure.Identity" Version="1.9.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.5.0" />
     <PackageReference Include="LogRPush" Version="1.1.11" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
@@ -42,6 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Palace.Secret.KeyVaultProvider\Palace.Secret.KeyVaultProvider.csproj" />
     <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
   </ItemGroup>
 
