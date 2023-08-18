@@ -13,13 +13,16 @@ public class PalacePlugin : IPalacePlugin
 
     public Task Configure(IServiceCollection services, IConfiguration configuration)
     {
-        var section = configuration.GetSection("Palace.AzureStorage");
-        if (section.Value is null)
+        try
+        {
+            var section = configuration.GetRequiredSection("Palace.AzureStorage");
+            section.Bind(_settings);
+        }
+        catch (Exception)
         {
             Console.WriteLine("Section Palace.AzureStorage not found in configuration");
             return Task.CompletedTask;
         }
-        section.Bind(_settings);
 
         services.AddSingleton(_settings);
 
