@@ -18,6 +18,11 @@ public class SecretValueReader : ISecretValueReader
 	public void Configure(IServiceCollection services, IConfiguration configuration)
 	{
 		var section = configuration.GetSection("Palace.KeyVaultProvider");
+		if (section.Value is null)
+        {
+            Console.WriteLine("Section Palace.KeyVaultProvider not found in configuration");
+            return;
+        }
 		section.Bind(_configuration);
 
 		var vaultUri = new Uri($"https://{_configuration.KeyVaultName}.vault.azure.net");
@@ -34,8 +39,7 @@ public class SecretValueReader : ISecretValueReader
 		var client = new SecretClient(vaultUri, credential);
 		_configuration.SecretClient = client;
 
-		services.AddSingleton(_configuration);
-		services.AddTransient<ISecretValueReader, SecretValueReader>();
+		services.AddSingleton<ISecretValueReader>(this);
 	}
 
 	public async Task<string> GetSecretValue(string secretName)

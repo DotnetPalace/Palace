@@ -28,14 +28,15 @@ IHost host = Host.CreateDefaultBuilder(args)
 	{
 		var section = hostingContext.Configuration.GetSection("Palace");
 
-		var keyVaultName = section.GetValue<string>("KeyVaultName");
-		var keyVaultTenantId = section.GetValue<string>("KeyVaultTenantId");
-		var KeyVaultClientId = section.GetValue<string>("KeyVaultClientId");
-		var KeyVaultClientSecret = section.GetValue<string>("KeyVaultClientSecret");
 		var prefixQueue = section.GetValue<string>("PrefixQueue");
 
-		var vaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
-		var credential = new ClientSecretCredential(keyVaultTenantId, KeyVaultClientId, KeyVaultClientSecret);
+        var keyVaultName = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultName")!;
+        var keyVaultTenantId = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultTenantId")!;
+        var keyVaultClientId = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultClientId")!;
+        var keyVaultClientSecret = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultClientSecret")!;
+
+        var vaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
+		var credential = new ClientSecretCredential(keyVaultTenantId, keyVaultClientId, keyVaultClientSecret);
 		var client = new SecretClient(vaultUri, credential);
 
 		var apiKeySecret = client.GetSecretAsync("ApiKey").Result;
@@ -46,6 +47,10 @@ IHost host = Host.CreateDefaultBuilder(args)
 
 		var hostName = args.GetParameterValue("--hostname");
 		var serviceName = args.GetParameterValue("--servicename");
+		if (string.IsNullOrWhiteSpace(serviceName))
+		{
+			serviceName = nameof(DemoSvc1);
+		}
 
 		services.AddPalaceClient(config =>
 		{

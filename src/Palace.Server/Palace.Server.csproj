@@ -4,8 +4,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.1.15.1</Version>
+    <Version>2.2.16.1</Version>
 	  <PackageReleaseNotes>
+		  2.2.16.1 : Implementation of a plugin mechanism to upload and download packages zip files in Azure Storage.
 		  2.1.15.1 : Implementation of a plugin mechanism to read configuration parameters through a secret reader.
 		  2.0.14.1 : Allow to use 3 differents update strategies (by service, by host, chaos)
 		  2.0.13.1 : Allow to configure many service starting arguments by host
@@ -47,6 +48,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Palace.Secret.KeyVaultProvider\Palace.Secret.KeyVaultProvider.csproj" />
     <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
+    <ProjectReference Include="..\Plugins\Palace.PackageDownloader.AzureStorage.Plugin\Palace.PackageDownloader.AzureStorage.Plugin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

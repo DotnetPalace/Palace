@@ -2,8 +2,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-using Palace.Server.Services;
-
 namespace Palace.Server.Controllers;
 
 [ApiController]
@@ -12,15 +10,18 @@ public class PalaceApiController : ControllerBase
 {
     private readonly Configuration.GlobalSettings _settings;
     private readonly ILogger<PalaceApiController> _logger;
-    private readonly Orchestrator _orchestrator;
+    private readonly IPackageRepository _packageRepository;
+    private readonly IPackageDownloaderService _packageDownloaderService;
 
     public PalaceApiController(Configuration.GlobalSettings settings,
         ILogger<PalaceApiController> logger,
-        Services.Orchestrator orchestrator)
+        IPackageRepository packageRepository,
+        IPackageDownloaderService packageDownloaderService)
     {
         _settings = settings;
         _logger = logger;
-        _orchestrator = orchestrator;
+        _packageRepository = packageRepository;
+        _packageDownloaderService = packageDownloaderService;
     }
 
     [Microsoft.AspNetCore.Mvc.Route("ping")]
@@ -34,17 +35,20 @@ public class PalaceApiController : ControllerBase
     }
 
     [HttpGet]
-    [Microsoft.AspNetCore.Mvc.Route("download/{packageFileName}")]
-    public IActionResult DownloadPackage([FromHeader] string authorization, string packageFileName)
+    [Microsoft.AspNetCore.Mvc.Route("download/{key:guid}/{packageFileName}")]
+    public IActionResult DownloadPackage(Guid key, string packageFileName)
     {
         if (string.IsNullOrWhiteSpace(packageFileName))
         {
             return BadRequest();
         }
 
-        EnsureGoodAuthorization(authorization);
+        if (!_packageDownloaderService.IsKeyExists(key))
+        {
+            return NotFound($"this package does not exist");
+        }
 
-        var list = _orchestrator.GetPackageInfoList();
+        var list = _packageRepository.GetPackageInfoList();
         var serviceInfo = list.FirstOrDefault(i => i.PackageFileName.Equals(packageFileName, StringComparison.InvariantCultureIgnoreCase));
         if (serviceInfo == null)
         {

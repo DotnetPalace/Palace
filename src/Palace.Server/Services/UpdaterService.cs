@@ -17,20 +17,23 @@ public class UpdaterService : BackgroundService
 	private readonly Configuration.GlobalSettings _settings;
 	private readonly ILogger<UpdaterService> _logger;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
-	private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+    private readonly IPackageRepository _packageRepository;
+    private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 	private readonly UpdateStrategyBase _updateStrategyBase = default!;
 
 	public UpdaterService(Orchestrator orchestrator,
 		Configuration.GlobalSettings settings,
 		ILogger<UpdaterService> logger,
 		IEnumerable<UpdateStrategyBase> updateStrategies,
-		IServiceScopeFactory serviceScopeFactory)
+		IServiceScopeFactory serviceScopeFactory,
+		IPackageRepository packageRepository)
 	{
 		_orchestrator = orchestrator;
 		_settings = settings;
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
-		_orchestrator.PackageChanged += OnPackageChanged;
+        _packageRepository = packageRepository;
+        _packageRepository.PackageChanged += OnPackageChanged;
 
 		_updateStrategyBase = updateStrategies.Single(i => i.Name.Equals(_settings.DefaultUpdateStrategyName, StringComparison.InvariantCultureIgnoreCase));
 		_updateStrategyBase.Initialize(_processList);
@@ -52,6 +55,10 @@ public class UpdaterService : BackgroundService
 
 	public override Task StopAsync(CancellationToken cancellationToken)
 	{
+		if (_packageRepository is not null)
+		{
+			_packageRepository.PackageChanged -= OnPackageChanged;
+		}
 		return base.StopAsync(cancellationToken);
 	}
 

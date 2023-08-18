@@ -48,7 +48,7 @@ public static class ConfigurationExtensions
         }
     }
 
-	public static async Task SetParmetersFromSecrets(this Configuration.GlobalSettings settings, WebApplicationBuilder builder)
+	public static async Task SetParametersFromSecrets(this Configuration.GlobalSettings settings, WebApplicationBuilder builder)
 	{
         var currentFolder = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
         var secretAssemblies = System.IO.Directory.GetFiles(currentFolder, "Palace.Secret.*.dll");
