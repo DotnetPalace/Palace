@@ -1,4 +1,4 @@
-﻿namespace Palace.Server.Models;
+﻿namespace Palace.Shared;
 
 public class PackageInfo
 {
@@ -8,4 +8,5 @@ public class PackageInfo
     public string? LockedBy { get; set; }
     public string CurrentVersion { get; set; } = null!;
     public bool ChangeDetected { get; set; }
+    public string Location { get; set; } = null!;
 }

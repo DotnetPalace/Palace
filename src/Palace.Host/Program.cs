@@ -33,9 +33,9 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton(settings);
 
         if (!string.IsNullOrWhiteSpace(settings.SecretConfigurationReaderName)
-             && !settings.SecretConfigurationReaderName.Equals("NoReader", StringComparison.InvariantCultureIgnoreCase))
+             && !settings.SecretConfigurationReaderName.Equals("NoSecret", StringComparison.InvariantCultureIgnoreCase))
         {
-            settings.SetParmetersFromSecrets(services, hostingContext.Configuration).Wait();
+            settings.SetParametersFromSecrets(services, hostingContext.Configuration).Wait();
 		}
 
 		services.AddHostedService<MainWorker>();
@@ -55,7 +55,6 @@ IHost host = Host.CreateDefaultBuilder(args)
         var version = $"{typeof(Program).Assembly.GetName().Version}";
         services.AddHttpClient("PalaceServer", configure =>
         {
-            configure.DefaultRequestHeaders.Add("Authorization", $"Basic {settings.ApiKey}");
             configure.DefaultRequestHeaders.UserAgent.ParseAdd($"Palace/{version} ({System.Environment.OSVersion}; {System.Environment.MachineName}; {settings.HostName})");
         });
 

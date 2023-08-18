@@ -36,7 +36,14 @@ public sealed partial class Index : ComponentBase, IDisposable
 	[Inject]
 	ServiceSettingsRepository ServiceSettingsRepository { get; set; } = default!;
 
-	List<MicroServiceSettings> serviceSettingsList = new();
+    [Inject]
+    IPackageRepository PackageRepository { get; set; } = default!;
+
+    [Inject]
+    IPackageDownloaderService PackageDownloaderService { get; set; } = default!;
+
+
+    List<MicroServiceSettings> serviceSettingsList = new();
     List<HostInfo> hostList = new();
     List<ExtendedMicroServiceInfo> serviceInfoList = new();
     List<PackageInfo> packageInfoList = new();
@@ -47,7 +54,7 @@ public sealed partial class Index : ComponentBase, IDisposable
         {
             Orchestrator.HostChanged += Orchestrator_OnHostChanged;
             Orchestrator.ServiceChanged += Orchestrator_OnServiceChanged;
-            Orchestrator.PackageChanged += Orchestrator_OnPackageChanged;
+            PackageRepository.PackageChanged += Orchestrator_OnPackageChanged;
         }
     }
 
@@ -61,12 +68,12 @@ public sealed partial class Index : ComponentBase, IDisposable
         serviceSettingsList = (await ServiceSettingsRepository.GetAll()).ToList();
 		hostList = Orchestrator.GetHostList().ToList();
 		serviceInfoList = Orchestrator.GetServiceList().ToList();
-		packageInfoList = Orchestrator.GetPackageInfoList().ToList();
+		packageInfoList = PackageRepository.GetPackageInfoList().ToList();
 	}
 
 	void Orchestrator_OnPackageChanged(PackageInfo obj)
     {
-        packageInfoList = Orchestrator.GetPackageInfoList().ToList();
+        packageInfoList = PackageRepository.GetPackageInfoList().ToList();
         InvokeAsync(StateHasChanged);
     }
 
@@ -87,7 +94,8 @@ public sealed partial class Index : ComponentBase, IDisposable
     {
         await Task.Yield();
         var currentUri = new Uri(NavigationManager.Uri);
-        var downloadUrl = $"{currentUri.Scheme}://{currentUri.Host}:{currentUri.Port}/api/palace/download/{serviceSettings.PackageFileName}";
+        var downloadUrl = await PackageDownloaderService.GenerateUrl(serviceSettings.PackageFileName);
+            // $"{currentUri.Scheme}://{currentUri.Host}:{currentUri.Port}/api/palace/download/{serviceSettings.PackageFileName}";
         var actionId = Guid.NewGuid();
 		var arguments = await ServiceSettingsRepository.GetArgumentsByHostForService(host.HostName, serviceSettings.Id);
 		var result = new Models.LongAction
@@ -258,7 +266,7 @@ public sealed partial class Index : ComponentBase, IDisposable
         {
 			Orchestrator.HostChanged -= Orchestrator_OnHostChanged;
 			Orchestrator.ServiceChanged -= Orchestrator_OnServiceChanged;
-			Orchestrator.PackageChanged -= Orchestrator_OnPackageChanged;
+            PackageRepository.PackageChanged -= Orchestrator_OnPackageChanged;
 		}
 	}
 }

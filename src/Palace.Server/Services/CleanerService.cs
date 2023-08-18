@@ -2,12 +2,12 @@
 
 public class CleanerService : BackgroundService
 {
-	private readonly Orchestrator _orchestrator;
+    private readonly IPackageRepository _packageRepository;
 
-	public CleanerService(Orchestrator orchestrator)
+    public CleanerService(IPackageRepository packageRepository)
     {
-		_orchestrator = orchestrator;
-	}
+        _packageRepository = packageRepository;
+    }
 
     public override Task StartAsync(CancellationToken cancellationToken)
 	{
@@ -25,10 +25,10 @@ public class CleanerService : BackgroundService
 
 	private void CleanBackups()
 	{
-		var packages = _orchestrator.GetPackageInfoList();
+		var packages = _packageRepository.GetPackageInfoList();
 		foreach (var package in packages)
 		{
-			var backupList = _orchestrator.GetBackupFileList(package.PackageFileName);
+			var backupList = _packageRepository.GetBackupFileList(package.PackageFileName);
 			if (backupList.Count > 10)
 			{
 				var toDelete = backupList.OrderBy(i => i.CreationTime).Take(backupList.Count - 10);

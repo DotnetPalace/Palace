@@ -17,8 +17,13 @@ var configuration = configurationBuilder.Build();
 var deployConfiguration = new DeployConfiguration();
 configuration.GetSection("Palace").Bind(deployConfiguration);
 
-var vaultUri = new Uri($"https://{deployConfiguration.KeyVaultName}.vault.azure.net");
-var credential = new ClientSecretCredential(deployConfiguration.KeyVaultTenantId, deployConfiguration.KeyVaultClientId, deployConfiguration.KeyVaultClientSecret);
+var keyvaultName = configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultName")!;
+var keyVaultTenantId = configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultTenantId")!;
+var keyVaultClientId = configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultClientId")!;
+var keyVaultClientSecret = configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultClientSecret")!;
+
+var vaultUri = new Uri($"https://{keyvaultName}.vault.azure.net");
+var credential = new ClientSecretCredential(keyVaultTenantId, keyVaultClientId, keyVaultClientSecret);
 var client = new SecretClient(vaultUri, credential);
 
 var apiKeySecret = client.GetSecretAsync("ApiKey").Result;

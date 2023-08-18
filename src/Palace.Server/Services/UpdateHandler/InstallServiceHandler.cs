@@ -8,6 +8,7 @@ using ArianeBus;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 using Palace.Server.Models;
+using Palace.Shared;
 
 namespace Palace.Server.Services.UpdateHandler;
 
@@ -17,18 +18,20 @@ public class InstallServiceHandler : IUpdateHandler
     private readonly IServiceBus _bus;
     private readonly Configuration.GlobalSettings _settings;
     private readonly Orchestrator _orchestrator;
-
+    private readonly IPackageDownloaderService _packageDownloaderService;
     private MicroserviceUpdateContext? _context = null;
 
     public InstallServiceHandler(ILogger<InstallServiceHandler> logger,
         ArianeBus.IServiceBus bus,
         Palace.Server.Configuration.GlobalSettings settings,
-        Orchestrator orchestrator)
+        Orchestrator orchestrator,
+        IPackageDownloaderService packageDownloaderService)
     {
         _logger = logger;
         _bus = bus;
         _settings = settings;
         _orchestrator = orchestrator;
+        _packageDownloaderService = packageDownloaderService;
     }
 
     public string Name => nameof(InstallServiceHandler);
@@ -46,7 +49,8 @@ public class InstallServiceHandler : IUpdateHandler
 
         // 4 - Envoyer une demande d'installation
         _logger.LogInformation("Send install service {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
-        var downloadUrl = $"{_settings.CurrentUrl}/api/palace/download/{context.ServiceSettings.PackageFileName}";
+        var downloadUrl = await _packageDownloaderService.GenerateUrl(context.ServiceSettings.PackageFileName);
+        // var downloadUrl = $"{_settings.CurrentUrl}/api/palace/download/{context.ServiceSettings.PackageFileName}";
         await _bus.PublishTopic(_settings.InstallServiceTopicName, new Palace.Shared.Messages.InstallService
         {
             ActionId = context.Id,

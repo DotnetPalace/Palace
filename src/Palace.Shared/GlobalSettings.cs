@@ -7,6 +7,7 @@ public class GlobalSettings
     public Guid ApiKey { get; set; }
 
     public string SecretConfigurationReaderName { get; set; } = "NoSecret";
+    public string PackageDownloaderServiceName { get; set; } = "Local";
 
     public string HostHealthCheckQueueName { get; set; } = "palace.hosthealthcheck";
     public string HostStoppedQueueName { get; set; } = "palace.hoststopped";

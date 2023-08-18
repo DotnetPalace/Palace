@@ -1,22 +1,24 @@
-﻿namespace Palace.Server.Pages;
+﻿using Palace.Server.Services;
+
+namespace Palace.Server.Pages;
 
 public partial class PackageList
 {
     [Inject]
     ILogger<PackageList> Logger { get; set; } = default!;
-    [Inject]
-    Services.Orchestrator Orchestrator { get; set; } = default!;
     [Inject] 
     Configuration.GlobalSettings GloblaSettings { get; set; } = default!;
     [Inject]
     Services.DialogService DialogService { get; set; } = default!;
+    [Inject]
+    IPackageRepository PackageRepository { get; set; } = default!;
 
     string? errorReport = null;
-    List<Models.PackageInfo> availablePackageList = new();
+    List<PackageInfo> availablePackageList = new();
 
     protected override void OnInitialized()
     {
-        Orchestrator.PackageChanged += async (package) =>
+        PackageRepository.PackageChanged += async (package) =>
         {
             await InvokeAsync(() =>
             {
@@ -29,7 +31,7 @@ public partial class PackageList
 
     void UpdateLists()
     {
-        availablePackageList = Orchestrator.GetPackageInfoList().ToList();
+        availablePackageList = PackageRepository.GetPackageInfoList().ToList();
     }
 
 
@@ -40,7 +42,7 @@ public partial class PackageList
         {
             return;
         }
-        var result = await Orchestrator.RemovePackage(packageFileName);
+        var result = await PackageRepository.RemovePackage(packageFileName);
         if (result != null)
         {
             errorReport = result;

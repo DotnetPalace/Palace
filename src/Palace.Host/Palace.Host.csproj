@@ -4,8 +4,9 @@
     <TargetFramework>net7.0-Windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <Version>2.1.55.3</Version>
+	  <Version>2.2.56.3</Version>
 	  <PackageReleaseNotes>
+		  2.2.56.3 : Implementation of a plugin mechanism to upload and download packages zip files in Azure Storage.
 		  2.1.55.3 : Implementation of a plugin mechanism to read configuration parameters through a secret reader.
 		  2.0.54.3 : Allow to use 3 differents update strategies (by service, by host, chaos)
 		  2.0.53.3 : Allow to configure many service starting arguments by host

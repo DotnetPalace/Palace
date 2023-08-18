@@ -11,6 +11,8 @@ using Palace.Server.Services;
 
 using FluentValidation;
 using LogRWebMonitor;
+using Palace.Server;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Palace.Tests")]
 
@@ -34,10 +36,12 @@ builder.Services.AddSingleton(settings);
 settings.PrepareFolders();
 
 if (!string.IsNullOrWhiteSpace(settings.SecretConfigurationReaderName)
-	 && !settings.SecretConfigurationReaderName.Equals("NoReader", StringComparison.InvariantCultureIgnoreCase))
+	 && !settings.SecretConfigurationReaderName.Equals("NoSecret", StringComparison.InvariantCultureIgnoreCase))
 {
-	await settings.SetParmetersFromSecrets(builder);
+	await settings.SetParametersFromSecrets(builder);
 }
+
+await Palace.Server.PluginLoader.LoadPlugins(builder);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -55,6 +59,9 @@ builder.Services.AddHostedService<CleanerService>();
 builder.Services.AddHostedService<HealthCheckerService>();
 builder.Services.AddSingleton<LongActionService>();
 builder.Services.AddTransient<ServiceSettingsRepository>();
+builder.Services.AddSingleton<IPackageRepository, LocalStoragePackageRepository>();
+
+builder.Services.TryAddSingleton<Palace.Shared.IPackageDownloaderService, Palace.Server.Services.DefaultPackageDownloaderService>();
 
 builder.Services.AddTransient<Palace.Server.Services.UpdateHandler.IUpdateHandler, 
     Palace.Server.Services.UpdateHandler.SaveServiceStateHandler>();

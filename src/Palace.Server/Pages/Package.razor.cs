@@ -11,22 +11,22 @@ public partial class Package
     ILogger<Package> Logger { get; set; } = default!;
 
     [Inject]
-    Orchestrator Orchestrator { get; set; } = default!;
-
-    [Inject]
     NavigationManager NavigationManager { get; set; } = default!;
 
     [Inject]
     Services.DialogService DialogService { get; set; } = default!;
 
-    Models.PackageInfo package = new();
+    [Inject]
+    IPackageRepository PackageRepository { get; set; } = default!;
+
+    PackageInfo package = new();
     List<FileInfo> backupFileInfoList = new();
     string? errorReport { get; set; }
 
 
     protected override void OnInitialized()
     {
-        var packageList = Orchestrator.GetPackageInfoList();
+        var packageList = PackageRepository.GetPackageInfoList();
         var existing = packageList.FirstOrDefault(i => i.PackageFileName.Equals(PackageFileName, StringComparison.InvariantCultureIgnoreCase));
         if (existing is null)
         {
@@ -34,7 +34,7 @@ public partial class Package
             return;
         }
         package = existing;
-        backupFileInfoList = Orchestrator.GetBackupFileList(PackageFileName);
+        backupFileInfoList = PackageRepository.GetBackupFileList(PackageFileName);
         base.OnInitialized();
     }
 
@@ -46,7 +46,7 @@ public partial class Package
             return;
         }
 
-		var result = Orchestrator.RollbackPackage(package!, fileInfo);
+		var result = PackageRepository.RollbackPackage(package!, fileInfo);
         if (result != null)
         {
             errorReport = result;

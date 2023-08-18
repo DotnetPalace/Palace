@@ -165,29 +165,31 @@ public class InstallService : ArianeBus.MessageReaderBase<Shared.Messages.Instal
             return result;
         }
 
-        if (!response.Content.Headers.Contains("content-disposition"))
-        {
-            _logger.LogWarning("response fail for {0} header content-disposition not found", downloadUrl);
-            result.Success = false;
-            result.FailReason = $"response fail for {downloadUrl} header content-disposition not found";
-			return result;
-        }
+   //     if (!response.Content.Headers.Contains("content-disposition"))
+   //     {
+   //         _logger.LogWarning("response fail for {0} header content-disposition not found", downloadUrl);
+   //         result.Success = false;
+   //         result.FailReason = $"response fail for {downloadUrl} header content-disposition not found";
+			//return result;
+   //     }
 
-        var contentDisposition = response.Content.Headers.GetValues("content-disposition").FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(contentDisposition))
-        {
-            _logger.LogWarning("response fail for {0} header content-disposition empty", downloadUrl);
-            result.Success = false;
-            result.FailReason = $"response fail for {downloadUrl} header content-disposition empty";
-			return result;
-        }
+   //     var contentDisposition = response.Content.Headers.GetValues("content-disposition").FirstOrDefault();
+   //     if (string.IsNullOrWhiteSpace(contentDisposition))
+   //     {
+   //         _logger.LogWarning("response fail for {0} header content-disposition empty", downloadUrl);
+   //         result.Success = false;
+   //         result.FailReason = $"response fail for {downloadUrl} header content-disposition empty";
+			//return result;
+   //     }
 
         if (!System.IO.Directory.Exists(_settings.DownloadFolder))
         {
             System.IO.Directory.CreateDirectory(_settings.DownloadFolder);
         }
 
-        result.ZipFileName = System.IO.Path.Combine(_settings.DownloadFolder, contentDisposition.Split(';')[1].Split('=')[1]);
+        var zipFileName = System.IO.Path.GetFileName(downloadUrl);
+
+        result.ZipFileName = System.IO.Path.Combine(_settings.DownloadFolder, zipFileName);
 
         if (File.Exists(result.ZipFileName))
         {

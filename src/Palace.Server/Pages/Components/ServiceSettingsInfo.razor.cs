@@ -12,7 +12,7 @@ public partial class ServiceSettingsInfo
     public Palace.Shared.MicroServiceSettings ServiceSettings { get; set; } = default !;
 
     [Parameter]
-    public Models.PackageInfo PackageInfo { get; set; } = default !;
+    public PackageInfo PackageInfo { get; set; } = default !;
 
     [Parameter]
     public EventCallback OnSettingSaved { get; set; } = default!;

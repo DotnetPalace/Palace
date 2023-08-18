@@ -42,7 +42,7 @@ public static class GlobalExtensions
 		}
     }
 
-    public static async Task SetParmetersFromSecrets(this Configuration.GlobalSettings settings, IServiceCollection services, IConfiguration configuration)
+    public static async Task SetParametersFromSecrets(this Configuration.GlobalSettings settings, IServiceCollection services, IConfiguration configuration)
     {
 		var currentFolder = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
 		var secretAssemblies = System.IO.Directory.GetFiles(currentFolder, "Palace.Secret.*.dll");

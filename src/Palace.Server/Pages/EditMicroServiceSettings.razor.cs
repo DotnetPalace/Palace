@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using Palace.Server.Pages.Shared;
+using Palace.Server.Services;
 
 namespace Palace.Server.Pages;
 
@@ -18,6 +19,8 @@ public partial class EditMicroServiceSettings : ComponentBase
     FluentValidation.IValidator<Palace.Shared.MicroServiceSettings> Validator { get; set; } = default!;
     [Inject]
     Services.Orchestrator Orchestrator { get; set; } = default!;
+    [Inject]
+    IPackageRepository PackageRepository { get; set; } = default!;
 
 
     [Parameter]
@@ -43,7 +46,7 @@ public partial class EditMicroServiceSettings : ComponentBase
             serviceSettings = data;
         }
 
-        var packageList = Orchestrator.GetPackageInfoList();
+        var packageList = PackageRepository.GetPackageInfoList();
         packageFileNameList = packageList.Select(i => i.PackageFileName).ToList();
 
         if (serviceSettings.Id != Guid.Empty)
