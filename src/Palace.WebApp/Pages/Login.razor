@@ -1,0 +1,15 @@
+﻿
+<h3>Login</h3>
+
+<EditForm Model="loginForm" OnValidSubmit="Validate">
+    <DataAnnotationsValidator/>
+    <CustomValidator @ref="loginValidator"></CustomValidator>
+    <div class="mb-3">
+        <label class="form-label">Key :</label>
+        <InputText type="text" @bind-Value="loginForm.Key" class="form-control" />
+        <small>
+            <ValidationMessage For="() => loginForm.Key"/>
+        </small>
+    </div>
+    <button type="submit" class="btn btn-primary">Connect</button>
+</EditForm>

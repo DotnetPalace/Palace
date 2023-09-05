@@ -5,9 +5,7 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Palace.Shared;
-
-using static System.Collections.Specialized.BitVector32;
+using Palace.Server.Services;
 
 namespace Palace.Secret.KeyVaultProvider;
 
@@ -23,14 +21,14 @@ public class SecretValueReader : ISecretValueReader
 		{
 			var section = configuration.GetRequiredSection("Palace.KeyVaultProvider");
 			section.Bind(_configuration);
-        }
+		}
 		catch (Exception)
 		{
-            Console.WriteLine("Section Palace.KeyVaultProvider not found in configuration");
-            return;
-        }
+			Console.WriteLine("Section Palace.KeyVaultProvider not found in configuration");
+			return;
+		}
 
-        var vaultUri = new Uri($"https://{_configuration.KeyVaultName}.vault.azure.net");
+		var vaultUri = new Uri($"https://{_configuration.KeyVaultName}.vault.azure.net");
 		TokenCredential? credential = null;
 		if ("Secret".Equals(_configuration.ClientMethod, StringComparison.InvariantCultureIgnoreCase))
 		{

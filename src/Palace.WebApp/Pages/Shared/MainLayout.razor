@@ -1,0 +1,49 @@
+﻿@inherits LayoutComponentBase
+@inject ILoginService LoginService
+
+<PageTitle>Palace Server</PageTitle>
+
+<div class="page">
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+        </Authorized>
+    </AuthorizeView>
+    <main>
+        <div class="content">
+            <AuthorizeView>
+                <Authorized>
+                    <CascadingValue Value="this">
+                        @Body
+                    </CascadingValue>
+                </Authorized>
+                <NotAuthorized>
+                    <DynamicComponent Type="@LoginService.LoginComponentType"/>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </main>
+</div>
+
+@if (DialogService.DialogType is not null)
+{
+    <DynamicComponent Type="DialogService.DialogType" Parameters="DialogService.Parameters" />
+}
+
+<div class="toast-container position-absolute bottom-0 end-0 p-3">
+    @foreach (var stackedToast in stackedToastList)
+    {
+		if (stackedToast.TypeName == "longaction")
+		{
+			<CascadingValue Value="this">
+				<LongActionInfo LongAction="@stackedToast.LongAction" />
+			</CascadingValue>
+		}
+		else
+		{
+			<StackedToast StackedToastInfo="@stackedToast" Close="@((t) => RemoveToast(stackedToast))" />
+		}
+	}
+</div>

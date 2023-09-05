@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Palace.Host\Palace.Host.csproj" />
-    <ProjectReference Include="..\Palace.Server\Palace.Server.csproj" />
+    <ProjectReference Include="..\Palace.WebApp\Palace.WebApp.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

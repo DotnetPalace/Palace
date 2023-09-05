@@ -8,7 +8,7 @@ using Palace.Server.Configuration;
 
 namespace Palace.Tests
 {
-	internal class PalaceServerApplication : WebApplicationFactory<global::Palace.Server.App>
+	internal class PalaceServerApplication : WebApplicationFactory<global::Palace.WebApp.App>
     {
 		private readonly GlobalSettings _settings;
 

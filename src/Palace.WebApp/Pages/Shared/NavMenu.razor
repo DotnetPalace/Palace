@@ -1,0 +1,46 @@
+﻿
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Palace Server</a>
+        <button title="Navigation menu" class="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link p-1" href="/" Match="NavLinkMatch.All">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> Dashboard
+            </NavLink>
+            <NavLink class="nav-link p-1" href="/services" Match="NavLinkMatch.All">
+                <span class="oi oi-audio" aria-hidden="true"></span> Services
+            </NavLink>
+            <NavLink class="nav-link p-1" href="Logs" Match="NavLinkMatch.All">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Logs
+            </NavLink>
+            <NavLink class="nav-link p-1" href="Packages" Match="NavLinkMatch.All">
+                <span class="oi oi-folder" aria-hidden="true"></span> Packages
+            </NavLink>
+            <AuthorizeView Roles="admin">
+                <Authorized>
+                    @if (LoginService.MenuComponentType is not null)
+                    {
+                        <DynamicComponent Type="LoginService.MenuComponentType"/>
+                    }
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </nav>
+    <div class="text-center m-3">
+        <button class="btn btn-danger" @onclick="GlobalReset">Reset</button>
+    </div>
+    <div class="text-center m-3">
+        <button class="btn btn-warning" @onclick="SignOut">Signout</button>
+    </div>
+    <div class="text-center">
+        <small class="text-white">Version : @version</small>
+    </div>
+</div>

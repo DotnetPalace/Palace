@@ -10,10 +10,10 @@ namespace PalaceDeployCli
 	{
 		public string ServiceName { get; set; } = "Palace";
 		public string LastUpdatePalaceHostUrl { get; set; } = "https://github.com/DotnetPalace/Palace/releases/download/Latest/palacehost.zip";
-		public string LastUpdatePalaceServerUrl { get; set; } = "https://github.com/DotnetPalace/Palace/releases/download/Latest/palaceserver.zip";
+		public string LastUpdatePalaceServerUrl { get; set; } = "https://github.com/DotnetPalace/Palace/releases/download/Latest/palacewebapp.zip";
 		public string DownloadDirectory { get; set; } = @".\Download";
-		public string PalaceHostDeployDirectory { get; set; }
-		public string PalaceServerDeployDirectory { get; set; }
-		public string PalaceServerWorkerProcessName { get; set; }
-	}
+		public string PalaceHostDeployDirectory { get; set; } = null!;
+		public string PalaceServerDeployDirectory { get; set; } = null!;
+        public string PalaceServerWorkerProcessName { get; set; } = null!;
+    }
 }
