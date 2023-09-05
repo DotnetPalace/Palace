@@ -64,7 +64,7 @@ public class ServiceSettingsRepository
 		return (true, serviceSettings.Id, new List<ValidationFailure>());
 	}
 
-	internal async Task<ArgumentsByHost?> GetArgumentsByHostForService(string hostName, Guid serviceSettingsId)
+	public async Task<ArgumentsByHost?> GetArgumentsByHostForService(string hostName, Guid serviceSettingsId)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
 		var query = from abh in db.ArgumentsByHosts
@@ -76,28 +76,28 @@ public class ServiceSettingsRepository
 		return result;
 	}
 
-	internal async Task<List<Palace.Shared.ArgumentsByHost>> GetArgumentsByService(Guid serviceSettingsId)
+	public async Task<List<Palace.Shared.ArgumentsByHost>> GetArgumentsByService(Guid serviceSettingsId)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
 		var result = await db.ArgumentsByHosts.Where(i => i.ServiceSettingId == serviceSettingsId).ToListAsync();
 		return result;
 	}
 
-	internal async Task<MicroServiceSettings?> GetByServiceName(string serviceName)
+	public async Task<MicroServiceSettings?> GetByServiceName(string serviceName)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
 		var result = await db.MicroServiceSettings.FirstOrDefaultAsync(i => i.ServiceName == serviceName);
 		return result;
 	}
 
-	internal async Task<IEnumerable<MicroServiceSettings>> GetListByPackageFileName(string packageFileName)
+	public async Task<IEnumerable<MicroServiceSettings>> GetListByPackageFileName(string packageFileName)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
 		var result = await db.MicroServiceSettings.Where(i => i.PackageFileName == packageFileName).ToListAsync();
 		return result;
 	}
 
-	internal async Task<int> SaveArgumentsByHost(List<ArgumentsByHost> argumentsByHosts)
+	public async Task<int> SaveArgumentsByHost(List<ArgumentsByHost> argumentsByHosts)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
 		foreach (var item in argumentsByHosts)

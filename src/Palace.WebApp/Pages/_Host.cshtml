@@ -1,0 +1,98 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Components.Web
+@using System.Security.Claims;
+@using Palace.WebApp;
+@namespace Palace.Server.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject ILoginService LoginService
+@{
+    async Task TrySignIn()
+    {
+        if (User.Identity!.IsAuthenticated)
+        {
+            return;
+        }
+        var tokenParam = $"{Request.Query["Token"]}";
+        if (string.IsNullOrWhiteSpace(tokenParam))
+        {
+            return;
+        }
+
+        Guid.TryParse(tokenParam, out Guid token);
+        if (token != Guid.Empty && LoginService.Contains(token))
+        {
+            LoginService.Remove(token);
+            var claims = new List<Claim>();
+            var roleList = LoginService.GetRoleList(token);
+            foreach (var role in roleList)
+			{
+				claims.Add(new Claim(ClaimTypes.Role, role));
+			}
+
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var userPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            var authProperties = new AuthenticationProperties
+                    {
+                        AllowRefresh = true,
+                        IsPersistent = true,
+                    };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                userPrincipal,
+                authProperties);
+        }
+    }
+
+    async Task TrySignOut()
+    {
+        if (User.Identity == null
+            || !User.Identity.IsAuthenticated)
+        {
+            return;
+        }
+        var logoffParam = $"{Request.Query["logout"]}";
+        if (string.IsNullOrWhiteSpace(logoffParam))
+        {
+            return;
+        }
+
+        await HttpContext.SignOutAsync();
+    }
+
+    await TrySignIn();
+    await TrySignOut();
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link href="Palace.WebApp.styles.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body>
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+﻿@page "/user/add"
+@page "/user/edit/{userid:guid}"
+
+<h3>EditUser</h3>
+
+@code {
+	[Parameter]
+	public Guid? UserId { get; set; }
+}

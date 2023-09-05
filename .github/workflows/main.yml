@@ -52,14 +52,14 @@ jobs:
 
     - name: Build Palace Server
       run: |
-        cd ${{github.workspace}}\src\palace.server
+        cd ${{github.workspace}}\src\palace.webapp
         dotnet publish -c ${{env.DOTNET_CONFIGURATION}}
 
-    - name: Zip Palace Server
+    - name: Zip Palace WebApp
       run: |
-        cd ${{github.workspace}}\src\palace.server\bin\${{env.DOTNET_CONFIGURATION}}\net7.0\publish
+        cd ${{github.workspace}}\src\palace.webapp\bin\${{env.DOTNET_CONFIGURATION}}\net7.0\publish
         del appsettings.*.json
-        7z.exe a -r -tzip ${{github.workspace}}\palaceserver.zip * 
+        7z.exe a -r -tzip ${{github.workspace}}\palacewebapp.zip * 
 
     - name: Build Palace Deploy Cli
       run: dotnet publish src\PalaceDeployCli\PalaceDeployCli.csproj -c ${{env.DOTNET_CONFIGURATION}} --no-restore -v d
@@ -97,13 +97,13 @@ jobs:
         asset_name: palacehost.zip
         asset_content_type: application/zip
 
-    - name: Upload Release PalaceServer
+    - name: Upload Release PalaceWeApp
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}\palaceserver.zip
+        asset_path: ${{github.workspace}}\palacewebapp.zip
         asset_name: palaceserver.zip
         asset_content_type: application/zip
 

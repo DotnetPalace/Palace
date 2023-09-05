@@ -6,13 +6,17 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Builder;
+
+using Palace.Server.Services;
+
 namespace Palace.Server.Extensions;
 
 public static class ConfigurationExtensions
 {
     public static void PrepareFolders(this Configuration.GlobalSettings settings)
     {
-        var directoryName = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
+        var directoryName = System.IO.Path.GetDirectoryName(typeof(ConfigurationExtensions).Assembly.Location)!;
         if (settings.RepositoryFolder.StartsWith(@".\"))
         {
             settings.RepositoryFolder = System.IO.Path.Combine(directoryName, settings.RepositoryFolder.Replace(@".\", ""));
@@ -29,8 +33,12 @@ public static class ConfigurationExtensions
         {
             settings.TempFolder = System.IO.Path.Combine(directoryName, settings.TempFolder.Replace(@".\", ""));
         }
+		if (settings.DataFolder.StartsWith(@".\"))
+		{
+			settings.DataFolder = System.IO.Path.Combine(directoryName, settings.DataFolder.Replace(@".\", ""));
+		}
 
-        if (!System.IO.Directory.Exists(settings.RepositoryFolder))
+		if (!System.IO.Directory.Exists(settings.RepositoryFolder))
         {
             System.IO.Directory.CreateDirectory(settings.RepositoryFolder);
         }
@@ -46,11 +54,15 @@ public static class ConfigurationExtensions
         {
             System.IO.Directory.CreateDirectory(settings.TempFolder);
         }
-    }
+		if (!System.IO.Directory.Exists(settings.DataFolder))
+		{
+			System.IO.Directory.CreateDirectory(settings.DataFolder);
+		}
+	}
 
 	public static async Task SetParametersFromSecrets(this Configuration.GlobalSettings settings, WebApplicationBuilder builder)
 	{
-        var currentFolder = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
+        var currentFolder = System.IO.Path.GetDirectoryName(typeof(ConfigurationExtensions).Assembly.Location)!;
         var secretAssemblies = System.IO.Directory.GetFiles(currentFolder, "Palace.Secret.*.dll");
         foreach (var secretAssemblyFile in secretAssemblies)
         {

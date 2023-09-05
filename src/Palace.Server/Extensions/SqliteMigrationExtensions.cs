@@ -8,6 +8,6 @@ public static class SqliteMigrationExtensions
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<Services.PalaceDbContext>();
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(); 
     }
 }

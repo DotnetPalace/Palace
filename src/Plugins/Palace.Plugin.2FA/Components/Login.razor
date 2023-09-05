@@ -1,0 +1,28 @@
+﻿<h3>Login</h3>
+
+<EditForm Model="loginForm" OnValidSubmit="Validate">
+	<DataAnnotationsValidator />
+	<CustomValidator @ref="customValidator"></CustomValidator>
+	@if (loginForm.Step == "email")
+	{
+		<p>Saisissez votre adresse email pour recevoir un code d'accès</p>
+		<div class="loginform m-auto">
+			<InputText @bind-Value="@loginForm.Email" auto-complete="true" placeholder="Indiquez votre adresse email" class="form-control width-input" />
+			<small>
+				<ValidationMessage For="() => loginForm.Email" />
+			</small>
+			<button type="submit" class="btn btn-primary">@submitMessage</button>
+		</div>
+	}
+	else if (loginForm.Step == "digicode")
+	{
+		<p>Saisissez le code d'accès reçu par email</p>
+		<div class="loginform m-auto">
+			<InputText @bind-Value="loginForm.Digicode" class="form-control width-input" />
+			<small>
+				<ValidationMessage For="() => loginForm.Digicode" />
+			</small>
+			<button type="submit" class="btn btn-primary">@submitMessage</button>
+		</div>
+	}
+</EditForm>

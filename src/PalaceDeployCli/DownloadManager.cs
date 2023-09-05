@@ -22,11 +22,11 @@ namespace PalaceDeployCli
         protected ILogger Logger { get; }
         protected IHttpClientFactory HttpClientFactory { get; }
 
-        public async Task<string> DownloadPackage(string packageUrl)
+        public async Task<string?> DownloadPackage(string packageUrl)
         {
             var httpClient = HttpClientFactory.CreateClient("Downloader");
 
-            HttpResponseMessage response = null;
+            HttpResponseMessage? response = null;
             try
             {
                 response = await httpClient.GetAsync(packageUrl);

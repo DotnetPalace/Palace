@@ -34,7 +34,7 @@ section.Bind(settings);
 
 if (settings.DownloadDirectory.StartsWith(@".\"))
 {
-	var currentDirectory = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location);
+	var currentDirectory = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location)!;
 	var downloadDirectory = System.IO.Path.Combine(currentDirectory, settings.DownloadDirectory);
 	if (!System.IO.Directory.Exists(downloadDirectory))
 	{
@@ -71,7 +71,7 @@ AnsiConsole.WriteLine();
 var table = new Table();
 table.AddColumn("Action").AddColumn("Description");
 table.AddRow("1", "Install latest version of palace host");
-table.AddRow("2", "Install latest version of palace server");
+table.AddRow("2", "Install latest version of palace webapp");
 table.AddRow("3", "Quit");
 
 AnsiConsole.Write(table);
@@ -85,7 +85,7 @@ if (selectedAction == 3)
 
 var dlManager = sp.GetRequiredService<DownloadManager>();
 var deployService = sp.GetRequiredService<DeployService>();
-string zipFileName = null;
+string? zipFileName = null;
 
 switch (selectedAction)
 {

@@ -1,12 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-using ArianeBus;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-
-using Palace.Server.Models;
-using Palace.Server.Services.UpdateHandler;
+﻿using Palace.Server.Models;
 using Palace.Server.Services.UpdateStrategies;
 
 namespace Palace.Server.Services;
@@ -17,8 +9,8 @@ public class UpdaterService : BackgroundService
 	private readonly Configuration.GlobalSettings _settings;
 	private readonly ILogger<UpdaterService> _logger;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IPackageRepository _packageRepository;
-    private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+	private readonly IPackageRepository _packageRepository;
+	private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 	private readonly UpdateStrategyBase _updateStrategyBase = default!;
 
 	public UpdaterService(Orchestrator orchestrator,
@@ -32,8 +24,8 @@ public class UpdaterService : BackgroundService
 		_settings = settings;
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
-        _packageRepository = packageRepository;
-        _packageRepository.PackageChanged += OnPackageChanged;
+		_packageRepository = packageRepository;
+		_packageRepository.PackageChanged += OnPackageChanged;
 
 		_updateStrategyBase = updateStrategies.Single(i => i.Name.Equals(_settings.DefaultUpdateStrategyName, StringComparison.InvariantCultureIgnoreCase));
 		_updateStrategyBase.Initialize(_processList);
@@ -66,7 +58,7 @@ public class UpdaterService : BackgroundService
 	{
 		using var scope = _serviceScopeFactory.CreateScope();
 		var serviceSettingRepository = scope.ServiceProvider.GetRequiredService<ServiceSettingsRepository>();
-		
+
 		var settingsList = await serviceSettingRepository.GetListByPackageFileName(package.PackageFileName);
 
 		if (settingsList.Count() == 0)
