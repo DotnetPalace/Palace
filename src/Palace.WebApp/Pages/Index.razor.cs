@@ -1,5 +1,9 @@
+using Microsoft.Extensions.Hosting;
+
 using Palace.Server.Models;
 using Palace.Server.Services.UpdateHandler;
+using Palace.WebApp.Services;
+
 namespace Palace.WebApp.Pages;
 
 public sealed partial class Index : ComponentBase, IDisposable
@@ -30,6 +34,9 @@ public sealed partial class Index : ComponentBase, IDisposable
 
 	[Inject]
 	IPackageDownloaderService PackageDownloaderService { get; set; } = default!;
+
+	[Inject]
+	DialogService DialogService { get; set; } = default!;
 
 
 	List<MicroServiceSettings> serviceSettingsList = new();
@@ -184,6 +191,45 @@ public sealed partial class Index : ComponentBase, IDisposable
 		};
 		return result;
 	}
+
+	async Task<Palace.Server.Models.LongAction?> CreateKillServiceAction(string hostName, Palace.Shared.MicroServiceSettings serviceSettings)
+	{
+		await Task.Yield();
+		var serviceInfo = serviceInfoList.FirstOrDefault(s => s.ServiceName == serviceSettings.ServiceName);
+		if (serviceInfo is null
+			|| serviceInfo.ProcessId == 0)
+		{
+			return null;
+		}
+
+		var confirm = await DialogService.Confirm("Kill the service", "Do you confirm to kill the service?");
+		if (!confirm)
+		{
+			return null;
+		}
+
+		var actionId = Guid.NewGuid();
+		var result = new Palace.Server.Models.LongAction
+		{
+			Id = actionId,
+			Name = "KillService",
+			Title = "Kill Service",
+			Description = $"Kill the service {serviceSettings.ServiceName} in host {hostName}",
+			Action = () =>
+			{
+				var publish = Bus.PublishTopic(Settings.KillServiceTopicName, new Palace.Shared.Messages.KillService
+				{
+					ActionId = actionId,
+					HostName = hostName,
+					ServiceSettings = serviceSettings,
+					ProcessId = serviceInfo.ProcessId
+				});
+				return publish;
+			}
+		};
+		return result;
+	}
+
 
 	async Task<Palace.Server.Models.LongAction> CreateStopAction(string hostName, string serviceName)
 	{
