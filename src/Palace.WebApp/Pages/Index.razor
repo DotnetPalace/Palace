@@ -84,6 +84,10 @@
 									<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateStopAction(serviceInfo))">Stop</LongActionButton>
 								}
 								<LongActionButton type="button" ButtonType="btn-warning" CreateLongAction="(() => CreateRecycleServiceAction(host.HostName, service))" >Recycle</LongActionButton>
+								@if (serviceInfo.ProcessId > 0)
+								{
+									<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateKillServiceAction(host.HostName, service))">Kill</LongActionButton>
+								}
 							}
 							else if (serviceInfo.ServiceState == ServiceState.Down)
 							{

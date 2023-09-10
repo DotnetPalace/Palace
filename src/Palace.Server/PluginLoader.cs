@@ -28,13 +28,17 @@ public static class PluginLoader
         {
             Assembly.LoadFrom(secretAssemblyFile);
         }
-        var palaceAssemblies = AppDomain.CurrentDomain
+        var palaceAssemblies = (AppDomain.CurrentDomain
                                 .GetAssemblies()
-                                .Where(a => a.FullName!.StartsWith($"Palace"));
+                                .Where(a => a.FullName!.StartsWith($"Palace"))).ToList();
 
-        var pluginList = palaceAssemblies
-                                .SelectMany(i => i.GetTypes()
-                                .Where(i => !i.IsInterface && typeof(IPalacePlugin).IsAssignableFrom(i)));
+        Console.WriteLine($"Found {palaceAssemblies.Count} palace assemblies");
+
+        var pluginList = (palaceAssemblies
+                                .SelectMany(i => i.GetTypes().Where(i => !i.IsInterface 
+                                    && typeof(IPalacePlugin).IsAssignableFrom(i)))).ToList();
+
+        Console.WriteLine($"Found {pluginList.Count} palace plugins");
 
         foreach (var item in pluginList)
         {

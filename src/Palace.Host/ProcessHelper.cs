@@ -134,4 +134,23 @@ internal static class ProcessHelper
 			await Task.Delay(1 * 1000);
 		}
 	}
+
+	public static async Task<(bool Success, string? FailReason)> KillProcess(int processId)
+	{
+		var process = System.Diagnostics.Process.GetProcessById(processId);
+		string? exception = null;
+		try
+		{
+			process.Kill();
+		}
+		catch (Exception ex)
+		{
+			exception = ex.Message;
+		}
+		if (exception is null)
+		{
+			await WaitForProcessDown(processId.ToString());
+		}
+		return (exception is null, exception);
+	}
 }

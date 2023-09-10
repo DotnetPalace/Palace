@@ -50,7 +50,7 @@ public class AlwaysStartedCheckerService : BackgroundService
 					}
 				}
 			}
-			await Task.Delay(60 * 1000);
+			await Task.Delay(30 * 1000);
 		}
 	}
 }
