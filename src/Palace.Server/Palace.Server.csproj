@@ -1,62 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.2.16.1</Version>
-	  <PackageReleaseNotes>
-		  2.2.16.1 : Implementation of a plugin mechanism to upload and download packages zip files in Azure Storage.
-		  2.1.15.1 : Implementation of a plugin mechanism to read configuration parameters through a secret reader.
-		  2.0.14.1 : Allow to use 3 differents update strategies (by service, by host, chaos)
-		  2.0.13.1 : Allow to configure many service starting arguments by host
-		  2.0.12.1 : Web Design
-		  2.0.11.1 : Refacto + Black Theme
-		  2.0.10.1 : WebDesign
-		  2.0.9.1 : Global prefix for queues and topics + cosmetic
-		  2.0.8.1 : Server reset
-		  2.0.7.1 : One update by host for the same service + WebDesign
-		  2.0.6.1 : Fix send health check message (without hostname)
-		  2.0.6.0 : Improve logging when process start or failed
-		  2.0.5.0 : Fix Orchestrator threadsafe + webdesign
-		  2.0.4.0 : UnInstall Service
-		  2.0.3.0 : Fix creation of backup folder
-		  2.0.2.0 : Creation
-	  </PackageReleaseNotes>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>2.2.17.1</Version>
+		<PackageReleaseNotes>
+			2.2.17.1 : Update Nuget
+			2.2.16.1 : Implementation of a plugin mechanism to upload and download packages zip files in Azure Storage.
+			2.1.15.1 : Implementation of a plugin mechanism to read configuration parameters through a secret reader.
+			2.0.14.1 : Allow to use 3 differents update strategies (by service, by host, chaos)
+			2.0.13.1 : Allow to configure many service starting arguments by host
+			2.0.12.1 : Web Design
+			2.0.11.1 : Refacto + Black Theme
+			2.0.10.1 : WebDesign
+			2.0.9.1 : Global prefix for queues and topics + cosmetic
+			2.0.8.1 : Server reset
+			2.0.7.1 : One update by host for the same service + WebDesign
+			2.0.6.1 : Fix send health check message (without hostname)
+			2.0.6.0 : Improve logging when process start or failed
+			2.0.5.0 : Fix Orchestrator threadsafe + webdesign
+			2.0.4.0 : UnInstall Service
+			2.0.3.0 : Fix creation of backup folder
+			2.0.2.0 : Creation
+		</PackageReleaseNotes>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\localconfig\appsettings.local.json" Link="appsettings.local.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\localconfig\appsettings.local.json" Link="appsettings.local.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ArianeBus" Version="1.0.10.4" />
-    <PackageReference Include="FluentValidation" Version="11.7.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
-    <PackageReference Include="LogRWebMonitor" Version="1.2.24" />
-    <PackageReference Include="MediatR" Version="12.1.1" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.10" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="ArianeBus" Version="1.0.11.5" />
+		<PackageReference Include="FluentValidation" Version="11.7.1" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
+		<PackageReference Include="LogRWebMonitor" Version="1.2.25.1" />
+		<PackageReference Include="MediatR" Version="12.1.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.11" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Update="appsettings.local.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Update="appsettings.local.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

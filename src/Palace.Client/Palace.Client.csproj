@@ -5,8 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>Palace.Client</PackageId> 
-		<Version>2.0.18.1</Version>
+		<Version>2.0.19.1</Version>
 		<PackageReleaseNotes>
+			2.0.19.1 Update Nuget
 			2.0.18.1 Allow to configure many service stating arguments by host
 			2.0.17.1 Tracking messages
 			2.0.16.1 Global prefix for queues and topics
@@ -32,7 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ArianeBus" Version="1.0.10.4" />
+		<PackageReference Include="ArianeBus" Version="1.0.11.5" />
 	</ItemGroup>
 
 	<!--<ItemGroup>
