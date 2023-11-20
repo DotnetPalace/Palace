@@ -33,7 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ArianeBus" Version="1.0.11.5" />
+		<PackageReference Include="ArianeBus" Version="1.0.13.6" />
 	</ItemGroup>
 
 	<!--<ItemGroup>

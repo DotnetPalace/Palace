@@ -33,7 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ArianeBus" Version="1.0.11.5" />
+		<PackageReference Include="ArianeBus" Version="1.0.13.6" />
 		<PackageReference Include="LogRPush" Version="1.2.13.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
