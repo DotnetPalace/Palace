@@ -26,7 +26,8 @@ public static class PluginLoader
         var pluginAssemblies = System.IO.Directory.GetFiles(currentFolder, $"Palace*.dll");
         foreach (var assemblyFile in pluginAssemblies)
         {
-            Assembly.Load(assemblyFile);
+            var assemblyName = assemblyFile.Replace(currentFolder, "").Replace("\\", "").Replace(".dll", "");
+            Assembly.Load(assemblyName);
         }
         var assemblies = (AppDomain.CurrentDomain
                                 .GetAssemblies()
