@@ -95,13 +95,13 @@ internal static class ProcessHelper
 		}
 
 		process.BeginErrorReadLine();
+        await Task.Delay(1 * 1000);
 
-		int loop = 0;
+        int loop = 0;
 		while (true)
 		{
 			await Task.Delay(1 * 1000);
-			if (loop > 5
-				&& !hasError)
+			if (!hasError)
 			{
 				break;
 			}

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using Palace.Server;
+using Palace.Server.Pages;
 using Palace.Server.Services;
 using Palace.WebApp.Services;
 
@@ -16,8 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 var settings = await builder.AddPalaceServer();
 
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
+
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<DialogService>();
@@ -53,13 +55,14 @@ else
 	app.UseDeveloperExceptionPage();
 }
 
-app.UseStaticFiles();
-
 app.UseRouting();
-
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
 app.MapControllers();
+
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode();
 
 app.UseLogRWebMonitor();
 

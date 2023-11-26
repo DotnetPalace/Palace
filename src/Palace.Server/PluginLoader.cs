@@ -24,17 +24,18 @@ public static class PluginLoader
     {
         var currentFolder = System.IO.Path.GetDirectoryName(typeof(PluginLoader).Assembly.Location)!;
         var pluginAssemblies = System.IO.Directory.GetFiles(currentFolder, $"Palace*.dll");
-        foreach (var secretAssemblyFile in pluginAssemblies)
+        foreach (var assemblyFile in pluginAssemblies)
         {
-            Assembly.LoadFrom(secretAssemblyFile);
+            var assemblyName = assemblyFile.Replace(currentFolder, "").Replace("\\", "").Replace(".dll", "");
+            Assembly.Load(assemblyName);
         }
-        var palaceAssemblies = (AppDomain.CurrentDomain
+        var assemblies = (AppDomain.CurrentDomain
                                 .GetAssemblies()
                                 .Where(a => a.FullName!.StartsWith($"Palace"))).ToList();
 
-        Console.WriteLine($"Found {palaceAssemblies.Count} palace assemblies");
+        Console.WriteLine($"Found {assemblies.Count} palace assemblies");
 
-        var pluginList = (palaceAssemblies
+        var pluginList = (assemblies
                                 .SelectMany(i => i.GetTypes().Where(i => !i.IsInterface 
                                     && typeof(IPalacePlugin).IsAssignableFrom(i)))).ToList();
 

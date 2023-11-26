@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<PackageId>Palace.Client</PackageId> 
-		<Version>2.0.19.1</Version>
-		<PackageReleaseNotes>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Palace.Client</PackageId>
+    <Version>2.0.19.1</Version>
+    <PackageReleaseNotes>
 			2.0.19.1 Update Nuget
 			2.0.18.1 Allow to configure many service stating arguments by host
 			2.0.17.1 Tracking messages
@@ -17,35 +16,30 @@
 			2.0.12.0 remove Palace.Shared dependency, replaced by symbolic links
 			2.0.11.0 global refacto of the project
 		</PackageReleaseNotes>
-		<PackageProjectUrl>https://github.com/DotnetPalace/Palace</PackageProjectUrl>
-		<IncludeSymbols>true</IncludeSymbols>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<EmbedUntrackedSources>true</EmbedUntrackedSources>
-	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Include="..\Palace.Shared\Messages\IMessage.cs" Link="Links\IMessage.cs" />
-	  <Compile Include="..\Palace.Shared\Messages\ServiceHealthCheck.cs" Link="Links\ServiceHealthCheck.cs" />
-	  <Compile Include="..\Palace.Shared\Messages\StopService.cs" Link="Links\StopService.cs" />
-	  <Compile Include="..\Palace.Shared\Messages\StopServiceReport.cs" Link="Links\StopServiceReport.cs" />
-	  <Compile Include="..\Palace.Shared\RunningMicroserviceInfo.cs" Link="Links\RunningMicroserviceInfo.cs" />
-	  <Compile Include="..\Palace.Shared\ServiceState.cs" Link="Links\ServiceState.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="ArianeBus" Version="1.0.11.5" />
-	</ItemGroup>
-
-	<!--<ItemGroup>
+    <PackageProjectUrl>https://github.com/DotnetPalace/Palace</PackageProjectUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Palace.Shared\Messages\IMessage.cs" Link="Links\IMessage.cs" />
+    <Compile Include="..\Palace.Shared\Messages\ServiceHealthCheck.cs" Link="Links\ServiceHealthCheck.cs" />
+    <Compile Include="..\Palace.Shared\Messages\StopService.cs" Link="Links\StopService.cs" />
+    <Compile Include="..\Palace.Shared\Messages\StopServiceReport.cs" Link="Links\StopServiceReport.cs" />
+    <Compile Include="..\Palace.Shared\RunningMicroserviceInfo.cs" Link="Links\RunningMicroserviceInfo.cs" />
+    <Compile Include="..\Palace.Shared\ServiceState.cs" Link="Links\ServiceState.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ArianeBus" Version="1.0.13.6" />
+  </ItemGroup>
+  <!--<ItemGroup>
 		<Content Include="$(OutputPath)\Palace.Shared.dll">
 			<BuildAction>None</BuildAction>
 			<PackagePath>lib\net70</PackagePath>
 			<Pack>true</Pack>
 		</Content>
 	</ItemGroup>-->
-
-	<ItemGroup>
-	  <Folder Include="Links\" />
-	</ItemGroup>
-
+  <ItemGroup>
+    <Folder Include="Links\" />
+  </ItemGroup>
 </Project>
