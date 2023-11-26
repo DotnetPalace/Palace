@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palace.Plugin.PackageDownlo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palace.Plugin.2FA", "src\Plugins\Palace.Plugin.2FA\Palace.Plugin.2FA.csproj", "{32939B7B-205A-4E4A-923D-01654BA3D170}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Palace.WebApp", "src\Palace.WebApp\Palace.WebApp.csproj", "{B88C2BC5-AD5E-42FB-8430-E1BF87A861E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palace.WebApp", "src\Palace.WebApp\Palace.WebApp.csproj", "{B88C2BC5-AD5E-42FB-8430-E1BF87A861E7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9269D523-F189-454E-A588-C9C6B2749837}"
 EndProject

@@ -30,7 +30,7 @@ public partial class Login : ComponentBase
 		}
 		var token = Guid.NewGuid();
 		LoginService!.AddToken(token);
-		NavigationManager!.NavigateTo($"/?Token={token}", true);
+		NavigationManager!.NavigateTo($"/authenticate/{token}", true);
 	}
 
 }

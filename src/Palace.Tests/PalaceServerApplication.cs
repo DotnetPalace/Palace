@@ -5,10 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Palace.Server.Configuration;
+using Palace.Server.Pages;
 
 namespace Palace.Tests
 {
-	internal class PalaceServerApplication : WebApplicationFactory<global::Palace.WebApp.App>
+	internal class PalaceServerApplication : WebApplicationFactory<App>
     {
 		private readonly GlobalSettings _settings;
 
