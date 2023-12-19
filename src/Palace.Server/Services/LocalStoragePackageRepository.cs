@@ -137,6 +137,10 @@ public class LocalStoragePackageRepository : IPackageRepository
                 return ex.Message;
             }
         }
+        else
+        {
+            _logger.LogWarning("RemovePackage {fileName} not found", fileName);
+        }
         return null;
     }
 

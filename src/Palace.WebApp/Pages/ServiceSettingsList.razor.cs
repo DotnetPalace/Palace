@@ -46,4 +46,13 @@ public partial class ServiceSettingsList
 			toast.Show("Settings saved", ToastLevel.Info);
 		}
 	}
+
+    async Task RemoveSettings(MicroServiceSettings settings)
+    {
+        var result = await ServiceSettingsRepository.RemoveServiceSettings(settings);
+        if (!result)
+        {
+            toast.Show($"remove failed", ToastLevel.Error);
+        }
+    }
 }

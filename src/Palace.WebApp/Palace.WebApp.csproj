@@ -3,8 +3,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.3.3.0</Version>
+    <Version>3.3.4.0</Version>
     <PackageReleaseNotes>
+		3.3.4.0 : Log remove package
 		3.3.3.0 : Migration dotnet8
 		2.3.2.0 : Force kill service
 		2.3.1.0 : Split Blazor and Server assemblies
