@@ -151,6 +151,14 @@ public class Orchestrator
 		}
     }
 
+    public void OnServicesChanged()
+    {
+        if (ServiceChanged is not null) 
+        {
+            ServiceChanged.Invoke(new());
+		}
+    }
+
 	internal void RemoveMicroServiceInfo(ExtendedMicroServiceInfo rmi)
 	{
         if (rmi is null) 
