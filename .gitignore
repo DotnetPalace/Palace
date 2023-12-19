@@ -404,3 +404,4 @@ appsettings.local.json
 /src/Palace.Server/Datas/Palace.db-shm
 /src/Palace.Server/Datas/Palace.db-wal
 /src/Palace.Server/Datas
+/src/Palace.WebApp/.config
