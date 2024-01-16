@@ -17,6 +17,6 @@ public class PalaceSettings
 	public int ScanIntervalInSeconds { get; set; } = 15;
 
 	internal string MachineName { get; set; } = System.Environment.MachineName;
-	internal string Key => $"{HostName}-{ServiceName}";
+	internal string Key => $"{HostName}||{ServiceName}";
 
 }

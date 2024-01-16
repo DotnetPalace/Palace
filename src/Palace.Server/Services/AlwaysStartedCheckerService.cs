@@ -34,7 +34,7 @@ public class AlwaysStartedCheckerService : BackgroundService
 					{
 						continue;
 					}
-					var key = $"{host.HostName}-{item.ServiceName}".ToLower();
+					var key = $"{host.HostName}||{item.ServiceName}".ToLower();
 					var runningService = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
 					if (runningService is null
 						|| runningService.ServiceState == ServiceState.Offline)
