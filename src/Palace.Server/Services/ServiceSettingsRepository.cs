@@ -67,6 +67,11 @@ public class ServiceSettingsRepository
 	public async Task<bool> RemoveServiceSettings(MicroServiceSettings serviceSettings)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
+		var existing = await db.MicroServiceSettings.FindAsync(serviceSettings.Id);
+		if (existing is null)
+		{
+			return false;
+		}
 		db.MicroServiceSettings.Attach(serviceSettings);
 		db.Entry(serviceSettings).State = EntityState.Deleted;
 		var changeCount = await db.SaveChangesAsync();
