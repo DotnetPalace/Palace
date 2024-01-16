@@ -1,6 +1,6 @@
 ﻿using Palace.Server.Services;
 
-namespace Palace.Server.MessageReaders;
+namespace Palace.Server.MessageReaders; 
 
 public class HostHealthCheck : ArianeBus.MessageReaderBase<Palace.Shared.Messages.HostHealthCheck>
 {
