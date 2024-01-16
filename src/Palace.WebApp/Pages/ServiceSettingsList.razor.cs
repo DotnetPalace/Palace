@@ -11,6 +11,10 @@ public partial class ServiceSettingsList
     ClipboardService ClipboardService { get; set; } = default!;
 	[Inject]
 	FluentValidation.IValidator<Palace.Shared.MicroServiceSettings> Validator { get; set; } = default!;
+    [Inject]
+    DialogService DialogService { get; set; } = default!;
+	[Inject]
+	Orchestrator Orchestrator { get; set; } = default!;
 
 
 	string jsonServicesContent = string.Empty;
@@ -20,7 +24,12 @@ public partial class ServiceSettingsList
 
     protected override async Task OnInitializedAsync()
     {
-        serviceSettingsList = (await ServiceSettingsRepository.GetAll()).ToList();
+        await LoadDatas();
+	}
+
+    async Task LoadDatas()
+    {
+		serviceSettingsList = (await ServiceSettingsRepository.GetAll()).ToList();
 	}
 
     async Task CopyToClipboard(object item)
@@ -40,10 +49,32 @@ public partial class ServiceSettingsList
         if (!result.success)
         {
 			toast.Show($"save failed with message : {result.brokenRules.FirstOrDefault()?.ErrorMessage}", ToastLevel.Error);
+            return;
 		}
 		else
         {
 			toast.Show("Settings saved", ToastLevel.Info);
 		}
+		await LoadDatas();
+		StateHasChanged();
 	}
+
+	async Task RemoveSettings(MicroServiceSettings settings)
+    {
+        var confirm = await DialogService.Confirm("Suppression", "Confirmez vous la suppression de ce service ?");
+        if (!confirm)
+        {
+            return;
+        }
+        var result = await ServiceSettingsRepository.RemoveServiceSettings(settings);
+        if (!result)
+        {
+            toast.Show($"remove failed", ToastLevel.Error);
+            return;
+        }
+        Orchestrator.OnServicesChanged();
+
+		await LoadDatas();
+        StateHasChanged();
+    }
 }

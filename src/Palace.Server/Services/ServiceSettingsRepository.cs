@@ -64,6 +64,20 @@ public class ServiceSettingsRepository
 		return (true, serviceSettings.Id, new List<ValidationFailure>());
 	}
 
+	public async Task<bool> RemoveServiceSettings(MicroServiceSettings serviceSettings)
+	{
+		var db = await _dbContextFactory.CreateDbContextAsync();
+		var existing = await db.MicroServiceSettings.FindAsync(serviceSettings.Id);
+		if (existing is null)
+		{
+			return false;
+		}
+		db.MicroServiceSettings.Attach(serviceSettings);
+		db.Entry(serviceSettings).State = EntityState.Deleted;
+		var changeCount = await db.SaveChangesAsync();
+		return changeCount > 0;
+	}
+
 	public async Task<ArgumentsByHost?> GetArgumentsByHostForService(string hostName, Guid serviceSettingsId)
 	{
 		var db = await _dbContextFactory.CreateDbContextAsync();
