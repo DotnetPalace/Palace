@@ -31,7 +31,7 @@ public class KillServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 			return;
 		}
 
-		var key = $"{message.HostName}-{message.ServiceName}".ToLower();
+		var key = $"{message.HostName}||{message.ServiceName}".ToLower();
 		var emsi = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
 		if (emsi is null)
 		{

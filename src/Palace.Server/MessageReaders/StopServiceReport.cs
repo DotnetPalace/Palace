@@ -33,7 +33,7 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
             return;
         }
 
-		var key = $"{message.HostName}-{message.ServiceName}";
+		var key = $"{message.HostName}||{message.ServiceName}";
 		var microServiceInfo = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
 
 		if (microServiceInfo is not null)

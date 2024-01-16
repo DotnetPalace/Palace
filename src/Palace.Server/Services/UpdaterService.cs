@@ -81,7 +81,7 @@ public class UpdaterService : BackgroundService
 		{
 			foreach (var host in hostNameList)
 			{
-				var key = $"{host}-{serviceName}".ToLower();
+				var key = $"{host}||{serviceName}".ToLower();
 				var service = services.SingleOrDefault(i => i.Key == key);
 				if (service is null)
 				{
