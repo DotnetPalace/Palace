@@ -9,5 +9,5 @@ public class ExtendedMicroServiceInfo : RunningMicroserviceInfo
     public List<PerformanceCounter> ThreadCountHistory { get; set; } = new();
     public List<PerformanceCounter> WorkingSetHistory { get; set; } = new();
 
-    public string Key => $"{HostName}||{ServiceName}".ToLower();
+    public string Key => $"{HostName}__{ServiceName}".ToLower();
 }
