@@ -4,8 +4,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Palace.Client</PackageId>
-    <Version>2.0.20.1</Version>
+    <Version>2.0.22.1</Version>
     <PackageReleaseNotes>
+		2.0.22.1 : Rename Key
 		2.0.20.1 : Rename Key
 		2.0.19.1 Update Nuget
 		2.0.18.1 Allow to configure many service stating arguments by host

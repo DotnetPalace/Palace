@@ -36,7 +36,7 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
             return;
         }
 
-        var key = $"{message.HostName}||{message.ServiceName}".ToLower();
+        var key = $"{message.HostName}__{message.ServiceName}".ToLower();
         var emsi = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
         if (emsi is not null)
         {
