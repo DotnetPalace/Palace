@@ -62,7 +62,7 @@
 				</td>
 				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
-					var serviceInfo = serviceInfoList.SingleOrDefault(i => i.HostName == host.HostName && i.ServiceName == service.ServiceName);
+					var serviceInfo = serviceInfoList.SingleOrDefault(i => i.HostName.Equals(host.HostName, StringComparison.InvariantCultureIgnoreCase) && i.ServiceName.Equals(service.ServiceName, StringComparison.InvariantCultureIgnoreCase));
 					var serviceStyle = serviceInfo?.ServiceState == ServiceState.Down ? "table-danger" : "";
 					<td class="@serviceStyle">
 						@if (serviceInfo is not null)
