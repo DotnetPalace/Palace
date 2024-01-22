@@ -43,5 +43,6 @@
 	</ItemGroup>-->
   <ItemGroup>
     <Folder Include="Links\" />
+    <Folder Include="Nuget\" />
   </ItemGroup>
 </Project>
