@@ -11,7 +11,7 @@ public class UpdaterService : BackgroundService
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IPackageRepository _packageRepository;
 	private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
-	private readonly UpdateStrategyBase _updateStrategyBase = default!;
+	private readonly UpdateStrategyBase _updateStrategyBase;
 
 	public UpdaterService(Orchestrator orchestrator,
 		Configuration.GlobalSettings settings,
@@ -61,7 +61,7 @@ public class UpdaterService : BackgroundService
 
 		var settingsList = await serviceSettingRepository.GetListByPackageFileName(package.PackageFileName);
 
-		if (settingsList.Count() == 0)
+		if (!settingsList.Any())
 		{
 			// Pas de service à mettre à jour correspondant à ce package
 			_logger.LogWarning("No service to update for package {PackageFileName}", package.PackageFileName);

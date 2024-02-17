@@ -1,15 +1,12 @@
 ﻿namespace Palace.Server.Services;
 
-public class HealthCheckerService : BackgroundService
+public class HealthCheckerService(
+	Orchestrator orchestrator,
+	ILogger<HealthCheckerService> logger
+	) 
+	: BackgroundService
 {
-	private readonly Orchestrator _orchestrator;
-
-	public HealthCheckerService(Orchestrator orchestrator)
-    {
-		_orchestrator = orchestrator;
-	}
-
-    public override Task StartAsync(CancellationToken cancellationToken)
+	public override Task StartAsync(CancellationToken cancellationToken)
 	{
 		return base.StartAsync(cancellationToken);
 	}
@@ -26,26 +23,28 @@ public class HealthCheckerService : BackgroundService
 
 	public void CheckServices()
 	{
-		var services = _orchestrator.GetServiceList();
+		var services = orchestrator.GetServiceList();
 		foreach (var service in services)
 		{
 			if (service.LastHitDate < DateTime.Now.AddMinutes(-1))
 			{
+				logger.LogWarning("Service {serviceName} is down", service.ServiceName);
 				service.ServiceState = Palace.Shared.ServiceState.Down;
-				_orchestrator.AddOrUpdateMicroServiceInfo(service);
+				orchestrator.AddOrUpdateMicroServiceInfo(service);
 			}
 		}
 	}
 
 	public void CheckHosts()
 	{
-		var hosts = _orchestrator.GetHostList();
+		var hosts = orchestrator.GetHostList();
 		foreach (var host in hosts)
 		{
 			if (host.LastHitDate < DateTime.Now.AddMinutes(-1))
 			{
+				logger.LogWarning("Host {hostName} is down", host.HostName);
 				host.HostState = Palace.Shared.HostState.Down;
-				_orchestrator.AddOrUpdateHost(host);
+				orchestrator.AddOrUpdateHost(host);
 			}
 		}
 	}
