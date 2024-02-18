@@ -6,46 +6,37 @@ using Palace.Host.Configuration;
 
 namespace Palace.Host;
 
-public class MainWorker : BackgroundService
+public class MainWorker(ILogger<MainWorker> logger,
+	ArianeBus.IServiceBus bus,
+	Configuration.GlobalSettings globalSettings) : BackgroundService
 {
-    private readonly ILogger<MainWorker> _logger;
-    private readonly IServiceBus _bus;
-    private readonly GlobalSettings _settings;
-    private string _ip = null!;
+	private string _ip = null!;
 
-    public MainWorker(ILogger<MainWorker> logger,
-        ArianeBus.IServiceBus bus,
-        Configuration.GlobalSettings globalSettings)
+	public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger = logger;
-        _bus = bus;
-        _settings = globalSettings;
-    }
+        logger.LogInformation("Service started");
 
-    public override async Task StartAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Service started");
+		_ip = await Shared.ExternalIPResolver.GetIP();
+
 		await base.StartAsync(cancellationToken);
 	}
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-		_ip = await Shared.ExternalIPResolver.GetIP();
-
-        var installedServiceList = await ProcessHelper.GetInstalledServiceList(_settings.InstallationFolder);
+        var installedServiceList = await ProcessHelper.GetInstalledServiceList(globalSettings.InstallationFolder);
         var serviceSettingsList = installedServiceList.Select(x => x.MainAssembly).ToList();
 
-        _logger.LogInformation("{count} found already installed services", installedServiceList.Count);
+        logger.LogInformation("{count} found already installed services", installedServiceList.Count);
 
         var runningServiceList = ProcessHelper.GetRunningProcess(serviceSettingsList.ToArray());
         foreach (var item in runningServiceList)
         {
-            installedServiceList.RemoveAll(i => i.ServiceName == i.ServiceName);
+            installedServiceList.RemoveAll(i => i.ServiceName is not null && i.ServiceName == i.ServiceName!);
 		}
 
-		_logger.LogInformation("{count} found already running services", runningServiceList.Count);
+		logger.LogInformation("{count} found already running services", runningServiceList.Count);
 
-		await PublishInstalledServices(installedServiceList);
+		await PublishInstalledServices(installedServiceList, stoppingToken);
 
         // Lancer tous les services qui ne sont pas en état running
         // et marqué dans les settings comme always started
@@ -56,51 +47,63 @@ public class MainWorker : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
         {
-            var currentDrive = System.IO.Path.GetPathRoot(System.Reflection.Assembly.GetExecutingAssembly().Location!);
-            var driveInfo = new System.IO.DriveInfo(currentDrive!);
-            var process = System.Diagnostics.Process.GetCurrentProcess();
-            var percentCpu = process.TotalProcessorTime.TotalMilliseconds / (Environment.ProcessorCount * process.TotalProcessorTime.TotalMilliseconds) * 100;
-            await _bus.EnqueueMessage(_settings.HostHealthCheckQueueName, new Shared.Messages.HostHealthCheck
+            try
             {
-                HostName = _settings.HostName,
-                MachineName = System.Environment.MachineName,
-                ExternalIp = _ip,
-                MainFileName = System.Reflection.Assembly.GetExecutingAssembly().Location!,
-                Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(),
-                TotalDriveSize = driveInfo.TotalSize,
-                TotalFreeSpaceOfDriveSize = driveInfo.TotalFreeSpace,
-                OsDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
-                OsVersion = System.Environment.OSVersion.ToString(),
-                ProcessId = process.Id,
-                PercentCpu = percentCpu
-            });
+                var currentDrive = System.IO.Path.GetPathRoot(System.Reflection.Assembly.GetExecutingAssembly().Location!);
+                var driveInfo = new System.IO.DriveInfo(currentDrive!);
+                var process = System.Diagnostics.Process.GetCurrentProcess();
+                double factor = (Environment.ProcessorCount * process.TotalProcessorTime.TotalMilliseconds) * 100;
+                if (factor == 0)
+				{
+					factor = 1;
+				}
+				var percentCpu = process.TotalProcessorTime.TotalMilliseconds / factor;
+                await bus.EnqueueMessage(globalSettings.HostHealthCheckQueueName, new Shared.Messages.HostHealthCheck
+                {
+                    HostName = globalSettings.HostName,
+                    MachineName = System.Environment.MachineName,
+                    ExternalIp = _ip,
+                    MainFileName = System.Reflection.Assembly.GetExecutingAssembly().Location!,
+                    Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(),
+                    TotalDriveSize = driveInfo.TotalSize,
+                    TotalFreeSpaceOfDriveSize = driveInfo.TotalFreeSpace,
+                    OsDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+                    OsVersion = System.Environment.OSVersion.ToString(),
+                    ProcessId = process.Id,
+                    PercentCpu = percentCpu
+                }, cancellationToken: stoppingToken);
+            }
+            catch (Exception ex)
+			{
+				logger.LogError(ex, "Error while sending health check");
+			}
 
-            await Task.Delay(_settings.ScanIntervalInSeconds * 1000, stoppingToken);
-            _logger.LogTrace("Service up {date}", DateTime.Now);
+            await Task.Delay(globalSettings.ScanIntervalInSeconds * 1000, stoppingToken);
+            logger.LogTrace("Service up {date}", DateTime.Now);
         }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _bus.EnqueueMessage(_settings.HostStoppedQueueName, new Shared.Messages.HostStopped
+        await bus.EnqueueMessage(globalSettings.HostStoppedQueueName, new Shared.Messages.HostStopped
         {
-            HostName = _settings.HostName,
+            HostName = globalSettings.HostName,
             MachineName = System.Environment.MachineName,
-        });
-        _logger.LogInformation("Service stopped");
+        }, cancellationToken: cancellationToken);
+        logger.LogInformation("Service stopped");
     }
 
-    async Task PublishInstalledServices(List<Palace.Shared.MicroServiceSettings> serviceSettingsList)
+    async Task PublishInstalledServices(List<Palace.Shared.MicroServiceSettings> serviceSettingsList, CancellationToken cancellationToken)
     { 
 		foreach (var serviceSettings in serviceSettingsList)
 		{
 			var report = new Shared.Messages.ServiceInstallationReport
 			{
-				HostName = _settings.HostName,
+				HostName = globalSettings.HostName,
 				ServiceName = serviceSettings.ServiceName,
 				Success = true
 			};
-			await _bus.EnqueueMessage(_settings.InstallationReportQueueName, report);
+			await bus.EnqueueMessage(globalSettings.InstallationReportQueueName, report, cancellationToken: cancellationToken);
 		}
     }
 

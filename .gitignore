@@ -405,3 +405,4 @@ appsettings.local.json
 /src/Palace.Server/Datas/Palace.db-wal
 /src/Palace.Server/Datas
 /src/Palace.WebApp/.config
+/src/Palace.Client/pushtonuget.cmd

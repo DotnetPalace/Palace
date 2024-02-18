@@ -11,7 +11,7 @@ public class UpdaterService : BackgroundService
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IPackageRepository _packageRepository;
 	private readonly ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _processList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
-	private readonly UpdateStrategyBase _updateStrategyBase = default!;
+	private readonly UpdateStrategyBase _updateStrategyBase;
 
 	public UpdaterService(Orchestrator orchestrator,
 		Configuration.GlobalSettings settings,
@@ -61,16 +61,17 @@ public class UpdaterService : BackgroundService
 
 		var settingsList = await serviceSettingRepository.GetListByPackageFileName(package.PackageFileName);
 
-		if (settingsList.Count() == 0)
+		if (!settingsList.Any())
 		{
 			// Pas de service à mettre à jour correspondant à ce package
+			_logger.LogWarning("No service to update for package {PackageFileName}", package.PackageFileName);
 			return;
 		}
 
 		var serviceNameList = settingsList.Select(i => i.ServiceName).Distinct().ToList();
 
 		var services = _orchestrator.GetServiceList()
-						.Where(i => serviceNameList.Contains(i.ServiceName))
+						.Where(i => serviceNameList.Exists(j => i.ServiceName.Equals(j, StringComparison.InvariantCultureIgnoreCase)))
 						.ToList();
 
 		var hostNameList = services.Select(i => i.HostName).Distinct().ToList();
@@ -82,7 +83,7 @@ public class UpdaterService : BackgroundService
 			foreach (var host in hostNameList)
 			{
 				var key = $"{host}__{serviceName}".ToLower();
-				var service = services.SingleOrDefault(i => i.Key == key);
+				var service = services.SingleOrDefault(i => i.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase));
 				if (service is null)
 				{
 					continue;
@@ -101,10 +102,13 @@ public class UpdaterService : BackgroundService
 				};
 				if (!_processList.ContainsKey(muc.Key))
 				{
+					_logger.LogInformation("AddOrUpdateMicroServiceInfo {Key}", muc.Key);
 					_processList.TryAdd(muc.Key, muc);
 				}
 			}
 		}
+
+		_logger.LogInformation("OnPackageChanged {PackageFileName}", package.PackageFileName);
 	}
 
 }

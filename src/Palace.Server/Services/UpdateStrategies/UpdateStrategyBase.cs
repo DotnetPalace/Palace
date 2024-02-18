@@ -13,7 +13,7 @@ public abstract class UpdateStrategyBase
 	private readonly Orchestrator _orchestrator;
 	protected ConcurrentDictionary<string, Models.MicroserviceUpdateContext> _contextList = default!;
 
-	public UpdateStrategyBase(IServiceScopeFactory serviceScopeFactory,
+	protected UpdateStrategyBase(IServiceScopeFactory serviceScopeFactory,
 		ILogger<UpdateStrategyBase> logger,
 		Orchestrator orchestrator)
     {

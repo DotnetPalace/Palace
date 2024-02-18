@@ -54,8 +54,8 @@ public class StopMessageReader : MessageReaderBase<StopService>
             return;
         }
 
-        if (message.ServiceName != _settings.ServiceName
-            || message.HostName != _settings.HostName)
+        if (!_settings.ServiceName.Equals(message.ServiceName, StringComparison.InvariantCultureIgnoreCase)
+            || !_settings.HostName.Equals(message.HostName, StringComparison.InvariantCultureIgnoreCase))
         {
             // Not for me
             _logger.LogTrace("Message stop is not for me svc {s1} <-> {s2} host {h1} <-> {h2}", 
