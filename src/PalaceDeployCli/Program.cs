@@ -20,6 +20,7 @@ using CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Web.Administration;
 using PalaceDeployCli;
 using Spectre.Console;
 
@@ -48,6 +49,7 @@ services.AddTransient<DownloadManager>();
 services.AddTransient<IISManager>();
 services.AddTransient<ServiceManager>();
 services.AddTransient<DeployService>();
+services.AddTransient<BuildAndPublishPalaceServer>();
 services.AddSingleton(settings);
 services.AddHttpClient("Downloader", configure =>
 {
@@ -70,18 +72,16 @@ AnsiConsole.WriteLine();
 
 var table = new Table();
 table.AddColumn("Action").AddColumn("Description");
-table.AddRow("1", "Install latest version of palace host");
-table.AddRow("2", "Install latest version of palace webapp");
-table.AddRow("3", "Quit");
+table.AddRow("1", "Build, Publish Palace.WebApp and Zip");
+table.AddRow("2", "Install latest version of palace webapp from local zip");
+table.AddRow("3", "Install latest version of palace host from github");
+table.AddRow("4", "Install latest version of palace webapp from github");
+
+table.AddRow("5", "Quit");
 
 AnsiConsole.Write(table);
 
 var selectedAction = AnsiConsole.Prompt(new TextPrompt<int>("Choose your action :"));
-
-if (selectedAction == 3)
-{
-	return 0;
-}
 
 var dlManager = sp.GetRequiredService<DownloadManager>();
 var deployService = sp.GetRequiredService<DeployService>();
@@ -90,6 +90,15 @@ string? zipFileName = null;
 switch (selectedAction)
 {
 	case 1:
+		var publishServer = sp.GetRequiredService<BuildAndPublishPalaceServer>();
+		await publishServer.PublishServer();
+		break;
+
+	case 2:
+		await DeployLocalServerWebApp();
+		break;
+
+	case 3:
 		zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceHostUrl);
 		if (zipFileName == null)
 		{
@@ -107,7 +116,7 @@ switch (selectedAction)
 		var start = serviceManager.StartService();
 
 		break;
-	case 2:
+	case 4:
 		zipFileName = await dlManager.DownloadPackage(settings.LastUpdatePalaceServerUrl);
 		if (zipFileName == null)
 		{
@@ -125,8 +134,34 @@ switch (selectedAction)
 		}
 		var startWorker = iisManager.StartIISWorkerProcess();
 		break;
+
+	default:
+		Environment.Exit(0);
+		return 0;
 }
 
 goto start;
 
+async Task<int> DeployLocalServerWebApp()
+{
+	await Task.Yield();
+	zipFileName = System.IO.Path.GetDirectoryName(settings.PalaceServerCsProjectFileName)!;
+	zipFileName = System.IO.Path.Combine(zipFileName, "bin", "debug", "net8.0", "publish.zip");
+	if (zipFileName == null)
+	{
+		AnsiConsole.WriteLine("File does not exists");
+		return -1;
+	}
+	var iisManager = sp.GetRequiredService<IISManager>();
+	var stopWorker = iisManager.StopIISWorkerProcess();
+	iisManager.WaitForStop();
+	var deployServer = deployService.UnZipServer(zipFileName);
+	if (!deployServer)
+	{
+		AnsiConsole.WriteLine("Deploy failed");
+		return -1;
+	}
+	var startWorker = iisManager.StartIISWorkerProcess();
 
+	return -1;
+}
