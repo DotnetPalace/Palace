@@ -36,10 +36,10 @@ jobs:
       run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_GITHUB}} --skip-duplicate
 
 
-    - name: Create Fake local AppSettings
-      run: |
-        mkdir ${{github.workspace}}\localconfig
-        echo {} > ${{github.workspace}}\localconfig\appsettings.local.json
+    # - name: Create Fake local AppSettings
+    #   run: |
+    #     mkdir ${{github.workspace}}\localconfig
+    #     echo {} > ${{github.workspace}}\localconfig\appsettings.local.json
 
     - name: Build Palace Host
       run: dotnet publish src\palace.host\palace.host.csproj -c ${{env.DOTNET_CONFIGURATION}} --no-restore -v d
