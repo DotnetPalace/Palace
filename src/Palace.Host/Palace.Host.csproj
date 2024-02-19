@@ -41,6 +41,7 @@
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Palace.Secret.KeyVaultProvider\Palace.Secret.KeyVaultProvider.csproj" />
     <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
