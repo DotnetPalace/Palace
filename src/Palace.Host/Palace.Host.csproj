@@ -32,7 +32,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ArianeBus" Version="1.0.13.6" />
+    <PackageReference Include="ArianeBus" Version="1.1.14" />
     <PackageReference Include="LogRPush" Version="1.2.15.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
@@ -41,7 +41,6 @@
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Palace.Secret.KeyVaultProvider\Palace.Secret.KeyVaultProvider.csproj" />
     <ProjectReference Include="..\Palace.Shared\Palace.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>

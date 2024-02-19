@@ -5,7 +5,7 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Palace.Server.Services;
+using Palace.Shared;
 
 namespace Palace.Secret.KeyVaultProvider;
 

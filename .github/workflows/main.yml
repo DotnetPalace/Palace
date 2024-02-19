@@ -61,6 +61,10 @@ jobs:
         del appsettings.*.json
         7z.exe a -r -tzip ${{github.workspace}}\palacewebapp.zip * 
 
+    - name: Create empty appsettings local json
+      run: |
+        echo. > "src\PalaceDeployCli\appsettings.local.json"
+
     - name: Build Palace Deploy Cli
       run: dotnet publish src\PalaceDeployCli\PalaceDeployCli.csproj -c ${{env.DOTNET_CONFIGURATION}} --no-restore -v d
 

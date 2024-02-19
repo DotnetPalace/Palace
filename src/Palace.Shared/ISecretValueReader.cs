@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Palace.Server.Services;
+namespace Palace.Shared;
 
 public interface ISecretValueReader
 {
