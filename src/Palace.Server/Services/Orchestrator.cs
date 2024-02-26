@@ -63,7 +63,7 @@ public class Orchestrator(
 		var success = _extendedMicroServiceInfoList.TryGetValue(key, out var result);
 		if (!success)
 		{
-			logger.LogWarning("GetExtendedMicroServiceInfoByKey - Could not find key {key}", key);
+			logger.LogTrace("Could not find key {key}", key);
 			return null;
 		}
 		return result;
@@ -188,17 +188,14 @@ public class Orchestrator(
 			return;
 		}
 
-		_extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
-		if (existing is not null)
+		// _extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
+		try
 		{
-			try
-			{
-				ServiceChanged?.Invoke(existing);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error while removing microservice info");
-			}
+			ServiceChanged?.Invoke(rmi);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error while removing microservice info");
 		}
 	}
 }
