@@ -8,6 +8,7 @@ public class ExtendedMicroServiceInfo : RunningMicroserviceInfo
     public string? Log { get; set; }
     public List<PerformanceCounter> ThreadCountHistory { get; set; } = new();
     public List<PerformanceCounter> WorkingSetHistory { get; set; } = new();
+    public DateTime? RemovedDate { get; set; }
 
     public string Key => $"{HostName}__{ServiceName}".ToLower();
 }
