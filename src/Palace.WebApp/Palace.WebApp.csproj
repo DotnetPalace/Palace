@@ -3,8 +3,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.3.9.0</Version>
+    <Version>3.3.10.0</Version>
     <PackageReleaseNotes>
+			3.3.10.0 : Add Start button when service is down
 			3.3.9.0 : Consolidation
 			3.3.8.0 : Dont remove service in list
 			3.3.7.0 : More logs
