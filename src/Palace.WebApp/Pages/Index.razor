@@ -99,6 +99,10 @@
 								<LongActionButton type="button" ButtonType="btn-primary" CreateLongAction="(() => CreateStartAction(service, serviceInfo))">Start</LongActionButton>
 								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateUnInstallServiceAction(host, service))">UnInstall</LongActionButton>
 							}
+							else if (serviceInfo.ServiceState == ServiceState.InstallationFailed)
+							{
+								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateKillServiceAction(host.HostName, service))">Kill</LongActionButton>
+							}
 						}
 						else
 						{
