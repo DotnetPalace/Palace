@@ -3,6 +3,7 @@ using System.Runtime;
 using ArianeBus;
 
 using Palace.Host.Configuration;
+using Palace.Shared;
 
 namespace Palace.Host;
 
@@ -26,8 +27,6 @@ public class MainWorker(ILogger<MainWorker> logger,
         var installedServiceList = await ProcessHelper.GetInstalledServiceList(globalSettings.InstallationFolder);
         var serviceSettingsList = installedServiceList.Select(x => x.MainAssembly).ToList();
 
-        logger.LogInformation("{count} found already installed services", installedServiceList.Count);
-
         var runningServiceList = ProcessHelper.GetRunningProcess(serviceSettingsList.ToArray());
         foreach (var item in runningServiceList)
         {
@@ -45,6 +44,8 @@ public class MainWorker(ILogger<MainWorker> logger,
             // ProcessHelper.StartProcess(item.ServiceName, _settings.InstallationDirectory);
         }
 
+        var lastCheck = DateTime.Now;
+        var checkInstalledServiceDate = DateTime.Now;
 		while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -78,8 +79,21 @@ public class MainWorker(ILogger<MainWorker> logger,
 				logger.LogError(ex, "Error while sending health check");
 			}
 
-            await Task.Delay(globalSettings.ScanIntervalInSeconds * 1000, stoppingToken);
+            // Check installed service every 1 minute
+            if (checkInstalledServiceDate.AddMinutes(1) < DateTime.Now) 
+            {
+				var notInstalledNotRunningList = await GetNotRunningInstalledServices();
+                if (notInstalledNotRunningList.Any())
+                {
+                    await PublishInstalledServices(notInstalledNotRunningList, stoppingToken);
+                }
+				checkInstalledServiceDate = DateTime.Now;
+			}
+
+			await Task.Delay(globalSettings.ScanIntervalInSeconds * 1000, stoppingToken);
             logger.LogTrace("Service up {date}", DateTime.Now);
+
+            lastCheck = DateTime.Now;
         }
     }
 
@@ -107,4 +121,15 @@ public class MainWorker(ILogger<MainWorker> logger,
 		}
     }
 
+    public async Task<List<MicroServiceSettings>> GetNotRunningInstalledServices()
+    {
+		var installedServiceList = await ProcessHelper.GetInstalledServiceList(globalSettings.InstallationFolder);
+		var serviceSettingsList = installedServiceList.Select(x => x.MainAssembly).ToList();
+		var runningServiceList = ProcessHelper.GetRunningProcess(serviceSettingsList.ToArray());
+		foreach (var item in runningServiceList)
+		{
+			installedServiceList.RemoveAll(i => i.ServiceName is not null && i.ServiceName == i.ServiceName!);
+		}
+        return installedServiceList;
+	}
 }

@@ -34,7 +34,7 @@ public class StopMessageReader : MessageReaderBase<StopService>
             return;
         }
 
-		_logger.LogTrace("Receive stop message for {hostName}/{servcieName}/{origin}", message.ServiceName, message.HostName, message.Origin);
+		_logger.LogInformation("Receive stop message for {hostName}/{servcieName}/{origin}", message.ServiceName, message.HostName, message.Origin);
 
         if (string.IsNullOrWhiteSpace(message.HostName))
         {
@@ -50,7 +50,7 @@ public class StopMessageReader : MessageReaderBase<StopService>
 
 		if (message.Timeout < DateTime.Now)
         {
-            _logger.LogTrace("message is too old");
+            _logger.LogInformation("stop message is too old");
             return;
         }
 
@@ -58,7 +58,7 @@ public class StopMessageReader : MessageReaderBase<StopService>
             || !_settings.HostName.Equals(message.HostName, StringComparison.InvariantCultureIgnoreCase))
         {
             // Not for me
-            _logger.LogTrace("Message stop is not for me svc {s1} <-> {s2} host {h1} <-> {h2}", 
+            _logger.LogInformation("Message stop is not for me svc {s1} <-> {s2} host {h1} <-> {h2}", 
                 message.ServiceName, 
                 _settings.ServiceName, 
                 message.HostName, 
