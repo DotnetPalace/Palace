@@ -16,6 +16,7 @@ namespace PalaceDeployCli
 		public string PalaceServerDeployDirectory { get; set; } = null!;
 		public string PalaceServerCsProjectFileName { get; set; } = null!;
 		public string PalaceServerWorkerProcessName { get; set; } = null!;
+		public string PalaceHostCsProjectFileName { get; set; } = null!;
 		public string Environment { get; set; } = "development";
     }
 }

@@ -63,7 +63,12 @@
 				@foreach (var host in hostList.OrderBy(i => i.HostName))
 				{
 					var serviceInfo = serviceInfoList.SingleOrDefault(i => i.HostName.Equals(host.HostName, StringComparison.InvariantCultureIgnoreCase) && i.ServiceName.Equals(service.ServiceName, StringComparison.InvariantCultureIgnoreCase));
-					var serviceStyle = serviceInfo?.ServiceState == ServiceState.Down ? "table-danger" : "";
+					string serviceStyle = "";
+					if (serviceInfo is not null)
+					{
+						serviceStyle = serviceInfo.ServiceState == ServiceState.Down ? "table-danger" : "";
+						serviceStyle = serviceInfo.RemovedDate.HasValue ? "table-danger" : "";
+					}
 					<td class="@serviceStyle">
 						@if (serviceInfo is not null)
 						{
@@ -91,7 +96,12 @@
 							}
 							else if (serviceInfo.ServiceState == ServiceState.Down)
 							{
+								<LongActionButton type="button" ButtonType="btn-primary" CreateLongAction="(() => CreateStartAction(service, serviceInfo))">Start</LongActionButton>
 								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateUnInstallServiceAction(host, service))">UnInstall</LongActionButton>
+							}
+							else if (serviceInfo.ServiceState == ServiceState.InstallationFailed)
+							{
+								<LongActionButton type="button" ButtonType="btn-danger" CreateLongAction="(() => CreateKillServiceAction(host.HostName, service))">Kill</LongActionButton>
 							}
 						}
 						else

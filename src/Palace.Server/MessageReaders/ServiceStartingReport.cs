@@ -45,6 +45,7 @@ public class ServiceStartingReport : ArianeBus.MessageReaderBase<Palace.Shared.M
             emsi.FailReason = message.FailReason;
             emsi.ProcessId = message.ProcessId;
             emsi.Location = message.InstallationFolder;
+			emsi.RemovedDate = null;
 		}
 		else
         {

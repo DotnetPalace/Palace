@@ -50,6 +50,7 @@ services.AddTransient<IISManager>();
 services.AddTransient<ServiceManager>();
 services.AddTransient<DeployService>();
 services.AddTransient<BuildAndPublishPalaceServer>();
+services.AddTransient<BuildAndPublishPalaceHost>();
 services.AddSingleton(settings);
 services.AddHttpClient("Downloader", configure =>
 {
@@ -72,8 +73,8 @@ AnsiConsole.WriteLine();
 
 var table = new Table();
 table.AddColumn("Action").AddColumn("Description");
-table.AddRow("1", "Build, Publish Palace.WebApp and Zip");
-table.AddRow("2", "Install latest version of palace webapp from local zip");
+table.AddRow("1", "Build, Publish Palace.WebApp and install from local");
+table.AddRow("2", "Build, Publish Palace.Host and install from local");
 table.AddRow("3", "Install latest version of palace host from github");
 table.AddRow("4", "Install latest version of palace webapp from github");
 
@@ -90,12 +91,42 @@ string? zipFileName = null;
 switch (selectedAction)
 {
 	case 1:
-		var publishServer = sp.GetRequiredService<BuildAndPublishPalaceServer>();
-		await publishServer.PublishServer();
+		var buildServer = sp.GetRequiredService<BuildAndPublishPalaceServer>();
+		zipFileName = await buildServer.PublishServer();
+		if (zipFileName is null)
+		{
+			Console.WriteLine("No zip available");
+			break;
+		}
+		var localIisManager = sp.GetRequiredService<IISManager>();
+		localIisManager.StopIISWorkerProcess();
+		localIisManager.WaitForStop();
+		var localDeployServer = deployService.UnZipServer(zipFileName);
+		if (!localDeployServer)
+		{
+			AnsiConsole.WriteLine("Deploy failed");
+			return -1;
+		}
+		localIisManager.StartIISWorkerProcess();
 		break;
 
 	case 2:
-		await DeployLocalServerWebApp();
+		var publishHost = sp.GetRequiredService<BuildAndPublishPalaceHost>();
+		zipFileName = await publishHost.PublisHost();
+		if (zipFileName is null)
+		{
+			Console.WriteLine("No zip available");
+			break;
+		}
+		var localServiceManager = sp.GetRequiredService<ServiceManager>();
+		await localServiceManager.StopService();
+		var localDeployHost = deployService.UnZipHost(zipFileName!);
+		if (!localDeployHost)
+		{
+			AnsiConsole.WriteLine("Deploy failed");
+			return -1;
+		}
+		localServiceManager.StartService();
 		break;
 
 	case 3:
@@ -113,7 +144,7 @@ switch (selectedAction)
 			AnsiConsole.WriteLine("Deploy failed");
 			return -1;
 		}
-		var start = serviceManager.StartService();
+		serviceManager.StartService();
 
 		break;
 	case 4:
@@ -124,7 +155,7 @@ switch (selectedAction)
 			return -1;
 		}
 		var iisManager = sp.GetRequiredService<IISManager>();
-		var stopWorker = iisManager.StopIISWorkerProcess();
+		iisManager.StopIISWorkerProcess();
 		iisManager.WaitForStop();
 		var deployServer = deployService.UnZipServer(zipFileName);
 		if (!deployServer)
@@ -132,7 +163,7 @@ switch (selectedAction)
 			AnsiConsole.WriteLine("Deploy failed");
 			return -1;
 		}
-		var startWorker = iisManager.StartIISWorkerProcess();
+		iisManager.StartIISWorkerProcess();
 		break;
 
 	default:
@@ -142,26 +173,3 @@ switch (selectedAction)
 
 goto start;
 
-async Task<int> DeployLocalServerWebApp()
-{
-	await Task.Yield();
-	zipFileName = System.IO.Path.GetDirectoryName(settings.PalaceServerCsProjectFileName)!;
-	zipFileName = System.IO.Path.Combine(zipFileName, "bin", "debug", "net8.0", "publish.zip");
-	if (zipFileName == null)
-	{
-		AnsiConsole.WriteLine("File does not exists");
-		return -1;
-	}
-	var iisManager = sp.GetRequiredService<IISManager>();
-	var stopWorker = iisManager.StopIISWorkerProcess();
-	iisManager.WaitForStop();
-	var deployServer = deployService.UnZipServer(zipFileName);
-	if (!deployServer)
-	{
-		AnsiConsole.WriteLine("Deploy failed");
-		return -1;
-	}
-	var startWorker = iisManager.StartIISWorkerProcess();
-
-	return -1;
-}

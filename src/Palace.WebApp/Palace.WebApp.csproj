@@ -3,9 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.3.8.0</Version>
+    <Version>3.3.11.0</Version>
     <PackageReleaseNotes>
-		3.3.8.0 : Best new package displaying
 		3.3.7.0 : More logs
 		3.3.6.0 : Rename Key
 		3.3.4.0 : Log remove package

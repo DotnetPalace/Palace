@@ -4,21 +4,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Palace.Client</PackageId>
-    <Version>2.0.23.1</Version>
+    <Version>2.0.24.1</Version>
     <PackageReleaseNotes>
-		2.0.23.1 : Ignore case on serviceName and hostname
-		2.0.22.1 : Rename Key
-		2.0.20.1 : Rename Key
-		2.0.19.1 Update Nuget
-		2.0.18.1 Allow to configure many service stating arguments by host
-		2.0.17.1 Tracking messages
-		2.0.16.1 Global prefix for queues and topics
-		2.0.15.1 More logs for stop
-		2.0.14.1 More logs for stop
-		2.0.13.1 Fix send health check message (without hostname)
-		2.0.12.0 remove Palace.Shared dependency, replaced by symbolic links
-		2.0.11.0 global refacto of the project
-	</PackageReleaseNotes>
+			2.0.24.1 : More logs
+			2.0.23.1 : Ignore case on serviceName and hostname
+			2.0.22.1 : Rename Key
+			2.0.20.1 : Rename Key
+			2.0.19.1 Update Nuget
+			2.0.18.1 Allow to configure many service stating arguments by host
+			2.0.17.1 Tracking messages
+			2.0.16.1 Global prefix for queues and topics
+			2.0.15.1 More logs for stop
+			2.0.14.1 More logs for stop
+			2.0.13.1 Fix send health check message (without hostname)
+			2.0.12.0 remove Palace.Shared dependency, replaced by symbolic links
+			2.0.11.0 global refacto of the project
+		</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/DotnetPalace/Palace</PackageProjectUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

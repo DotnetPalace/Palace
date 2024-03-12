@@ -1,22 +1,20 @@
-﻿using Spectre.Console;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace PalaceDeployCli;
 
-internal class BuildAndPublishPalaceServer(PalaceDeployCliSettings settings,
-	DeployService deployService)
+internal class BuildAndPublishPalaceHost(PalaceDeployCliSettings settings)
 {
-	public async Task<string?> PublishServer()
+	public async Task<string?> PublisHost()
 	{
-		var build = await Helpers.Process("dotnet", @$"build -c Debug {settings.PalaceServerCsProjectFileName}");
-		var publish = await Helpers.Process("dotnet", @$"publish -c Debug {settings.PalaceServerCsProjectFileName}");
+		var build = await Helpers.Process("dotnet", @$"build -c Debug {settings.PalaceHostCsProjectFileName}");
+		var publish = await Helpers.Process("dotnet", @$"publish -c Debug {settings.PalaceHostCsProjectFileName}");
 		if (!publish.Success)
 		{
 			Console.WriteLine(publish.Report);
 			return null;
 		}
 
-		var publishPath = Path.GetDirectoryName(settings.PalaceServerCsProjectFileName)!;
+		var publishPath = Path.GetDirectoryName(settings.PalaceHostCsProjectFileName)!;
 		publishPath = System.IO.Path.Combine(publishPath, "bin", "debug", "net8.0", "publish");
 
 		var envTxtFileName = System.IO.Path.Combine(publishPath, $"env.txt");
@@ -24,15 +22,10 @@ internal class BuildAndPublishPalaceServer(PalaceDeployCliSettings settings,
 
 		var localConfigFileName = System.IO.Path.Combine(publishPath, $"appsettings.local.json");
 		System.IO.File.Delete(localConfigFileName);
-		if (System.IO.File.Exists(localConfigFileName))
-		{
-			throw new Exception();
-		}
 
 		await Helpers.Process(@"C:\Program Files\7-Zip\7z.exe", @$"a -tzip -r {publishPath} *", publishPath);
 
 		var zipFileName = System.IO.Path.Combine(publishPath, "..\\", $"publish.zip");
-
 		return zipFileName;
 	}
 }
