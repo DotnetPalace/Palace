@@ -2,22 +2,17 @@
 
 namespace Palace.Server.Services;
 
-public class LocalStoragePackageRepository : IPackageRepository
+public class LocalStoragePackageRepository(
+    ILogger<LocalStoragePackageRepository> logger,
+	Configuration.GlobalSettings settings
+    ) 
+    : IPackageRepository
 {
-    private readonly ILogger<LocalStoragePackageRepository> _logger;
-    private readonly Configuration.GlobalSettings _settings;
-    private readonly ConcurrentDictionary<string, PackageInfo> _packageList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+	private readonly ConcurrentDictionary<string, PackageInfo> _packageList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 
     public event Action<PackageInfo> PackageChanged = default!;
 
-    public LocalStoragePackageRepository(ILogger<LocalStoragePackageRepository> logger,
-        Configuration.GlobalSettings settings)
-    {
-        _logger = logger;
-        _settings = settings;
-    }
-
-    public IEnumerable<PackageInfo> GetPackageInfoList()
+	public IEnumerable<PackageInfo> GetPackageInfoList()
     {
         if (_packageList.Count == 0)
         {
@@ -40,7 +35,7 @@ public class LocalStoragePackageRepository : IPackageRepository
             zipFileName = zipFileName.Replace($".{version}", "");
         }
 
-        _logger.LogInformation("BackupAndUpdateRepositoryFile {0} with version {1} zipName {2}", zipFileFullPath, version, zipFileName);
+        logger.LogInformation("BackupAndUpdateRepositoryFile {0} with version {1} zipName {2}", zipFileFullPath, version, zipFileName);
         var list = GetPackageInfoList();
 
         var availablePackage = list.FirstOrDefault(i => i.PackageFileName.Equals(zipFileName, StringComparison.InvariantCultureIgnoreCase));
@@ -48,21 +43,21 @@ public class LocalStoragePackageRepository : IPackageRepository
         {
             if (availablePackage.ChangeDetected)
             {
-                _logger.LogInformation("BackupAndUpdateRepositoryFile {0} with version {1} change already detected", zipFileFullPath, version);
+                logger.LogInformation("BackupAndUpdateRepositoryFile {0} with version {1} change already detected", zipFileFullPath, version);
             }
             availablePackage.ChangeDetected = true;
         }
 
-        _logger.LogInformation("Start BackupAndUpdateRepositoryFile {0} with version {1}", zipFileFullPath, version);
+        logger.LogInformation("Start BackupAndUpdateRepositoryFile {0} with version {1}", zipFileFullPath, version);
 
-        var destFileName = Path.Combine(_settings.RepositoryFolder, zipFileName);
+        var destFileName = Path.Combine(settings.RepositoryFolder, zipFileName);
         if (File.Exists(destFileName))
         {
             // Backup
-            string backupDirectory = _settings.BackupFolder;
+            string backupDirectory = settings.BackupFolder;
             if (string.IsNullOrWhiteSpace(version))
             {
-                _logger.LogInformation("Try to BackupAndUpdateRepositoryFile {0}", zipFileFullPath);
+                logger.LogInformation("Try to BackupAndUpdateRepositoryFile {0}", zipFileFullPath);
                 backupDirectory = GetNewBackupDirectory(zipFileName);
                 if (!Directory.Exists(backupDirectory))
                 {
@@ -70,16 +65,16 @@ public class LocalStoragePackageRepository : IPackageRepository
                 }
                 var backupFileName = Path.Combine(backupDirectory, zipFileName);
                 File.Copy(zipFileFullPath, backupFileName, true);
-                _logger.LogInformation("Backup from {0} to {1} ", zipFileFullPath, backupFileName);
+                logger.LogInformation("Backup from {0} to {1} ", zipFileFullPath, backupFileName);
             }
             else
             {
-                _logger.LogInformation("Try to BackupAndUpdateRepositoryFile {0} with version {1}", zipFileFullPath, version);
+                logger.LogInformation("Try to BackupAndUpdateRepositoryFile {0} with version {1}", zipFileFullPath, version);
                 var directoryPart = zipFileName.Replace(".zip", "", StringComparison.InvariantCultureIgnoreCase);
                 var existingBackupFileName = Path.Combine(backupDirectory, directoryPart, version, zipFileName);
                 if (File.Exists(existingBackupFileName))
                 {
-                    _logger.LogInformation("File {0} with version {1} already backuped without changed", zipFileFullPath, version);
+                    logger.LogInformation("File {0} with version {1} already backuped without changed", zipFileFullPath, version);
                     // Ne pas faire de mise à jour
                     return;
                 }
@@ -89,21 +84,21 @@ public class LocalStoragePackageRepository : IPackageRepository
                     Directory.CreateDirectory(destDirectory);
                 }
                 var backupFileName = Path.Combine(destDirectory, zipFileName);
-                _logger.LogInformation("Try to Backup from {0} to {1} ", zipFileFullPath, backupFileName);
+                logger.LogInformation("Try to Backup from {0} to {1} ", zipFileFullPath, backupFileName);
                 File.Copy(zipFileFullPath, backupFileName, true);
-                _logger.LogInformation("Backup from {0} to {1} ", zipFileFullPath, backupFileName);
+                logger.LogInformation("Backup from {0} to {1} ", zipFileFullPath, backupFileName);
             }
         }
 
         try
         {
-            _logger.LogInformation("Try to deploy {0} to {1} ", zipFileFullPath, destFileName);
+            logger.LogInformation("Try to deploy {0} to {1} ", zipFileFullPath, destFileName);
             File.Copy(zipFileFullPath, destFileName, true);
-            _logger.LogInformation("package {0} deployed", destFileName);
+            logger.LogInformation("package {0} deployed", destFileName);
         }
         catch (IOException ex)
         {
-            _logger.LogError(ex, "deploy {0} failed", destFileName);
+            logger.LogError(ex, "deploy {0} failed", destFileName);
             return;
         }
         finally
@@ -114,16 +109,21 @@ public class LocalStoragePackageRepository : IPackageRepository
             }
         }
 
-        if (availablePackage is not null)
+		LoadPackageList();
+
+		if (availablePackage is not null)
         {
-            LoadPackageList();
             PackageChanged?.Invoke(availablePackage);
         }
+        else
+        {
+			PackageChanged?.Invoke(new());
+		}
     }
 
     public async Task<string?> RemovePackage(string packageFileName)
     {
-        var fileName = Path.Combine(_settings.RepositoryFolder, packageFileName);
+        var fileName = Path.Combine(settings.RepositoryFolder, packageFileName);
         if (File.Exists(fileName))
         {
             try
@@ -139,7 +139,7 @@ public class LocalStoragePackageRepository : IPackageRepository
         }
         else
         {
-            _logger.LogWarning("RemovePackage {fileName} not found", fileName);
+            logger.LogWarning("RemovePackage {fileName} not found", fileName);
         }
         return null;
     }
@@ -147,7 +147,7 @@ public class LocalStoragePackageRepository : IPackageRepository
     public List<FileInfo> GetBackupFileList(string packageFileName)
     {
         var directoryPart = packageFileName.Replace(".zip", "", StringComparison.InvariantCultureIgnoreCase);
-        var backupDirectory = Path.Combine(_settings.BackupFolder, directoryPart);
+        var backupDirectory = Path.Combine(settings.BackupFolder, directoryPart);
 
         if (!Directory.Exists(backupDirectory))
         {
@@ -163,7 +163,7 @@ public class LocalStoragePackageRepository : IPackageRepository
 
     public string? RollbackPackage(PackageInfo package, FileInfo fileInfo)
     {
-        var destPackage = Path.Combine(_settings.RepositoryFolder, package.PackageFileName);
+        var destPackage = Path.Combine(settings.RepositoryFolder, package.PackageFileName);
         try
         {
             fileInfo.LastWriteTime = DateTime.Now;
@@ -183,7 +183,7 @@ public class LocalStoragePackageRepository : IPackageRepository
     private void LoadPackageList()
     {
         _packageList.Clear();
-        var zipFileList = from f in Directory.GetFiles(_settings.RepositoryFolder, "*.zip", SearchOption.AllDirectories)
+        var zipFileList = from f in Directory.GetFiles(settings.RepositoryFolder, "*.zip", SearchOption.AllDirectories)
                           let fileInfo = new FileInfo(f)
                           select fileInfo;
 
@@ -206,7 +206,7 @@ public class LocalStoragePackageRepository : IPackageRepository
         var version = 1;
         var directoryPart = fileName.Replace(".zip", "", StringComparison.InvariantCultureIgnoreCase);
 
-        var packageBackupDirectory = Path.Combine(_settings.BackupFolder, directoryPart);
+        var packageBackupDirectory = Path.Combine(settings.BackupFolder, directoryPart);
         if (!Directory.Exists(packageBackupDirectory))
         {
             Directory.CreateDirectory(packageBackupDirectory);
@@ -226,7 +226,7 @@ public class LocalStoragePackageRepository : IPackageRepository
         string? backupDirectory = null;
         while (true)
         {
-            backupDirectory = Path.Combine(_settings.BackupFolder, directoryPart, $"v{version}");
+            backupDirectory = Path.Combine(settings.BackupFolder, directoryPart, $"v{version}");
             if (Directory.Exists(backupDirectory))
             {
                 version++;

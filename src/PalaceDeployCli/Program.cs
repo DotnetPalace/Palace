@@ -77,7 +77,7 @@ table.AddRow("2", "Install latest version of palace webapp from local zip");
 table.AddRow("3", "Install latest version of palace host from github");
 table.AddRow("4", "Install latest version of palace webapp from github");
 
-table.AddRow("5", "Quit");
+table.AddRow("0", "Quit");
 
 AnsiConsole.Write(table);
 

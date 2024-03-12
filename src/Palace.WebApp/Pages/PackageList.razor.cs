@@ -16,16 +16,23 @@ public partial class PackageList
     string? errorReport = null;
     List<PackageInfo> availablePackageList = new();
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PackageRepository.PackageChanged += async (package) =>
+            {
+                await InvokeAsync(() =>
+                {
+                    UpdateLists();
+                    base.StateHasChanged();
+                });
+            };
+        }
+    }
+
     protected override void OnInitialized()
     {
-        PackageRepository.PackageChanged += async (package) =>
-        {
-            await InvokeAsync(() =>
-            {
-                UpdateLists();
-                base.StateHasChanged();
-            });
-        };
         UpdateLists();
     }
 
@@ -33,7 +40,6 @@ public partial class PackageList
     {
         availablePackageList = PackageRepository.GetPackageInfoList().ToList();
     }
-
 
     async Task RemovePackage(string packageFileName)
     {

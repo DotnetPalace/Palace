@@ -7,19 +7,16 @@ namespace Palace.Server.Services;
 public class PackageRepositoryWatcher : BackgroundService
 {
     private readonly Configuration.GlobalSettings _settings;
-    private readonly Orchestrator _orchestrator;
     private readonly ILogger<PackageRepositoryWatcher> _logger;
     private readonly IPackageRepository _packageRepository;
 
-    private ConcurrentDictionary<string, DateTime> _uploadedFiles = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, DateTime> _uploadedFiles = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 
     public PackageRepositoryWatcher(Configuration.GlobalSettings settings,
-        Services.Orchestrator orchestrator,
         ILogger<PackageRepositoryWatcher> logger,
         IPackageRepository packageRepository)
     {
         _settings = settings;
-        _orchestrator = orchestrator;
         _logger = logger;
         _packageRepository = packageRepository;
     }

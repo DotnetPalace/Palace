@@ -20,8 +20,12 @@ internal class BuildAndPublishPalaceServer(PalaceDeployCliSettings settings)
 		var envTxtFileName = System.IO.Path.Combine(publishPath, $"env.txt");
 		await System.IO.File.WriteAllTextAsync(envTxtFileName, settings.Environment);
 
-		var localConfigFileName = System.IO.Path.Combine(publishPath, $"appsettings.local.config");
+		var localConfigFileName = System.IO.Path.Combine(publishPath, $"appsettings.local.json");
 		System.IO.File.Delete(localConfigFileName);
+		if (System.IO.File.Exists(localConfigFileName))
+		{
+			throw new Exception();
+		}
 
 		await Helpers.Process(@"C:\Program Files\7-Zip\7z.exe", @$"a -tzip -r {publishPath} *", publishPath);
 
