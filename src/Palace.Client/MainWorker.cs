@@ -10,26 +10,17 @@ using Palace.Shared.Messages;
 
 namespace Palace.Client;
 
-public class MainWorker : BackgroundService
+public class MainWorker(
+	ILogger<MainWorker> logger,
+	PalaceSettings settings,
+	ArianeBus.IServiceBus bus
+	) 
+	: BackgroundService
 {
-    private readonly ILogger<MainWorker> _logger;
-	private readonly PalaceSettings _settings;
-	private readonly IServiceBus _bus;
-
-	public MainWorker(ILogger<MainWorker> logger,
-        PalaceSettings settings,
-		ArianeBus.IServiceBus bus)
-    {
-        _logger = logger;
-		_settings = settings;
-		_bus = bus;
-	}
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
 		var entryAssembly = Assembly.GetEntryAssembly()!;
 		var version = $"{entryAssembly.GetName().Version}";
-		var productAttribute = entryAssembly.GetCustomAttribute<System.Reflection.AssemblyProductAttribute>();
 		var fileInfo = new System.IO.FileInfo(entryAssembly.Location);
 		var startedDate = DateTime.Now;
 
@@ -37,8 +28,8 @@ public class MainWorker : BackgroundService
 		{
 			var rmi = new RunningMicroserviceInfo
 			{
-				ServiceName = _settings.ServiceName,
-				HostName = _settings.HostName,
+				ServiceName = settings.ServiceName,
+				HostName = settings.HostName,
 				Version = version,
 				Location = fileInfo.FullName,
 				UserInteractive = System.Environment.UserInteractive,
@@ -47,36 +38,36 @@ public class MainWorker : BackgroundService
 				ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id,
 				StartedDate = startedDate,
 				CommandLine = System.Environment.CommandLine,
-				EnvironmentName = _settings.HostEnvironmentName,
+				EnvironmentName = settings.HostEnvironmentName,
 				ServiceState = ServiceState.Running,
 				WorkingSet = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64,
 			};
 
-			await _bus.EnqueueMessage(_settings.ServiceHealthQueueName, new Shared.Messages.ServiceHealthCheck
+			await bus.EnqueueMessage(settings.ServiceHealthQueueName, new Shared.Messages.ServiceHealthCheck
 			{
-				HostName = _settings.HostName,
+				HostName = settings.HostName,
 				ServiceInfo = rmi
-			});
+			}, cancellationToken: stoppingToken);
 
-			_logger.LogTrace("Worker running at: {time}", DateTimeOffset.Now);
+			logger.LogTrace("Worker running at: {time}", DateTimeOffset.Now);
 			if (!stoppingToken.IsCancellationRequested)
 			{
-				await Task.Delay(_settings.ScanIntervalInSeconds * 1000, stoppingToken);
+				await Task.Delay(settings.ScanIntervalInSeconds * 1000, stoppingToken);
 			}
 		}
     }
 
 	public override async Task StopAsync(CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Service stopping");
+		logger.LogInformation("Service stopping");
 
 		// Send a message to the bus to say that the service is stopping
-		await _bus.EnqueueMessage(_settings.StopServiceReportQueueName, new StopServiceReport
+		await bus.EnqueueMessage(settings.StopServiceReportQueueName, new StopServiceReport
 		{
-			ServiceName = _settings.ServiceName,
-			HostName = _settings.HostName,
+			ServiceName = settings.ServiceName,
+			HostName = settings.HostName,
 			State = ServiceState.Offline
-		});
+		}, cancellationToken: cancellationToken);
 
 		await base.StopAsync(cancellationToken);
 	}
