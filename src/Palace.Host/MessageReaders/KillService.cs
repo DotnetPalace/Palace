@@ -49,9 +49,16 @@ internal class KillService : ArianeBus.MessageReaderBase<Palace.Shared.Messages.
 			ServiceName = message.ServiceSettings.ServiceName,
 		};
 
-		var result = await ProcessHelper.KillProcess(message.ProcessId);
-		report.Success = result.Success;
-		report.FailReason = report.FailReason;
+		try
+		{
+			var result = await ProcessHelper.KillProcess(message.ProcessId);
+			report.Success = result.Success;
+		}
+		catch (Exception ex)
+		{
+			report.Success = false;
+			report.FailReason = ex.Message;
+		}
 
 		await _bus.EnqueueMessage(_settings.KillServiceReportQueueName, report, cancellationToken: cancellationToken);
 	}
