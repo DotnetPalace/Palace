@@ -93,6 +93,7 @@ public static class StartupHelper
 			config.RegisterQueueReader<Palace.Server.MessageReaders.StopServiceReport>(new QueueName(settings.StopServiceReportQueueName));
 			config.RegisterQueueReader<Palace.Server.MessageReaders.ServiceUnInstallationReport>(new QueueName(settings.UnInstallationReportQueueName));
 			config.RegisterQueueReader<Palace.Server.MessageReaders.KillServiceReport>(new QueueName(settings.KillServiceReportQueueName));
+			config.RegisterQueueReader<Palace.Server.MessageReaders.HostStopped>(new QueueName(settings.HostStoppedQueueName));
 		});
 
 		builder.Services.AddValidatorsFromAssembly(currentAssembly);

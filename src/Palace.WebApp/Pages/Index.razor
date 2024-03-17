@@ -26,7 +26,7 @@
 		</tr>
 		<tr>
 			<th>Group</th>
-			<th>Serivce Name</th>
+			<th>Service Name</th>
 			@foreach (var host in hostList.OrderBy(i => i.HostName))
 			{
 				var hostStyle = host.HostState == Palace.Shared.HostState.Down ? "table-danger" : "";
