@@ -10,6 +10,6 @@ public class StartingServiceReport : IMessage
     public string? InstallationFolder { get; set; }
     public int ProcessId { get; set; }
     public string? CommandLine { get; set; }
-    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(60);
     public string Origin { get; set; } = null!;
 }

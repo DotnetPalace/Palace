@@ -10,5 +10,5 @@ public class InstallService : IMessage
     public required string DownloadUrl { get; set; } = null!;
     public string? OverridedArguments { get; set; }
     public string Trigger { get; set; } = null!;
-    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(60);
 }

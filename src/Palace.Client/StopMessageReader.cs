@@ -57,10 +57,6 @@ public sealed class StopMessageReader(
             return;
         }
 
-        _timer = new System.Timers.Timer();
-        _timer.Interval = settings.TimeoutInSecondBeforeKillService * 1000;
-        _timer.Elapsed += ExitTimerElapsed;
-
         logger.LogInformation($"Try to close the service {message.ServiceName} on {message.HostName}");
 
         await bus.EnqueueMessage(settings.StopServiceReportQueueName, new StopServiceReport
@@ -80,9 +76,12 @@ public sealed class StopMessageReader(
 		catch (Exception ex)
         {
             logger.LogError(ex, $"Error when try to stop the service {message.ServiceName} on {message.HostName}");
-        }
-        _timer.Start();
-    }
+			_timer = new System.Timers.Timer();
+			_timer.Interval = 5 * 1000;
+			_timer.Elapsed += ExitTimerElapsed;
+			_timer.Start();
+		}
+	}
 
     private async void ExitTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {

@@ -14,7 +14,7 @@ public class HostHealthCheck : IMessage
     public DateTime Now { get; set; } = DateTime.Now;
 	public string MainFileName { get; set; } = null!;
 	public string Version { get; set; } = null!;
-    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(30);
 	public long TotalDriveSize { get; set; }
 	public long TotalFreeSpaceOfDriveSize { get; set; }
 	public string? OsDescription { get; set; }

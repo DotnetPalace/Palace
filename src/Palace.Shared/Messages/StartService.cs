@@ -6,6 +6,6 @@ public class StartService : IMessage
     public string HostName { get; set; } = null!;
     public MicroServiceSettings ServiceSettings { get; set; } = new();
     public string? OverridedArguments { get; set; }
-    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+    public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(60);
 	public string Origin { get; set; } = null!;
 }
