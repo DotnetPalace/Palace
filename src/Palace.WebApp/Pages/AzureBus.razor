@@ -1,0 +1,35 @@
+﻿@page "/azurebus"
+@using ArianeBus
+
+@inject IServiceBus Bus
+
+@code {
+
+	private IEnumerable<QueueName> queueList = default!;
+	private IDictionary<TopicName, SubscriptionName> topicList = default!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Yield();
+		queueList = Bus.GetRegisteredQueueNameList();
+		topicList = Bus.GetRegisteredTopicAndSubscriptionNameList();
+	}
+}
+
+@if (queueList is not null && topicList is not null)
+{
+	<p>Queues :</p>
+<ul>
+	@foreach (var queue in queueList)
+	{
+		<li>@queue.Value</li>
+	}
+</ul>
+	<p>Topics :</p>
+<ul>
+	@foreach (var topic in topicList)
+	{
+		<li>Name : @topic.Key : Subscription : @topic.Value</li>
+	}
+</ul>
+}

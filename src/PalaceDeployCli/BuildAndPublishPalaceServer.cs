@@ -29,9 +29,13 @@ internal class BuildAndPublishPalaceServer(PalaceDeployCliSettings settings,
 			throw new Exception();
 		}
 
-		await Helpers.Process(@"C:\Program Files\7-Zip\7z.exe", @$"a -tzip -r {publishPath} *", publishPath);
-
 		var zipFileName = System.IO.Path.Combine(publishPath, "..\\", $"publish.zip");
+		if (System.IO.File.Exists(zipFileName))
+		{
+			System.IO.File.Delete(zipFileName);
+		}
+
+		await Helpers.Process(@"C:\Program Files\7-Zip\7z.exe", @$"a -tzip -r {publishPath} *", publishPath);
 
 		return zipFileName;
 	}

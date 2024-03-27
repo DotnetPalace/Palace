@@ -24,6 +24,9 @@
             <NavLink class="nav-link p-1" href="Packages" Match="NavLinkMatch.All">
                 <span class="oi oi-folder" aria-hidden="true"></span> Packages
             </NavLink>
+            <NavLink class="nav-link p-1" href="AzureBus" Match="NavLinkMatch.All">
+                <span class="oi oi-bullhorn" aria-hidden="true"></span> AzureBus
+            </NavLink>
             <AuthorizeView Roles="admin">
                 <Authorized>
                     @if (LoginService.MenuComponentType is not null)

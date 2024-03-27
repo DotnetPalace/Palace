@@ -6,5 +6,5 @@ public class KillService : IMessage
 	public required string HostName { get; set; } = null!;
     public required int ProcessId { get; set; }
     public required MicroServiceSettings ServiceSettings { get; set; } = new();
-	public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(15);
+	public DateTime Timeout { get; set; } = DateTime.Now.AddSeconds(60);
 }
