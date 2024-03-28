@@ -52,7 +52,7 @@ public class ServiceUnInstallationReport(
 		}
 
 		// On supprime le service de la liste
-		orchestrator.RemoveMicroServiceInfo(emsi);
+		orchestrator.RemoveMicroServiceInfo(emsi, true);
 
 		await longActionService.SetActionCompleted(new Models.ActionResult
 		{
