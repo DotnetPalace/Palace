@@ -181,14 +181,17 @@ public class Orchestrator(
 		}
 	}
 
-	internal void RemoveMicroServiceInfo(ExtendedMicroServiceInfo rmi)
+	internal void RemoveMicroServiceInfo(ExtendedMicroServiceInfo rmi, bool fromUninstall)
 	{
 		if (rmi is null)
 		{
 			return;
 		}
 
-		// _extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
+		if (fromUninstall)
+		{
+			_extendedMicroServiceInfoList.Remove(rmi.Key, out var existing);
+		}
 		try
 		{
 			ServiceChanged?.Invoke(rmi);

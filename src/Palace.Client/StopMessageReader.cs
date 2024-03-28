@@ -66,7 +66,7 @@ public sealed class StopMessageReader(
             HostName = settings.MachineName,
             State = Shared.ServiceState.TryToStop,
             Origin = message.Origin
-        });
+        },cancellationToken: cancellationToken);
 
         try
         {
@@ -76,19 +76,25 @@ public sealed class StopMessageReader(
 		catch (Exception ex)
         {
             logger.LogError(ex, $"Error when try to stop the service {message.ServiceName} on {message.HostName}");
-			_timer = new System.Timers.Timer();
-			_timer.Interval = 5 * 1000;
-			_timer.Elapsed += ExitTimerElapsed;
-			_timer.Start();
 		}
+
+        await Task.Delay(5000, cancellationToken);
+
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            _timer = new System.Timers.Timer();
+            _timer.Interval = 5 * 1000;
+            _timer.Elapsed += ExitTimerElapsed;
+            _timer.Start();
+        }
 	}
 
-    private async void ExitTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+	private async void ExitTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
+		_timer.Stop();
 		_timer.Elapsed -= ExitTimerElapsed;
 
 		logger.LogWarning($"Try to close the service {settings.ServiceName} fail with soft method");
-        _timer.Stop();
 
 		await bus.EnqueueMessage(settings.StopServiceReportQueueName, new StopServiceReport
         {

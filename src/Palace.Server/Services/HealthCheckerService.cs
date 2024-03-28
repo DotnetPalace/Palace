@@ -26,7 +26,8 @@ public class HealthCheckerService(
 		var services = orchestrator.GetServiceList();
 		foreach (var service in services)
 		{
-			if (service.LastHitDate < DateTime.Now.AddMinutes(-1))
+			if (!service.LastHitDate.HasValue
+				|| service.LastHitDate < DateTime.Now.AddMinutes(-1))
 			{
 				logger.LogWarning("Service {serviceName} is down", service.ServiceName);
 				service.ServiceState = Palace.Shared.ServiceState.Down;
