@@ -3,8 +3,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>3.2.64.0</Version>
+    <Version>3.2.65.0</Version>
     <PackageReleaseNotes>
+			3.2.65.0 : Retry twice when delete service folder
 			3.2.64.0 : Best timeouts
 			3.2.63.0 : Improve kill command with best reporting
 			3.2.62.0 : Check installed and not running services
