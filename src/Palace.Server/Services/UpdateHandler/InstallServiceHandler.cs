@@ -48,7 +48,7 @@ public class InstallServiceHandler : IUpdateHandler
         _orchestrator.AddOrUpdateMicroServiceInfo(context.ServiceInfo);
 
         // 4 - Envoyer une demande d'installation
-        _logger.LogInformation("Send install service {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
+        _logger.LogInformation("Send install service {ServiceName} for host {Host}", context.ServiceInfo.ServiceName, context.HostName);
         var downloadUrl = await _packageDownloaderService.GenerateUrl(context.ServiceSettings.PackageFileName);
         // var downloadUrl = $"{_settings.CurrentUrl}/api/palace/download/{context.ServiceSettings.PackageFileName}";
         await _bus.PublishTopic(_settings.InstallServiceTopicName, new Palace.Shared.Messages.InstallService
@@ -62,7 +62,7 @@ public class InstallServiceHandler : IUpdateHandler
         });
 
         // 5 - Attendre le retour d'installation réussie
-        _logger.LogInformation("Wait for service {serviceName} installed for host {host}", context.ServiceInfo.ServiceName, context.HostName);
+        _logger.LogInformation("Wait for service {ServiceName} installed for host {Host}", context.ServiceInfo.ServiceName, context.HostName);
         var loop = 0;
         while (true)
         {
@@ -82,7 +82,7 @@ public class InstallServiceHandler : IUpdateHandler
             loop++;
             if (loop > 2)
             {
-                _logger.LogWarning("Update aborted for service {serviceName} for host {host}", context.ServiceInfo.ServiceName, context.HostName);
+                _logger.LogWarning("Update aborted for service {ServiceName} for host {Host}", context.ServiceInfo.ServiceName, context.HostName);
                 return;
             }
         }
