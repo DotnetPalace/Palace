@@ -49,7 +49,7 @@ public class MainWorker(
 				ServiceInfo = rmi
 			}, cancellationToken: stoppingToken);
 
-			logger.LogTrace("Worker running at: {time}", DateTimeOffset.Now);
+			logger.LogTrace("Worker running at: {Time}", DateTimeOffset.Now);
 			if (!stoppingToken.IsCancellationRequested)
 			{
 				await Task.Delay(settings.ScanIntervalInSeconds * 1000, stoppingToken);

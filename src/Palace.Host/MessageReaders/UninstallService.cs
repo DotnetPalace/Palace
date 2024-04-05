@@ -79,20 +79,30 @@ internal class UninstallService : ArianeBus.MessageReaderBase<Palace.Shared.Mess
 			return;
 		}
 
-		// On supprime le dossier d'installation
-		try
+		var count = 0;
+		while (true)
 		{
-			System.IO.Directory.Delete(installationFolder, true);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, $"Error when deleting folder {installationFolder}");
-			report.Success = false;
-			report.FailReason = $"Error when deleting folder {installationFolder}";
-			await _bus.EnqueueMessage(_settings.UnInstallationReportQueueName, report);
+			// On supprime le dossier d'installation
+			try
+			{
+				System.IO.Directory.Delete(installationFolder, true);
+				report.Success = true;
+				break;
+			}
+			catch (Exception ex)
+			{
+				if (count > 2)
+				{
+					_logger.LogError(ex, "Error when deleting folder {InstallationFolder}", installationFolder);
+					report.Success = false;
+					report.FailReason = $"Error when deleting folder {installationFolder}";
+					break;
+				}
+				count++;
+				await Task.Delay(2 * 1000);
+			}
 		}
 
-		report.Success = true;
 		await _bus.EnqueueMessage(_settings.UnInstallationReportQueueName, report);
 	}
 }

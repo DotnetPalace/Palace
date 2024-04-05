@@ -25,7 +25,7 @@ public sealed class StopMessageReader(
             return;
         }
 
-		logger.LogInformation("Receive stop message for {hostName}/{servcieName}/{origin}", message.ServiceName, message.HostName, message.Origin);
+		logger.LogInformation("Receive stop message for {HostName}/{ServcieName}/{Origin}", message.HostName, message.ServiceName, message.Origin);
 
         if (string.IsNullOrWhiteSpace(message.HostName))
         {
@@ -49,7 +49,7 @@ public sealed class StopMessageReader(
             || !settings.HostName.Equals(message.HostName, StringComparison.InvariantCultureIgnoreCase))
         {
             // Not for me
-            logger.LogInformation("Message stop is not for me svc {s1} <-> {s2} host {h1} <-> {h2}", 
+            logger.LogInformation("Message stop is not for me svc {S1} <-> {S2} host {H1} <-> {H2}", 
                 message.ServiceName, 
                 settings.ServiceName, 
                 message.HostName, 
@@ -57,7 +57,7 @@ public sealed class StopMessageReader(
             return;
         }
 
-        logger.LogInformation($"Try to close the service {message.ServiceName} on {message.HostName}");
+        logger.LogInformation("Try to close the service {ServiceName} on {HostName}", message.ServiceName, message.HostName);
 
         await bus.EnqueueMessage(settings.StopServiceReportQueueName, new StopServiceReport
         {
@@ -71,30 +71,26 @@ public sealed class StopMessageReader(
         try
         {
             hostApplicationLifetime.StopApplication();
-			logger.LogInformation($"Service {message.ServiceName} on {message.HostName} is stopping");
+			logger.LogInformation("Service {ServiceName} on {HostName} is stopping", message.ServiceName, message.HostName);
 		}
 		catch (Exception ex)
         {
-            logger.LogError(ex, $"Error when try to stop the service {message.ServiceName} on {message.HostName}");
+            logger.LogError(ex, "Error when try to stop the service {ServiceName} on {HostName}", message.ServiceName, message.HostName);
 		}
 
-        await Task.Delay(5000, cancellationToken);
-
-        if (!cancellationToken.IsCancellationRequested)
-        {
-            _timer = new System.Timers.Timer();
-            _timer.Interval = 5 * 1000;
-            _timer.Elapsed += ExitTimerElapsed;
-            _timer.Start();
-        }
+        _timer = new System.Timers.Timer();
+        _timer.Interval = 10 * 1000;
+        _timer.Elapsed += ExitTimerElapsed;
+        _timer.Start();
 	}
 
 	private async void ExitTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
 		_timer.Stop();
 		_timer.Elapsed -= ExitTimerElapsed;
+        _timer.Dispose();
 
-		logger.LogWarning($"Try to close the service {settings.ServiceName} fail with soft method");
+		logger.LogWarning("Try to close the service {ServiceName} fail with soft method", settings.ServiceName);
 
 		await bus.EnqueueMessage(settings.StopServiceReportQueueName, new StopServiceReport
         {
