@@ -4,9 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Palace.Client</PackageId>
-    <Version>2.0.27.1</Version>
+    <Version>2.0.28.1</Version>
     <PackageReleaseNotes>
-			2.0.27.1 : Always start timer for stopping 
+			2.0.28.1 : Nuget update
+			2.0.27.1 : Always start timer for stopping
 			2.0.26.1 : Timer strategy where Soft stop is not possible
 			2.0.25.1 : More logs when stopping
 			2.0.24.1 : More logs
@@ -37,7 +38,7 @@
     <Compile Include="..\Palace.Shared\ServiceState.cs" Link="Links\ServiceState.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ArianeBus" Version="1.1.14" />
+    <PackageReference Include="ArianeBus" Version="1.1.16" />
   </ItemGroup>
   <!--<ItemGroup>
 		<Content Include="$(OutputPath)\Palace.Shared.dll">
