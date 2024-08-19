@@ -1,20 +1,14 @@
 ﻿namespace Palace.Server.Services;
 
-public class DefaultPackageDownloaderService : IPackageDownloaderService
+public class DefaultPackageDownloaderService(Configuration.GlobalSettings settings) : IPackageDownloaderService
 {
-    private readonly Configuration.GlobalSettings _settings;
     private readonly Dictionary<Guid, string> _urls = new();
-
-    public DefaultPackageDownloaderService(Configuration.GlobalSettings settings)
-    {
-        _settings = settings;
-    }
 
     public async Task<string> GenerateUrl(string packageFileName)
     {
         await Task.Yield();
         var tempId = Guid.NewGuid();
-        var result = $"{_settings.CurrentUrl}/api/palace/download/{tempId}/{packageFileName}";
+        var result = $"{settings.CurrentUrl}/api/palace/download/{tempId}/{packageFileName}";
         _urls.Add(tempId, packageFileName);
         return result;
     }

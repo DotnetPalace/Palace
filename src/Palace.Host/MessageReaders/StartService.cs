@@ -54,7 +54,7 @@ public class StartService(
         bool isStarted = false;
         try
         {
-            (startReport, processId, isStarted) = await processHelper.StartMicroServiceProcess(commandLine, cancellationToken);
+            (startReport, processId, isStarted) = await processHelper.StartMicroServiceProcess(message.HostName, commandLine, cancellationToken);
             if (isStarted)
             {
                 _serviceState = ServiceState.Running;

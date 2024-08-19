@@ -2,45 +2,37 @@
 
 namespace Palace.Server.MessageReaders;
 
-public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messages.StopServiceReport>
+public class StopServiceReport(
+	Services.Orchestrator orchestrator,
+    ILogger<StopServiceReport> logger,
+    LongActionService longActionService
+	) 
+	: ArianeBus.MessageReaderBase<Palace.Shared.Messages.StopServiceReport>
 {
-	private readonly Orchestrator _orchestrator;
-    private readonly ILogger<StopServiceReport> _logger;
-	private readonly LongActionService _longActionService;
-
-	public StopServiceReport(Services.Orchestrator orchestrator,
-		ILogger<StopServiceReport> logger,
-        LongActionService longActionService)
-    {
-		_orchestrator = orchestrator;
-        _logger = logger;
-		_longActionService = longActionService;
-	}
-
     public override async Task ProcessMessageAsync(Shared.Messages.StopServiceReport message, CancellationToken cancellationToken)
 	{
 		await Task.Yield();
 
         if (message is null)
         {
-            _logger.LogError("message is null");
+            logger.LogError("message is null");
             return;
         }
 
         if (message.Timeout < DateTime.Now)
         {
-            _logger.LogTrace("message is too old");
+            logger.LogTrace("message is too old");
             return;
         }
 
 		var key = $"{message.HostName}__{message.ServiceName}";
-		var microServiceInfo = _orchestrator.GetExtendedMicroServiceInfoByKey(key);
+		var microServiceInfo = orchestrator.GetExtendedMicroServiceInfoByKey(key);
 
 		if (microServiceInfo is not null)
 		{
 			microServiceInfo.ServiceState = message.State;
 			microServiceInfo.LastHitDate = message.ActionDate;
-			_orchestrator.AddOrUpdateMicroServiceInfo(microServiceInfo);
+			orchestrator.AddOrUpdateMicroServiceInfo(microServiceInfo);
 		}
 
 		if (message.Origin != "Recycle")
@@ -51,12 +43,12 @@ public class StopServiceReport : ArianeBus.MessageReaderBase<Palace.Shared.Messa
 				Success = message.State == ServiceState.TryToStop,
 				StepName = "StopService",
 			};
-			await _longActionService.SetActionCompleted(actionResult);
-			_orchestrator.OnLongActionProgress(actionResult);
+			await longActionService.SetActionCompleted(actionResult);
+			orchestrator.OnLongActionProgress(actionResult);
 		}
 		else if (message.Origin == "Recycle")
 		{
-			await _longActionService.AddLog(message.ActionSourceId, new Models.ActionLog
+			await longActionService.AddLog(message.ActionSourceId, new Models.ActionLog
 			{
 				Message = message.State == ServiceState.TryToStop ? "Service stopped" : "not stopped"
 			});

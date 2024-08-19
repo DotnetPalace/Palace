@@ -8,12 +8,12 @@ namespace DemoSvc1;
 
 internal static class CommandLineHelper
 {
-	public static string GetParameterValue(this string[] args, string parameterName)
+	public static string? GetParameterValue(this string[] args, string parameterName)
 	{
 		if (args == null
 			|| !args.Any())
 		{
-			return string.Empty;
+			return null;
 		}
 
 		string value = string.Empty;

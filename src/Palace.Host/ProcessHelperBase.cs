@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Palace.Host;
@@ -27,14 +28,13 @@ public abstract class ProcessHelperBase(
         return result;
     }
 
-    public virtual async Task<(string StartReport, int ProcessId, bool IsStarted)> StartMicroServiceProcess(string commandLine, CancellationToken cancellationToken)
+    public virtual async Task<(string StartReport, int ProcessId, bool IsStarted)> StartMicroServiceProcess(string hostName, string commandLine, CancellationToken cancellationToken)
     {
+        await Task.Yield();
+        using var mre = new ManualResetEvent(false);
         var psi = new ProcessStartInfo("dotnet");
 
-        var report = new StringBuilder();
         int processId = 0;
-        bool isStared = false;
-        bool hasError = false;
 
         psi.Arguments = commandLine;
 
@@ -42,57 +42,33 @@ public abstract class ProcessHelperBase(
         psi.UseShellExecute = false;
         psi.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
         psi.RedirectStandardError = true;
-        psi.RedirectStandardOutput = false;
+        psi.RedirectStandardOutput = true;
         psi.ErrorDialog = false;
 
+        var psl = new ProcessStartingLogger(logger, hostName, mre);
         var process = new Process();
         process.StartInfo = psi;
         process.EnableRaisingEvents = true;
-        process.ErrorDataReceived += (p, args) =>
-        {
-            if (args.Data is null)
-            {
-                return;
-            }
-            logger.LogDebug(args.Data);
-            report.AppendLine(args.Data);
-            hasError = true;
-        };
+        process.ErrorDataReceived += psl.ErrorDataReceived;
+        process.OutputDataReceived += psl.OutputDataReceived;
 
         logger.LogInformation("try to start ms with command line : 'dotnet {CommandLine}'", commandLine);
-        var start = process.Start();
-        if (start)
-        {
-            processId = process.Id;
-            logger.LogInformation("process started with id {ProcessId}", processId);
-            isStared = true;
-        }
-        else
-        {
-            logger.LogError("process start failed");
-            isStared = false;
-        }
+        process.Start();
 
         process.BeginErrorReadLine();
+        process.BeginOutputReadLine();
 
-        int loop = 0;
-        while (true)
+        mre.WaitOne(30 * 1000);
+
+        process.ErrorDataReceived -= psl.ErrorDataReceived;
+        process.OutputDataReceived -= psl.OutputDataReceived;
+
+        if (!psl.HasError)
         {
-            if (!hasError)
-            {
-                break;
-            }
-
-            loop++;
-            if (loop > 30)
-            {
-                break;
-            }
-
-            await Task.Delay(1 * 1000);
+            processId = process.Id;
         }
 
-        return (report.ToString(), processId, isStared);
+        return (psl.Report, processId, !psl.HasError);
     }
 
     public virtual async Task WaitForProcessDown(string commandLine)
@@ -132,4 +108,6 @@ public abstract class ProcessHelperBase(
         }
         return (exception is null, exception);
     }
+
+
 }

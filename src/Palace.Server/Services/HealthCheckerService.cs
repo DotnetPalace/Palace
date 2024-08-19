@@ -29,7 +29,7 @@ public class HealthCheckerService(
 			if (!service.LastHitDate.HasValue
 				|| service.LastHitDate < DateTime.Now.AddMinutes(-1))
 			{
-				logger.LogWarning("Service {serviceName} is down", service.ServiceName);
+				logger.LogWarning("Service {ServiceName} is down", service.ServiceName);
 				service.ServiceState = Palace.Shared.ServiceState.Down;
 				orchestrator.AddOrUpdateMicroServiceInfo(service);
 			}

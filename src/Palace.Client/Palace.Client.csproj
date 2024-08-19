@@ -6,6 +6,7 @@
     <PackageId>Palace.Client</PackageId>
     <Version>2.0.28.1</Version>
     <PackageReleaseNotes>
+			2.0.29.1 : Console.Write started
 			2.0.28.1 : Nuget update
 			2.0.27.1 : Always start timer for stopping
 			2.0.26.1 : Timer strategy where Soft stop is not possible

@@ -21,9 +21,15 @@ public class MainWorker(
         var version = $"{entryAssembly.GetName().Version}";
         var fileInfo = new System.IO.FileInfo(entryAssembly.Location);
         var startedDate = DateTime.Now;
+        var loop = 0;
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (loop == 1)
+            {
+                Console.WriteLine("Palace service is started");
+            }
+
             var rmi = new RunningMicroserviceInfo
             {
                 ServiceName = settings.ServiceName,
@@ -52,6 +58,7 @@ public class MainWorker(
             {
                 await Task.Delay(settings.ScanIntervalInSeconds * 1000, stoppingToken);
             }
+            loop++;
         }
     }
 

@@ -1,7 +1,6 @@
-﻿using Palace.Server.Configuration;
-using Palace.Shared;
+﻿using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore;
+using Palace.Server.Configuration;
 
 namespace Palace.Server.Services;
 
@@ -22,11 +21,11 @@ public class PalaceDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var microServiceSettingsTable = modelBuilder.Entity<MicroServiceSettings>()
+        modelBuilder.Entity<MicroServiceSettings>()
             .ToTable("MicroServiceSetting")
             .HasKey(i => i.Id);
 
-        var argumentsByHostsTable = modelBuilder.Entity<ArgumentsByHost>()
+        modelBuilder.Entity<ArgumentsByHost>()
             .ToTable("ArgumentsByHost")
             .HasKey(i => i.Id);
     }

@@ -5,33 +5,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Palace.Server.Services;
 
-public class ServiceSettingsRepository
+public class ServiceSettingsRepository(
+	IDbContextFactory<PalaceDbContext> dbContextFactory,
+    IValidator<MicroServiceSettings> validator
+	)
 {
-	private readonly IDbContextFactory<PalaceDbContext> _dbContextFactory;
-	private readonly IValidator<MicroServiceSettings> _validator;
-
-	public ServiceSettingsRepository(IDbContextFactory<PalaceDbContext> dbContextFactory,
-		IValidator<MicroServiceSettings> validator)
-    {
-		_dbContextFactory = dbContextFactory;
-		_validator = validator;
-	}
-
-	public async Task<IEnumerable<MicroServiceSettings>> GetAll()
+    public async Task<IEnumerable<MicroServiceSettings>> GetAll()
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		return await db.MicroServiceSettings.ToListAsync();
 	}
 
 	public async Task<(bool success, Guid id, List<ValidationFailure> brokenRules)> SaveServiceSettings(MicroServiceSettings serviceSettings)
 	{
 		Sanitize(serviceSettings);
-		var validation = await _validator.ValidateAsync(serviceSettings);
+		var validation = await validator.ValidateAsync(serviceSettings);
 		if (!validation.IsValid)
 		{
 			return (false, Guid.Empty, validation.Errors.ToList());
 		}
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		if (serviceSettings.Id == Guid.Empty)
 		{
 			serviceSettings.Id = Guid.NewGuid();
@@ -46,7 +39,7 @@ public class ServiceSettingsRepository
 
 		try
 		{
-			var changeCount = await db.SaveChangesAsync();
+			await db.SaveChangesAsync();
 		}
 		catch (Exception ex)
 		{
@@ -66,7 +59,7 @@ public class ServiceSettingsRepository
 
 	public async Task<bool> RemoveServiceSettings(MicroServiceSettings serviceSettings)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		var existing = await db.MicroServiceSettings.FindAsync(serviceSettings.Id);
 		if (existing is null)
 		{
@@ -80,7 +73,7 @@ public class ServiceSettingsRepository
 
 	public async Task<ArgumentsByHost?> GetArgumentsByHostForService(string hostName, Guid serviceSettingsId)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		var query = from abh in db.ArgumentsByHosts
 					where abh.HostName == hostName
 						&& abh.ServiceSettingId == serviceSettingsId
@@ -92,28 +85,28 @@ public class ServiceSettingsRepository
 
 	public async Task<List<Palace.Shared.ArgumentsByHost>> GetArgumentsByService(Guid serviceSettingsId)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		var result = await db.ArgumentsByHosts.Where(i => i.ServiceSettingId == serviceSettingsId).ToListAsync();
 		return result;
 	}
 
 	public async Task<MicroServiceSettings?> GetByServiceName(string serviceName)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		var result = await db.MicroServiceSettings.FirstOrDefaultAsync(i => i.ServiceName == serviceName);
 		return result;
 	}
 
 	public async Task<IEnumerable<MicroServiceSettings>> GetListByPackageFileName(string packageFileName)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		var result = await db.MicroServiceSettings.Where(i => i.PackageFileName == packageFileName).ToListAsync();
 		return result;
 	}
 
 	public async Task<int> SaveArgumentsByHost(List<ArgumentsByHost> argumentsByHosts)
 	{
-		var db = await _dbContextFactory.CreateDbContextAsync();
+		var db = await dbContextFactory.CreateDbContextAsync();
 		foreach (var item in argumentsByHosts)
 		{
 			if (item.Id == Guid.Empty) // New
