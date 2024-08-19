@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-
-namespace Palace.Server.Services;
+﻿namespace Palace.Server.Services;
 
 public interface ILoginService
 {

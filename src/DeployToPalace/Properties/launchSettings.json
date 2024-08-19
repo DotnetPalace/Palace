@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DeployToPalace": {
+      "commandName": "Project",
+      "commandLineArgs": "--ms DemoSvc1"
+    }
+  }
+}

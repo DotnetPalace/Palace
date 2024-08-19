@@ -25,15 +25,14 @@ public class UpdaterService : BackgroundService
 		_logger = logger;
 		_serviceScopeFactory = serviceScopeFactory;
 		_packageRepository = packageRepository;
-		_packageRepository.PackageChanged += OnPackageChanged;
+        _updateStrategyBase = updateStrategies.Single(i => i.Name.Equals(_settings.DefaultUpdateStrategyName, StringComparison.InvariantCultureIgnoreCase));
+    }
 
-		_updateStrategyBase = updateStrategies.Single(i => i.Name.Equals(_settings.DefaultUpdateStrategyName, StringComparison.InvariantCultureIgnoreCase));
-		_updateStrategyBase.Initialize(_processList);
-	}
-
-	public override Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
 	{
-		return base.StartAsync(cancellationToken);
+        _packageRepository.PackageChanged += OnPackageChanged;
+        _updateStrategyBase.Initialize(_processList);
+        return base.StartAsync(cancellationToken);
 	}
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)

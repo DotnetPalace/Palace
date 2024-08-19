@@ -1,62 +1,52 @@
-﻿using System.Diagnostics;
-
-using ArianeBus;
-
-using Palace.Shared;
+﻿using Palace.Shared;
 
 namespace Palace.Host.MessageReaders;
 
-public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartService>
+public class StartService(
+    ILogger<StartService> logger,
+    Configuration.GlobalSettings settings,
+    ArianeBus.IServiceBus bus,
+    IProcessHelper processHelper
+    )
+    : ArianeBus.MessageReaderBase<Shared.Messages.StartService>
 {
-    private readonly ILogger<StartService> _logger;
-    private readonly Configuration.GlobalSettings _settings;
-    private readonly IServiceBus _bus;
     private ServiceState _serviceState = ServiceState.Offline;
-
-    public StartService(ILogger<StartService> logger,
-        Configuration.GlobalSettings settings,
-        ArianeBus.IServiceBus bus)
-    {
-        _logger = logger;
-        _settings = settings;
-        _bus = bus;
-    }
 
     public override async Task ProcessMessageAsync(Shared.Messages.StartService message, CancellationToken cancellationToken)
     {
         if (message is null)
         {
-            _logger.LogError("message is null");
+            logger.LogError("message is null");
             return;
         }
 
         if (message.Timeout < DateTime.Now)
         {
-            _logger.LogTrace("message is too old");
+            logger.LogTrace("message is too old");
             return;
         }
 
-        if (!message.HostName.Equals(_settings.HostName))
+        if (!message.HostName.Equals(settings.HostName))
         {
-            _logger.LogTrace("installation service not for me");
+            logger.LogTrace("installation service not for me");
             return;
         }
 
-        var mainFileName = System.IO.Path.Combine(_settings.InstallationFolder, message.ServiceSettings.ServiceName, message.ServiceSettings.MainAssembly);
-        var installationFolder = System.IO.Path.Combine(_settings.InstallationFolder, message.ServiceSettings.ServiceName);
+        var mainFileName = System.IO.Path.Combine(settings.InstallationFolder, message.ServiceSettings.ServiceName, message.ServiceSettings.MainAssembly);
+        var installationFolder = System.IO.Path.Combine(settings.InstallationFolder, message.ServiceSettings.ServiceName);
         if (!System.IO.File.Exists(mainFileName))
         {
-            _logger.LogWarning("MainAssembly {mainFileName} not found in {installationFolder}", mainFileName, installationFolder);
+            logger.LogWarning("MainAssembly {MainFileName} not found in {InstallationFolder}", mainFileName, installationFolder);
             return;
         }
 
-		var commandLine = $"{mainFileName} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
+        var commandLine = $"{mainFileName} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
 
-		var runningProcesses = ProcessHelper.GetRunningProcess(commandLine);
+        var runningProcesses = processHelper.GetRunningProcess(commandLine);
         if (runningProcesses.Any())
         {
-			_logger.LogWarning("MainAssembly {mainFileName} already running in {installationFolder}", mainFileName, installationFolder);
-			return;
+            logger.LogWarning("MainAssembly {MainFileName} already running in {InstallationFolder}", mainFileName, installationFolder);
+            return;
         }
 
         string startReport = null!;
@@ -64,31 +54,31 @@ public class StartService : ArianeBus.MessageReaderBase<Shared.Messages.StartSer
         bool isStarted = false;
         try
         {
-			(startReport, processId, isStarted) = await ProcessHelper.StartMicroServiceProcess(commandLine);
+            (startReport, processId, isStarted) = await processHelper.StartMicroServiceProcess(message.HostName, commandLine, cancellationToken);
             if (isStarted)
-			{
-				_serviceState = ServiceState.Running;
-				_logger.LogInformation("Service {mainFileName} started with {processId} {report}", mainFileName, processId, startReport);
-			}
-			else
-			{
-				_serviceState = ServiceState.StartFail;
-				_logger.LogError("Service {mainFileName} start failed with {report}", mainFileName, startReport);
-			}
-		}
+            {
+                _serviceState = ServiceState.Running;
+                logger.LogInformation("Service {MainFileName} started with {ProcessId} {Report}", mainFileName, processId, startReport);
+            }
+            else
+            {
+                _serviceState = ServiceState.StartFail;
+                logger.LogError("Service {MainFileName} start failed with {Report}", mainFileName, startReport);
+            }
+        }
         catch (Exception ex)
         {
             _serviceState = ServiceState.StartFail;
             startReport = ex.Message;
             ex.Data.Add("ServiceName", mainFileName);
             ex.Data.Add("ServiceLocation", installationFolder);
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
         }
 
-        await _bus.EnqueueMessage(_settings.StartingServiceReportQueueName, new Shared.Messages.StartingServiceReport
+        await bus.EnqueueMessage(settings.StartingServiceReportQueueName, new Shared.Messages.StartingServiceReport
         {
             ActionSourceId = message.ActionId,
-            HostName = _settings.HostName,
+            HostName = settings.HostName,
             InstallationFolder = installationFolder,
             ServiceName = message.ServiceSettings.ServiceName,
             ServiceState = _serviceState,

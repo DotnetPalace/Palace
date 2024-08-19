@@ -28,7 +28,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 	{
 		var section = hostingContext.Configuration.GetSection("Palace");
 
-		var prefixQueue = section.GetValue<string>("PrefixQueue");
+		var prefixQueue = section.GetValue<string>("QueuePrefix");
 
         var keyVaultName = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultName")!;
         var keyVaultTenantId = hostingContext.Configuration.GetValue<string>("Palace.KeyVaultProvider:KeyVaultTenantId")!;
@@ -54,13 +54,10 @@ IHost host = Host.CreateDefaultBuilder(args)
 
 		services.AddPalaceClient(config =>
 		{
-			config.HostName = hostName ?? config.HostName;
+			config.HostName = hostName ?? section.GetValue<string>("HostName") ?? config.HostName;
 			config.ServiceName = serviceName ?? nameof(DemoSvc1);
 			config.QueuePrefix = prefixQueue;
 			config.AzureBusConnectionString = azureBusConnectionString;
-			config.StopServiceReportQueueName = "palace.stopservicereport";
-			config.ServiceHealthQueueName = "palace.servicehealth";
-			config.StopTopicName = "palace.stopservice";
 			config.HostEnvironmentName = hostingContext.HostingEnvironment.EnvironmentName;
 		});
 

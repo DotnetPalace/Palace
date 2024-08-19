@@ -1,18 +1,16 @@
-﻿using System.Collections.Concurrent;
-
-namespace Palace.Server.Services;
+﻿namespace Palace.Server.Services;
 
 public class LocalStoragePackageRepository(
     ILogger<LocalStoragePackageRepository> logger,
-	Configuration.GlobalSettings settings
-    ) 
+    Configuration.GlobalSettings settings
+    )
     : IPackageRepository
 {
-	private readonly ConcurrentDictionary<string, PackageInfo> _packageList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, PackageInfo> _packageList = new(comparer: StringComparer.InvariantCultureIgnoreCase);
 
     public event Action<PackageInfo> PackageChanged = default!;
 
-	public IEnumerable<PackageInfo> GetPackageInfoList()
+    public IEnumerable<PackageInfo> GetPackageInfoList()
     {
         if (_packageList.Count == 0)
         {
@@ -109,16 +107,16 @@ public class LocalStoragePackageRepository(
             }
         }
 
-		LoadPackageList();
+        LoadPackageList();
 
-		if (availablePackage is not null)
+        if (availablePackage is not null)
         {
             PackageChanged?.Invoke(availablePackage);
         }
         else
         {
-			PackageChanged?.Invoke(new());
-		}
+            PackageChanged?.Invoke(new());
+        }
     }
 
     public async Task<string?> RemovePackage(string packageFileName)

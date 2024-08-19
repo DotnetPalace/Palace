@@ -7,7 +7,7 @@ namespace Palace.Server.Services;
 
 public class LongActionService
 {
-    public readonly BindingList<Models.LongAction> _longActionList = new();
+    private readonly BindingList<Models.LongAction> _longActionList = new();
 	private readonly ILogger _logger;
 
 	public LongActionService(ILogger<LongActionService> logger)

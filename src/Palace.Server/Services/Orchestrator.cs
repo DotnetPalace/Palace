@@ -63,7 +63,7 @@ public class Orchestrator(
 		var success = _extendedMicroServiceInfoList.TryGetValue(key, out var result);
 		if (!success)
 		{
-			logger.LogTrace("Could not find key {key}", key);
+			logger.LogTrace("Could not find key {Key}", key);
 			return null;
 		}
 		return result;

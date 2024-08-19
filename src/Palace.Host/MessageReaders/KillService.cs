@@ -1,65 +1,53 @@
-﻿using System.Runtime;
+﻿namespace Palace.Host.MessageReaders;
 
-using ArianeBus;
-
-using Palace.Host.Configuration;
-
-namespace Palace.Host.MessageReaders;
-
-internal class KillService : ArianeBus.MessageReaderBase<Palace.Shared.Messages.KillService>
+internal class KillService(
+    ILogger<KillService> logger,
+    Configuration.GlobalSettings settings,
+    ArianeBus.IServiceBus bus,
+    IProcessHelper processHelper
+    )
+    : ArianeBus.MessageReaderBase<Palace.Shared.Messages.KillService>
 {
-	private readonly ILogger<KillService> _logger;
-	private readonly GlobalSettings _settings;
-	private readonly IServiceBus _bus;
-
-	public KillService(ILogger<KillService> logger,
-		Configuration.GlobalSettings _settings,
-		ArianeBus.IServiceBus bus)
-    {
-		_logger = logger;
-		this._settings = _settings;
-		_bus = bus;
-	}
     public override async Task ProcessMessageAsync(Shared.Messages.KillService message, CancellationToken cancellationToken)
-	{
-		await Task.Yield();
+    {
+        await Task.Yield();
 
-		if (message is null)
-		{
-			_logger.LogError("message is null");
-			return;
-		}
+        if (message is null)
+        {
+            logger.LogError("message is null");
+            return;
+        }
 
-		if (message.Timeout < DateTime.Now)
-		{
-			_logger.LogTrace("message is too old");
-			return;
-		}
+        if (message.Timeout < DateTime.Now)
+        {
+            logger.LogTrace("message is too old");
+            return;
+        }
 
-		if (!message.HostName.Equals(_settings.HostName))
-		{
-			_logger.LogTrace("installation service not for me");
-			return;
-		}
+        if (!message.HostName.Equals(settings.HostName))
+        {
+            logger.LogTrace("installation service not for me");
+            return;
+        }
 
-		var report = new Shared.Messages.KillServiceReport
-		{
-			ActionSourceId = message.ActionId,
-			HostName = _settings.HostName,
-			ServiceName = message.ServiceSettings.ServiceName,
-		};
+        var report = new Shared.Messages.KillServiceReport
+        {
+            ActionSourceId = message.ActionId,
+            HostName = settings.HostName,
+            ServiceName = message.ServiceSettings.ServiceName,
+        };
 
-		try
-		{
-			var result = await ProcessHelper.KillProcess(message.ProcessId);
-			report.Success = result.Success;
-		}
-		catch (Exception ex)
-		{
-			report.Success = false;
-			report.FailReason = ex.Message;
-		}
+        try
+        {
+            var result = await processHelper.KillProcess(message.ProcessId);
+            report.Success = result.Success;
+        }
+        catch (Exception ex)
+        {
+            report.Success = false;
+            report.FailReason = ex.Message;
+        }
 
-		await _bus.EnqueueMessage(_settings.KillServiceReportQueueName, report, cancellationToken: cancellationToken);
-	}
+        await bus.EnqueueMessage(settings.KillServiceReportQueueName, report, cancellationToken: cancellationToken);
+    }
 }

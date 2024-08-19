@@ -1,14 +1,7 @@
 ﻿namespace Palace.Server.Services;
 
-public class CleanerService : BackgroundService
+public class CleanerService(IPackageRepository packageRepository) : BackgroundService
 {
-    private readonly IPackageRepository _packageRepository;
-
-    public CleanerService(IPackageRepository packageRepository)
-    {
-        _packageRepository = packageRepository;
-    }
-
     public override Task StartAsync(CancellationToken cancellationToken)
 	{
 		return base.StartAsync(cancellationToken);
@@ -25,10 +18,10 @@ public class CleanerService : BackgroundService
 
 	private void CleanBackups()
 	{
-		var packages = _packageRepository.GetPackageInfoList();
+		var packages = packageRepository.GetPackageInfoList();
 		foreach (var package in packages)
 		{
-			var backupList = _packageRepository.GetBackupFileList(package.PackageFileName);
+			var backupList = packageRepository.GetBackupFileList(package.PackageFileName);
 			if (backupList.Count > 10)
 			{
 				var toDelete = backupList.OrderBy(i => i.CreationTime).Take(backupList.Count - 10);
