@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System.Security.Claims;
+
 using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-
-using Microsoft.AspNetCore.Components.Forms;
-using Palace.WebApp.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Palace.WebApp.Controllers;
 
@@ -38,7 +34,7 @@ public class AuthenticateController : Controller
         {
             _loginService.Remove(token);
             var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Name , "admin"));
+            claims.Add(new Claim(ClaimTypes.Name, "admin"));
             var roleList = _loginService.GetRoleList(token);
             foreach (var role in roleList)
             {
