@@ -3,8 +3,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>4.0.66.0</Version>
+    <Version>4.1.67.0</Version>
     <PackageReleaseNotes>
+			4.1.67.0 : Update/Install/Kill/Start all services in //
 			4.0.66.0 : Allow running on linux (ubuntu 24.*)
 			3.2.65.0 : Retry twice when delete service folder
 			3.2.64.0 : Best timeouts
