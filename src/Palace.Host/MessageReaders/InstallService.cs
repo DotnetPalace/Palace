@@ -14,88 +14,95 @@ public class InstallService(
     : ArianeBus.MessageReaderBase<Shared.Messages.InstallService>
 {
 
-    public override async Task ProcessMessageAsync(Shared.Messages.InstallService message, CancellationToken cancellationToken)
+    public override Task ProcessMessageAsync(Shared.Messages.InstallService message, CancellationToken cancellationToken)
     {
         if (message is null)
         {
             logger.LogError("message is null");
-            return;
+            return Task.CompletedTask;
         }
 
         if (message.Timeout < DateTime.Now)
         {
             logger.LogTrace("message is too old");
-            return;
+            return Task.CompletedTask;
         }
 
         if (!message.HostName.Equals(settings.HostName))
         {
             logger.LogTrace("installation service not for me");
-            return;
+            return Task.CompletedTask;
         }
 
-        var report = new Shared.Messages.ServiceInstallationReport
-        {
-            HostName = settings.HostName,
-            ServiceName = message.ServiceSettings.ServiceName,
-            Trigger = message.Trigger,
-            ActionSourceId = message.ActionId
-        };
-
-        // On recupere le zip sur le serveur
-        var downloadResult = await DownloadPackage(message.DownloadUrl);
-        if (!downloadResult.Success)
-        {
-            logger.LogWarning("Download zipfile for service {Name} failed", message.ServiceSettings.MainAssembly);
-            report.Success = false;
-            report.FailReason = downloadResult.FailReason;
-        }
-        else
-        {
-            report.Success = true;
-        }
-
-        try
-        {
-            var commandLine = $"{message.ServiceSettings.MainAssembly} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
-            await processHelper.WaitForProcessDown(commandLine);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Wait for process down failed");
-            report.Success = false;
-            report.FailReason = ex.Message;
-        }
-
-        if (report.Success)
-        {
-            var installResult = InstallLocalService(message, downloadResult);
-            if (!installResult.success)
-            {
-                logger.LogWarning("Install service {Name} failed", message.ServiceSettings.MainAssembly);
-                report.Success = false;
-                report.FailReason = installResult.failReason;
-            }
-        }
-
-        if (report.Success)
-        {
-            var deployResult = await DeployService(message.ServiceSettings, downloadResult.ZipFileName);
-            if (!deployResult.success)
-            {
-                report.Success = false;
-                report.FailReason = deployResult.failReason;
-            }
-            else
-            {
-                report.InstallationFolder = deployResult.installationFolder;
-            }
-        }
-
-        await bus.EnqueueMessage(settings.InstallationReportQueueName, report);
+        Task.Run(() => ProcessMessageInternal(message, cancellationToken));
+        return Task.CompletedTask;
     }
 
-    (bool success, string? failReason) InstallLocalService(Shared.Messages.InstallService message, DownloadFileResult zipFileInfo)
+    public async Task ProcessMessageInternal(Shared.Messages.InstallService message, CancellationToken cancellationToken)
+    {
+		var report = new Shared.Messages.ServiceInstallationReport
+		{
+			HostName = settings.HostName,
+			ServiceName = message.ServiceSettings.ServiceName,
+			Trigger = message.Trigger,
+			ActionSourceId = message.ActionId
+		};
+
+		// On recupere le zip sur le serveur
+		var downloadResult = await DownloadPackage(message.DownloadUrl);
+		if (!downloadResult.Success)
+		{
+			logger.LogWarning("Download zipfile for service {Name} failed", message.ServiceSettings.MainAssembly);
+			report.Success = false;
+			report.FailReason = downloadResult.FailReason;
+		}
+		else
+		{
+			report.Success = true;
+		}
+
+		try
+		{
+			var commandLine = $"{message.ServiceSettings.MainAssembly} {message.OverridedArguments ?? message.ServiceSettings.Arguments}".Trim();
+			await processHelper.WaitForProcessDown(commandLine);
+		}
+		catch (Exception ex)
+		{
+			logger.LogWarning(ex, "Wait for process down failed");
+			report.Success = false;
+			report.FailReason = ex.Message;
+		}
+
+		if (report.Success)
+		{
+			var installResult = InstallLocalService(message, downloadResult);
+			if (!installResult.success)
+			{
+				logger.LogWarning("Install service {Name} failed", message.ServiceSettings.MainAssembly);
+				report.Success = false;
+				report.FailReason = installResult.failReason;
+			}
+		}
+
+		if (report.Success)
+		{
+			var deployResult = await DeployService(message.ServiceSettings, downloadResult.ZipFileName);
+			if (!deployResult.success)
+			{
+				report.Success = false;
+				report.FailReason = deployResult.failReason;
+			}
+			else
+			{
+				report.InstallationFolder = deployResult.installationFolder;
+			}
+		}
+
+		await bus.EnqueueMessage(settings.InstallationReportQueueName, report);
+	}
+
+
+	(bool success, string? failReason) InstallLocalService(Shared.Messages.InstallService message, DownloadFileResult zipFileInfo)
     {
         var installationFolder = System.IO.Path.Combine(settings.InstallationFolder, message.ServiceSettings.ServiceName);
 
